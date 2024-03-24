@@ -18,6 +18,7 @@
     "@wiris/mathtype-generic": "^8.8.2",
     "ckeditor5-build-classic-simple-upload-adapter-image-resize": "^1.0.4",
     "formik": "^2.4.5",
+    "html-react-parser": "^5.1.9",
     "postcss-cli": "^11.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

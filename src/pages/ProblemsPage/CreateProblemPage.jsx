@@ -9,8 +9,7 @@ import '../../components/CKEditor/ckeditor.css';
 import { apiService } from '../../services/apiService';
 import TopicClassificationComponent from '../../components/TopicClassification/TopicClassification.jsx';
 
-const EditForm = () => {
-    const { problemId } = useParams();
+const CreateProblemPage = () => {
     const Submit = (values) => {
         console.log(values);
     };
@@ -36,35 +35,31 @@ const EditForm = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await apiService.fetchProblemById(problemId);
-                let topicClassificationList = await apiService.fetchTopicList();
+                const topicClassificationList = await apiService.fetchTopicList();
                 setTopicClassificationList(topicClassificationList);
-                setTopicClassificationSelected(data.classifications);
-
                 setInitialValues({
-                    Title: data.title || '',
-                    Description: data.description || '',
-                    MemoryLimit: data.memoryLimit || '',
-                    TimeLimit: data.timeLimit || '',
-                    Classifications: data.classifications || [],
-                    Input: data.input || '',
-                    Output: data.output || '',
-                    SampleInput: data.sampleInput || '',
-                    SampleOutput: data.sampleOutput || '',
-                    Source: data.source || '',
-                    Hint: data.hint || '',
+                    Title: '',
+                    Description: '',
+                    MemoryLimit: '128',
+                    TimeLimit: '1',
+                    Classifications: [],
+                    Input: '',
+                    Output: '',
+                    SampleInput: '',
+                    SampleOutput: '',
+                    Source: '',
+                    Hint: '',
                 });
                 setDataLoaded(true);
             } catch (error) {
-                console.error("Error al cargar los datos del problema:", error);
+                console.error("Error al cargar los datos:", error);
             }
         };
+        fetchData();
+    }, []);
 
-        if (problemId) {
-            fetchData();
-        }
-    }, [problemId]);
     
+
     const validationSchema = Yup.object().shape({
         Title: Yup.string().required('El título es obligatorio'),
         Description: Yup.string().required('La descripción es obligatoria'),
@@ -97,7 +92,10 @@ const EditForm = () => {
         };
     }
     return (
-        <form onSubmit={formik.handleSubmit}>
+        <form onSubmit={formik.handleSubmit} className='mx-10 my-10'>
+            <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
+                Edición de problema.
+            </h2>
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
                 <label htmlFor="problem-title" className="block text-xl font-semibold mb-2">Título</label>
                 <input id="problem-title" name="Title" type="text"
@@ -297,4 +295,4 @@ const EditForm = () => {
     );
 };
 
-export default EditForm;
+export default CreateProblemPage;

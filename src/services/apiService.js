@@ -25,7 +25,9 @@ async function fetchAPI(endpoint, { method = 'GET', body = null, token = null } 
 }
 
 export const apiService = {
+    fetchContestsList: (token) => fetchAPI('contests', { token: token }),
     fetchProblems: (token) => fetchAPI('problems', { token: token }),
     fetchProblemById: (id, token) => fetchAPI(`problems/${id}`, { method: 'GET', token: token }),
     fetchTopicList: (token) => fetchAPI(`topics`, { method: 'GET', token: token }),
+    fetchUserProfileList: (token) => fetchAPI(`users`, { method: 'GET', token: token }),
 };

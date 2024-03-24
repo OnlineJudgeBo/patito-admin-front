@@ -1,3 +1,4 @@
+import parse from 'html-react-parser';
 import React, { useState, useEffect, useRef } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
@@ -5,10 +6,13 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
 import '../../components/CKEditor/ckeditor.css';
+import { apiService } from '../../services/apiService.js';
 
 const ContestForm = () => {
     const [userSuggestions, setUserSuggestions] = useState([]);
     const [problemSuggestions, setProblemSuggestions] = useState([]);
+    const [problemsList, setProblemsList] = useState([]);
+    const [inputTmp, setInputTmp] = useState([]);
     const [languageSuggestions, setLanguageSuggestions] = useState([]);
     const [selectedProblems, setSelectedProblems] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -59,9 +63,23 @@ const ContestForm = () => {
         };
     }, []);
 
+    useEffect(() => {
+        apiService.fetchProblems()
+            .then(data => {
+                const updatedProblemsList = data.map(problem => ({
+                    id: problem.problemId,
+                    name: problem.title + " <br> id: " + problem.problemId + " <br> Clasificación: " + problem.classifications.map(classification => classification.name + " ")
+                    //classifications:
+                }));
+                setProblemsList(updatedProblemsList);
+            })
+            .catch(err => {
+                console.log(err);
+            });
+    }, []);
+
     const handleSubmit = (values) => {
         console.log(values)
-        debugger
     };
 
     const handleUserSearch = async (searchTerm) => {
@@ -75,22 +93,14 @@ const ContestForm = () => {
             user.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
             !selectedUsers.some(selectedUser => selectedUser.id === user.id)
         );
-
         setUserSuggestions(filteredUsers);
     };
 
     const handleProblemSearch = async (searchTerm) => {
-        const exampleProblems = [
-            { id: 1, name: 'Problema1' },
-            { id: 2, name: 'Problema2' },
-            { id: 3, name: 'Problema3' },
-        ];
-
-        const filteredProblems = exampleProblems.filter(problem =>
+        const filteredProblems = problemsList.filter(problem =>
             problem.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
             !selectedProblems.some(selectedProblem => selectedProblem.id === problem.id)
         );
-
         setProblemSuggestions(filteredProblems);
     };
 
@@ -109,15 +119,23 @@ const ContestForm = () => {
         setLanguageSuggestions(filteredLanguages);
     };
 
+    const updateHiddenInput = (formik, data, fieldName) => {
+        let updatedDescription = "";
+        data.forEach(selectedLanguage => {
+            updatedDescription += `${selectedLanguage.id},`;
+        });
+        formik.setFieldValue(fieldName, updatedDescription);
+    }
+
     const handleAddProblem = (formik, problem) => {
         setSelectedProblems([...selectedProblems, problem]);
         setProblemSuggestions([]);
-        updateHiddenInput(formik, [...selectedProblems, problem], 'selectedProblem')        
+        updateHiddenInput(formik, [...selectedProblems, problem], 'selectedProblem')
     };
 
     const handleRemoveProblem = (formik, problem) => {
         const updatedProblems = selectedProblems.filter(p => p.id !== problem.id);
-        updateHiddenInput(formik, updatedProblems, 'selectedProblem')        
+        updateHiddenInput(formik, updatedProblems, 'selectedProblem')
         setSelectedProblems(updatedProblems);
         setProblemSuggestions([]);
     };
@@ -132,14 +150,6 @@ const ContestForm = () => {
         setSelectedUsers(updatedUsers);
         setUserSuggestions([]);
     };
-
-    const updateHiddenInput = (formik, data, fieldName) => {
-        let updatedDescription = "";
-        data.forEach(selectedLanguage => {
-            updatedDescription += `${selectedLanguage.id},`;
-        });
-        formik.setFieldValue(fieldName, updatedDescription);
-    }
 
     const handleAddLanguage = (formik, language) => {
         setSelectedLanguages([...selectedLanguages, language]);
@@ -159,7 +169,7 @@ const ContestForm = () => {
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
-            >
+        >
             {formik => (
                 <Form className="ml-1" ref={autocompleteRef}>
                     <div className="flex divide-x divide-gray-200 w-full">
@@ -328,7 +338,8 @@ const ContestForm = () => {
                                     id="selectedProblem" />
                                 <Field
                                     type="text"
-                                    value=""
+                                    autoComplete="off"
+                                    value={inputTmp}
                                     name="selectedProblemList"
                                     id="selectedProblemList"
                                     placeholder="Ingrese el nombre del problema"
@@ -336,6 +347,7 @@ const ContestForm = () => {
                                     onChange={(e) => {
                                         formik.setFieldValue('selectedProblem', e.target.value);
                                         handleProblemSearch(e.target.value);
+                                        setInputTmp(e.target.value)
                                     }} />
                                 {problemSuggestions.length > 0 && (
                                     <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full shadow-md">
@@ -344,10 +356,12 @@ const ContestForm = () => {
                                                 key={problem.id}
                                                 className="p-2 hover:bg-gray-100 cursor-pointer"
                                                 onClick={(e) => {
-                                                    handleAddProblem(formik, problem)}
-                                                    }
+                                                    handleAddProblem(formik, problem)
+                                                    setInputTmp("")
+                                                }
+                                                }
                                             >
-                                                {problem.name}
+                                                {parse(problem.name)}
                                             </div>
                                         ))}
                                     </div>
@@ -360,12 +374,13 @@ const ContestForm = () => {
                                     <label className="block text-sm font-medium text-gray-700">Problemas Seleccionados</label>
                                     {selectedProblems.map((problem) => (
                                         <div key={problem.id} className="flex items-center mt-1">
-                                            <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{problem.name}</span>
+                                            <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{parse(problem.name)}</span>
                                             <button
                                                 type="button"
                                                 className="text-red-500 hover:text-red-700"
                                                 onClick={(e) => {
-                                                    handleRemoveProblem(formik, problem)}
+                                                    handleRemoveProblem(formik, problem);
+                                                }
                                                 }
                                             >
                                                 x
@@ -391,7 +406,7 @@ const ContestForm = () => {
                                                     className="p-2 hover:bg-gray-100 cursor-pointer"
                                                     onClick={() => handleAddUser(user)}
                                                 >
-                                                    {user.name}
+                                                    {parse(user.name)}
                                                 </div>
                                             ))}
                                         </div>
@@ -406,7 +421,7 @@ const ContestForm = () => {
                                         <label className="block text-sm font-medium text-gray-700">Usuarios Seleccionados</label>
                                         {selectedUsers.map((user) => (
                                             <div key={user.id} className="flex items-center mt-1">
-                                                <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{user.name}</span>
+                                                <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{parse(user.name)}</span>
                                                 <button
                                                     type="button"
                                                     className="text-red-500 hover:text-red-700"
