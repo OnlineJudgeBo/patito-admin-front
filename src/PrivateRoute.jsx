@@ -9,7 +9,7 @@ const PrivateRoute = ({ children }) => {
     }
 
     if (!isAuthenticated) {
-        window.location.href = "https://jv.umsa.bo";
+        window.location.href = "http://localhost:8080/oj";
         return null;
     }
 

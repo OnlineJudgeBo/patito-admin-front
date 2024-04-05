@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
-import { apiService } from '../../services/apiService';
+import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
 import TopicClassificationComponent from '../../components/TopicClassification/TopicClassification.jsx';
+import { apiService } from '../../services/apiService';
 
 const CreateProblemPage = () => {
+
     const Submit = (values) => {
-        console.log(values);
+        apiService.create('problems', values).then(data => {
+            console.log(data);
+        })
     };
 
     const [topicClassificationList, setTopicClassificationList] = useState();
@@ -58,7 +60,7 @@ const CreateProblemPage = () => {
         fetchData();
     }, []);
 
-    
+
 
     const validationSchema = Yup.object().shape({
         Title: Yup.string().required('El título es obligatorio'),
