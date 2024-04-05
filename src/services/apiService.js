@@ -1,6 +1,6 @@
 const BASE_URL = 'http://localhost:5043/api';
 
-async function fetchAPI(endpoint, { method = 'GET', body = null, token = null } = {}) {
+async function fetchAPI(endpoint, { method = 'GET', body = null, params = {}, token = null } = {}) {
     const headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -8,7 +8,11 @@ async function fetchAPI(endpoint, { method = 'GET', body = null, token = null } 
     };
 
     try {
-        const response = await fetch(`${BASE_URL}/${endpoint}`, {
+        const queryString = Object.keys(params).map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`).join('&');
+
+        const url = `${BASE_URL}/${endpoint}${method === 'GET' && queryString ? `?${queryString}` : ''}`;
+
+        const response = await fetch(url, {
             method: method,
             headers: headers,
             body: body ? JSON.stringify(body) : null
@@ -25,9 +29,12 @@ async function fetchAPI(endpoint, { method = 'GET', body = null, token = null } 
 }
 
 export const apiService = {
-    fetchContestsList: (token) => fetchAPI('contests', { token: token }),
-    fetchProblems: (token) => fetchAPI('problems', { token: token }),
-    fetchProblemById: (id, token) => fetchAPI(`problems/${id}`, { method: 'GET', token: token }),
-    fetchTopicList: (token) => fetchAPI(`topics`, { method: 'GET', token: token }),
-    fetchUserProfileList: (token) => fetchAPI(`users`, { method: 'GET', token: token }),
+    fetchContestsList: () => fetchAPI('contests', {}),
+    fetchProblems: () => fetchAPI('problems', {}),
+    fetchProblemById: (id, token) => fetchAPI(`problems/${id}`, { method: 'GET' }),
+    fetchTopicList: () => fetchAPI(`topics`, { method: 'GET' }),
+    fetchUserProfileList: (searchQuery) => fetchAPI(`users`, { method: 'GET', params: searchQuery }),
+    checkUsernameAvailability: (userId) => fetchAPI(`users/UsernameIsAvailable`, { method: 'POST', body: userId }),
+    checkUserEmailAvailability: (email) => fetchAPI(`users/UserEmailIsAvailable`, { method: 'POST', body: email }),
+    fetchRoles: () => fetchAPI(`Roles`),
 };

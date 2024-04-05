@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { apiService } from '../../services/apiService';
+import { EditProfileComponent } from './EditProfileComponent';
+import { ChangePasswordComponent } from './ChangePasswordComponent';
+import { DeleteAccountComponent } from './DeleteAccountComponent';
 
 function ListUserProfilePage() {
     const [problems, setProblems] = useState([]);
@@ -13,6 +16,7 @@ function ListUserProfilePage() {
     useEffect(() => {
         apiService.fetchUserProfileList()
             .then(data => {
+                console.log(data);
                 setProblems(data);
                 setIsLoading(false);
             })
@@ -34,10 +38,10 @@ function ListUserProfilePage() {
                 const bValue = getNestedValue(b, sortConfig.key);
                 if (aValue < bValue) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
-                  }
-                  if (aValue > bValue) {
+                }
+                if (aValue > bValue) {
                     return sortConfig.direction === 'ascending' ? 1 : -1;
-                  }
+                }
                 return 0;
             });
         }
@@ -110,27 +114,20 @@ function ListUserProfilePage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.userProfile.lastname}</td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a className="text-blue-600 hover:text-blue-900"
-                                            target="_blank"
-                                            href={`https://jv.umsa.bo/oj/problem.php?id=${problem.userId}`}>
-                                            Editar
-                                        </a>
+                                        <EditProfileComponent
+                                            email={problem.userProfile.email}
+                                            username={problem.userId}
+                                            name={problem.userProfile.nick}
+                                            lastname={problem.userProfile.lastname}
+                                            />
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a className="text-blue-600 hover:text-blue-900"
-                                            target="_blank"
-                                            href={`https://jv.umsa.bo/oj/problem.php?id=${problem.UserId}`}>
-                                            Cambiar Clave
-                                        </a>
+                                        <ChangePasswordComponent/>
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a className="text-blue-600 hover:text-blue-900"
-                                            target="_blank"
-                                            href={`https://jv.umsa.bo/oj/problem.php?id=${problem.problemId}`}>
-                                            Desactivar
-                                        </a>
+                                        <DeleteAccountComponent user_id={problem.userId}/>
                                     </td>
                                 </tr>
                             ))}

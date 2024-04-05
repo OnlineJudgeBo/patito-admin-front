@@ -35,10 +35,10 @@ function ListContestPage() {
                 const bValue = getNestedValue(b, sortConfig.key);
                 if (aValue < bValue) {
                     return sortConfig.direction === 'ascending' ? -1 : 1;
-                  }
-                  if (aValue > bValue) {
+                }
+                if (aValue > bValue) {
                     return sortConfig.direction === 'ascending' ? 1 : -1;
-                  }
+                }
                 return 0;
             });
         }
