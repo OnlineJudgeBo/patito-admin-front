@@ -66,10 +66,9 @@ const ContestForm = () => {
     useEffect(() => {
         apiService.fetchProblems()
             .then(data => {
-                const updatedProblemsList = data.map(problem => ({
+                let updatedProblemsList = data.map(problem => ({
                     id: problem.problemId,
                     name: problem.title + " <br> id: " + problem.problemId + " <br> Clasificación: " + problem.classifications.map(classification => classification.name + " ")
-                    //classifications:
                 }));
                 setProblemsList(updatedProblemsList);
             })

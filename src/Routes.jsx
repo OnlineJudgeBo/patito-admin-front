@@ -1,17 +1,18 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import UseAuth from './hooks/UseAuth';
-import IndexPage from './pages/IndexPage/IndexPage';
-import Sidebar from './components/Sidebar';
-import ListProblemPage from './pages/ProblemsPage/ListProblemPage';
-import EditProblemPage from './pages/ProblemsPage/EditProblemPage';
-import CreateProblemPage from './pages/ProblemsPage/CreateProblemPage';
-import CreateContestPage from './pages/ContestPage/CreateContestPage';
-import ListUserProfilePage from './pages/UsersPage/ListUserProfilePage';
-import ListContestPage from './pages/ContestPage/ListContestPage';
-import LoginPage from './pages/LoginPage/LoginPage';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
+import Sidebar from './components/Sidebar';
+import UseAuth from './hooks/UseAuth';
+import CreateContestPage from './pages/ContestPage/CreateContestPage';
+import ListContestPage from './pages/ContestPage/ListContestPage';
+import IndexPage from './pages/IndexPage/IndexPage';
+import LoginPage from './pages/LoginPage/LoginPage';
+import LogoutPage from './pages/LogoutPage';
 import UserAdminPage from './pages/Managment/Users/UserAdminPage';
+import CreateProblemPage from './pages/ProblemsPage/CreateProblemPage';
+import EditProblemPage from './pages/ProblemsPage/EditProblemPage';
+import ListProblemPage from './pages/ProblemsPage/ListProblemPage';
+import ListUserProfilePage from './pages/UsersPage/ListUserProfilePage';
 
 const App = () => {
     const { isAuthenticated, isLoading } = UseAuth();
@@ -44,7 +45,7 @@ const App = () => {
                         <Route path="/admin/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
                         <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
-                        <Route path="/admin/logout" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+                        <Route path="/admin/logout" element={<LogoutPage />} />
                         <Route path="/admin/login" element={<LoginPage />} />
                     </Routes>
                 </div>

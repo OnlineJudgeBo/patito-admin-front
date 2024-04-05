@@ -1,13 +1,14 @@
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
+
 import '../../components/CKEditor/ckeditor.css';
-import { apiService } from '../../services/apiService';
+import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
 import TopicClassificationComponent from '../../components/TopicClassification/TopicClassification.jsx';
+import { apiService } from '../../services/apiService';
 
 const EditForm = () => {
     const { problemId } = useParams();
@@ -64,7 +65,7 @@ const EditForm = () => {
             fetchData();
         }
     }, [problemId]);
-    
+
     const validationSchema = Yup.object().shape({
         Title: Yup.string().required('El título es obligatorio'),
         Description: Yup.string().required('La descripción es obligatoria'),
