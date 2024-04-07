@@ -1,8 +1,10 @@
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from 'yup';
 
 import '../../components/CKEditor/ckeditor.css';
@@ -12,8 +14,28 @@ import { apiService } from '../../services/apiService';
 
 const EditForm = () => {
     const { problemId } = useParams();
-    const Submit = (values) => {
+    const { toast } = useToast()
+    const navigate = useNavigate();
+
+    const Submit = async (values) => {
         console.log(values);
+        try {
+            const data = await apiService.update('problems', problemId, values);
+            toast({
+                variant: "success",
+                description: 'Problema actualizado correctamente.',
+            });
+            setTimeout(() => {
+                navigate('/admin/problems/');
+            }, 2000);
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error al actualizar el problema",
+                description: "Hubo un problema al actualizar. Por favor, revise todos los campos.",
+            });
+            console.error(error);
+        }
     };
 
     const [topicClassificationList, setTopicClassificationList] = useState();
@@ -38,6 +60,8 @@ const EditForm = () => {
         const fetchData = async () => {
             try {
                 const data = await apiService.fetchProblemById(problemId);
+                console.log(data);
+                console.log("dasdsad");
                 let topicClassificationList = await apiService.fetchTopicList();
                 setTopicClassificationList(topicClassificationList);
                 setTopicClassificationSelected(data.classifications);
@@ -85,7 +109,11 @@ const EditForm = () => {
     });
 
     const onSelectionChange = (selectedClassifications) => {
-        formik.setFieldValue('Classifications', selectedClassifications);
+        let classifications = []
+        selectedClassifications.forEach(classification => {
+            classifications.push({ "ClassificationId": classification })
+        });
+        formik.setFieldValue('Classifications', classifications);
     };
 
     if (!dataLoaded) {
@@ -99,6 +127,7 @@ const EditForm = () => {
     }
     return (
         <form onSubmit={formik.handleSubmit}>
+            <Toaster />
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
                 <label htmlFor="problem-title" className="block text-xl font-semibold mb-2">Título</label>
                 <input id="problem-title" name="Title" type="text"

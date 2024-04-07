@@ -1,7 +1,10 @@
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
@@ -10,14 +13,28 @@ import { apiService } from '../../services/apiService';
 
 const CreateProblemPage = () => {
 
+    const { toast } = useToast()
+    const navigate = useNavigate();
+
     const Submit = (values) => {
         apiService.create('problems', values).then(data => {
-            console.log(data);
+            toast({
+                description: 'Problema creado correctamente.',
+            })
+            setTimeout(() => {
+                navigate('/admin/problems/');
+            }, 2000);
+        }).catch((error) => {
+            toast({
+                variant: "destructive",
+                title: "Error al crear el problema",
+                description: "Error al crear el problema, revise todos los campos.",
+            })
+            console.log(error);
         })
     };
 
     const [topicClassificationList, setTopicClassificationList] = useState();
-    const [topicClassificationSelected, setTopicClassificationSelected] = useState();
 
     const [initialValues, setInitialValues] = useState({
         Title: '',
@@ -81,7 +98,11 @@ const CreateProblemPage = () => {
     });
 
     const onSelectionChange = (selectedClassifications) => {
-        formik.setFieldValue('Classifications', selectedClassifications);
+        let classifications = []
+        selectedClassifications.forEach(classification => {
+            classifications.push({ "ClassificationId": classification })
+        });
+        formik.setFieldValue('Classifications', classifications);
     };
 
     if (!dataLoaded) {
@@ -95,6 +116,7 @@ const CreateProblemPage = () => {
     }
     return (
         <form onSubmit={formik.handleSubmit} className='mx-10 my-10'>
+            <Toaster />
             <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
                 Edición de problema.
             </h2>

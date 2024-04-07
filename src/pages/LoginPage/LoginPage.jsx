@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 function LoginPage() {
     return (
         <div className="grid gap-6 py-8 px-4 sm:px-6 lg:px-8 bg-white shadow-lg rounded-lg max-w-md mx-auto">
+
             <div className="text-center">
                 <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
                     Iniciar sesión
