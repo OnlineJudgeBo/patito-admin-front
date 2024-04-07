@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/apiService';
 
 function ListProblemsPage() {
@@ -136,7 +136,9 @@ function ListProblemsPage() {
                                         }
                                     </td>
 
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">TestData</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <a className="text-blue-600 hover:text-blue-900" href={`/admin/fileManager/${problem.problemId}`}>Tes Data</a>
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-4">
                                         <a className="text-blue-600 hover:text-blue-900" href={`/admin/problems/edit/${problem.problemId}`}>Editar</a>
                                         <a className="text-red-600 hover:text-red-900" href="#" onClick={(e) => { e.preventDefault(); alert('Función de borrar no implementada.'); }}>Borrar</a>

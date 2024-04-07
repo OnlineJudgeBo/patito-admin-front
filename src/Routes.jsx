@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import UseAuth from './hooks/UseAuth';
 import CreateContestPage from './pages/ContestPage/CreateContestPage';
 import ListContestPage from './pages/ContestPage/ListContestPage';
+import FileManagerPage from './pages/FileManagerPage/FileManagerPage';
 import IndexPage from './pages/IndexPage/IndexPage';
 import LoginPage from './pages/LoginPage/LoginPage';
 import LogoutPage from './pages/LogoutPage';
@@ -34,9 +35,9 @@ const App = () => {
                         <Route path="/admin" element={<PrivateRoute><IndexPage /></PrivateRoute>} />
                         <Route path="/admin/users" element={<PrivateRoute><ListUserProfilePage /></PrivateRoute>} />
                         <Route path="/admin/problems" element={<PrivateRoute><ListProblemPage /></PrivateRoute>} />
+
                         <Route path="/admin/problems/add" element={<PrivateRoute><CreateProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/edit/:problemId" element={<PrivateRoute><EditProblemPage /></PrivateRoute>} />
-
                         <Route path="/admin/problems/rejudge" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
                         <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
@@ -44,6 +45,8 @@ const App = () => {
 
                         <Route path="/admin/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
                         <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+
+                        <Route path="/admin/fileManager/:problemId" element={<FileManagerPage />} />
 
                         <Route path="/admin/logout" element={<LogoutPage />} />
                         <Route path="/admin/login" element={<LoginPage />} />
