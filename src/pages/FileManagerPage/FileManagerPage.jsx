@@ -1,39 +1,51 @@
-import axios from 'axios';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { useParams } from 'react-router-dom';
-
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
+import React, { useCallback, useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { useParams } from "react-router-dom";
+import { apiService } from "../../services/apiService";
+import { DeleteFileContainer } from "./DeleteFileContainer";
+import { ViewFileContainer } from "./ViewFileContainer";
 
 const FileManagerPage = () => {
-    const apiUrl = 'http://localhost:5043/api';
+    const { toast } = useToast()
     const { problemId } = useParams();
-
     const [files, setFiles] = useState([]);
 
     useEffect(() => {
-        fetchFiles();
+        apiService.get(`files?problemId=` + problemId).then(data => {
+            setFiles(data);
+        }).catch((error) => {
+            toast({
+                variant: "destructive",
+                title: "Error al obtener la lita de archivos",
+                description: "Error al obtener la lista de archivos.",
+            })
+            console.log(error);
+        })
     }, []);
 
-    const fetchFiles = async () => {
-        try {
-            const response = await axios.get(`${apiUrl}/files?problemId=` + problemId);
-            setFiles(response.data);
-        } catch (error) {
-            console.error("Error fetching files:", error);
-        }
-    };
-
     const onDrop = useCallback(async (acceptedFiles) => {
-        const formData = new FormData();
-        formData.append('file', acceptedFiles[0]);
-
         try {
-            await axios.post(`${apiUrl}/upload`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            acceptedFiles.forEach(element => {
+                let formData = new FormData();
+                formData.append("file", element);
+                apiService.postFile(`files?problemId=${problemId}&fileName=${element.name}`, formData).then(data => {
+                    toast({
+                        variant: "success",
+                        title: "Archivo Subido",
+                        description: "Se subió el archivo",
+                    });
+                    window.location.reload();
+                }).catch((error) => {
+                    toast({
+                        variant: "destructive",
+                        title: "Error al obtener la lita de archivos",
+                        description: "Error al obtener la lista de archivos.",
+                    })
+                    console.log(error);
+                })
             });
-            fetchFiles();
         } catch (error) {
             console.error("Error uploading file:", error);
         }
@@ -41,61 +53,39 @@ const FileManagerPage = () => {
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
-    const viewFile = async (fileName) => {
-        // Agrega tu lógica aquí
-    };
-
-    const deleteFile = async (fileName) => {
-        try {
-            await axios.delete(`${apiUrl}/files/${fileName}`);
-            fetchFiles();
-        } catch (error) {
-            console.error("Error deleting file:", error);
-        }
-    };
-
-    const fileStyle = (fileName) => {
-        if (fileName.endsWith('.in')) {
-            return "bg-blue-100 border-blue-500";
-        } else if (fileName.endsWith('.out')) {
-            return "bg-red-100 border-red-500";
-        }
-        return "bg-gray-100 border-gray-400";
-    };
-
-    // Separamos los archivos .in y .out en dos arrays
-    const inFiles = files.filter(file => file.name.endsWith('.in'));
-    const outFiles = files.filter(file => !file.name.endsWith('.in'));
+    const inFiles = files.filter(file => file.name.endsWith(".in"));
+    const outFiles = files.filter(file => !file.name.endsWith(".in"));
 
     return (
         <div className="container mx-auto p-4">
+            <Toaster />
             <div {...getRootProps()} className="flex justify-center items-center p-10 border-2 border-dashed border-gray-400 cursor-pointer">
                 <input {...getInputProps()} />
                 <p>Arrastra archivos aquí o haz clic para seleccionar</p>
             </div>
             <div className="flex flex-wrap mt-5 gap-10">
-                {/* Columna para archivos .in */}
+                {/* .in */}
                 <div className="flex-1">
                     <h2 className="text-center font-bold mb-4">Archivos .IN</h2>
                     {inFiles.map((file, index) => (
-                        <div key={index} className={`border rounded-lg p-4 flex justify-between items-center ${fileStyle(file.name)}`}>
+                        <div key={index} className={`border rounded-lg p-4 flex justify-between items-center bg-blue-100 border-blue-500`}>
                             <span className="text-sm font-semibold truncate">{file.name}</span>
-                            <div>
-                                <button onClick={() => viewFile(file.name)} className="text-blue-500 hover:text-blue-700 text-xs mr-2">Ver</button>
-                                <button onClick={() => deleteFile(file.name)} className="text-red-500 hover:text-red-700 text-xs">Borrar</button>
+                            <div className="flex space-x-2">
+                                <ViewFileContainer fileName={file.name} problemId={problemId} />
+                                <DeleteFileContainer fileName={file.name} problemId={problemId} />
                             </div>
                         </div>
                     ))}
                 </div>
-                {/* Columna para archivos .out y otros */}
+                {/* .out */}
                 <div className="flex-1">
                     <h2 className="text-center font-bold mb-4">Archivos .OUT y otros</h2>
                     {outFiles.map((file, index) => (
-                        <div key={index} className={`border rounded-lg p-4 flex justify-between items-center ${fileStyle(file.name)}`}>
+                        <div key={index} className={`border rounded-lg p-4 flex justify-between items-center bg-blue-100 border-blue-500`}>
                             <span className="text-sm font-semibold truncate">{file.name}</span>
-                            <div>
-                                <button onClick={() => viewFile(file.name)} className="text-blue-500 hover:text-blue-700 text-xs mr-2">Ver</button>
-                                <button onClick={() => deleteFile(file.name)} className="text-red-500 hover:text-red-700 text-xs">Borrar</button>
+                            <div className="flex space-x-2">
+                                <ViewFileContainer fileName={file.name} problemId={problemId} />
+                                <DeleteFileContainer fileName={file.name} problemId={problemId} />
                             </div>
                         </div>
                     ))}
