@@ -1,18 +1,20 @@
-import parse from 'html-react-parser';
-import React, { useState, useEffect, useRef } from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { ErrorMessage, Field, Form, Formik } from 'formik';
+import parse from 'html-react-parser';
+import React, { useEffect, useRef, useState } from 'react';
+import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
+import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
 import { apiService } from '../../services/apiService.js';
 
 const ContestForm = () => {
     const [userSuggestions, setUserSuggestions] = useState([]);
     const [problemSuggestions, setProblemSuggestions] = useState([]);
     const [problemsList, setProblemsList] = useState([]);
+    const [userList, setUserList] = useState([]);
     const [inputTmp, setInputTmp] = useState([]);
+    const [inputUserTmp, setInputUserTmp] = useState([]);
     const [languageSuggestions, setLanguageSuggestions] = useState([]);
     const [selectedProblems, setSelectedProblems] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -75,6 +77,18 @@ const ContestForm = () => {
             .catch(err => {
                 console.log(err);
             });
+
+        apiService.fetchUserProfileList()
+            .then(data => {
+                let userData = data.map(user => ({
+                    id: user.userId,
+                    name: user.userProfile.nick + " " + user.userProfile.lastname
+                }));
+                setUserList(userData);
+            })
+            .catch(err => {
+                console.log(err);
+            });
     }, []);
 
     const handleSubmit = (values) => {
@@ -82,14 +96,8 @@ const ContestForm = () => {
     };
 
     const handleUserSearch = async (searchTerm) => {
-        const exampleUsers = [
-            { id: 1, name: 'Usuario1' },
-            { id: 2, name: 'Usuario2' },
-            { id: 3, name: 'Usuario3' },
-        ];
-
-        const filteredUsers = exampleUsers.filter(user =>
-            user.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        const filteredUsers = userList.filter(user =>
+            user.id.toLowerCase().includes(searchTerm.toLowerCase()) &&
             !selectedUsers.some(selectedUser => selectedUser.id === user.id)
         );
         setUserSuggestions(filteredUsers);
@@ -139,13 +147,15 @@ const ContestForm = () => {
         setProblemSuggestions([]);
     };
 
-    const handleAddUser = (user) => {
+    const handleAddUser = (formik, user) => {
         setSelectedUsers([...selectedUsers, user]);
         setUserSuggestions([]);
+        updateHiddenInput(formik, [...selectedUsers, user], 'selectedUser')
     };
 
-    const handleRemoveUser = (user) => {
+    const handleRemoveUser = (formik, user) => {
         const updatedUsers = selectedUsers.filter(u => u.id !== user.id);
+        updateHiddenInput(formik, updatedUsers, 'selectedUser')
         setSelectedUsers(updatedUsers);
         setUserSuggestions([]);
     };
@@ -334,7 +344,8 @@ const ContestForm = () => {
                                 <Field
                                     type="hidden"
                                     name="selectedProblem"
-                                    id="selectedProblem" />
+                                    id="selectedProblem"
+                                />
                                 <Field
                                     type="text"
                                     autoComplete="off"
@@ -347,7 +358,8 @@ const ContestForm = () => {
                                         formik.setFieldValue('selectedProblem', e.target.value);
                                         handleProblemSearch(e.target.value);
                                         setInputTmp(e.target.value)
-                                    }} />
+                                    }}
+                                />
                                 {problemSuggestions.length > 0 && (
                                     <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full shadow-md">
                                         {problemSuggestions.map((problem) => (
@@ -392,18 +404,35 @@ const ContestForm = () => {
                             {formik.values.isPrivate && (
                                 <div className="mb-4">
                                     <label htmlFor="selectedUser" className="block text-sm font-medium text-gray-700">Seleccionar Usuarios</label>
-                                    <Field type="text" id="selectedUser" name="selectedUser" placeholder="Ingrese el nombre del usuario" className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+                                    <Field
+                                        type="hidden"
+                                        name="selectedUser"
+                                        id="selectedUser"
+                                    />
+                                    <Field type="text"
+                                        autoComplete="off"
+                                        value={inputUserTmp}
+                                        id="selectedUser"
+                                        name="selectedUser"
+                                        placeholder="Ingrese el nombre del usuario"
+                                        className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                                         onChange={(e) => {
                                             formik.setFieldValue('selectedUser', e.target.value);
                                             handleUserSearch(e.target.value);
-                                        }} />
+                                            setInputUserTmp(e.target.value)
+                                        }}
+                                    />
                                     {userSuggestions.length > 0 && (
                                         <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full shadow-md">
                                             {userSuggestions.map((user) => (
                                                 <div
                                                     key={user.id}
                                                     className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                    onClick={() => handleAddUser(user)}
+                                                    onClick={(e) => {
+                                                        handleAddUser(formik, user)
+                                                        setInputUserTmp("")
+                                                    }
+                                                    }
                                                 >
                                                     {parse(user.name)}
                                                 </div>
@@ -424,7 +453,7 @@ const ContestForm = () => {
                                                 <button
                                                     type="button"
                                                     className="text-red-500 hover:text-red-700"
-                                                    onClick={() => handleRemoveUser(user)}
+                                                    onClick={() => handleRemoveUser(formik, user)}
                                                 >
                                                     x
                                                 </button>
