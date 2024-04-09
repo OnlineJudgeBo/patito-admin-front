@@ -117,7 +117,7 @@ function ListProblemsPage() {
                                             problem.classifications ?
                                                 Array.from(new Set(problem.classifications.map(classification => classification.topic.name)))
                                                     .map((name, index) => (
-                                                        <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
+                                                        <span key={index} className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
                                                             {name}<br />
                                                         </span>
                                                     )) : ""
@@ -129,7 +129,7 @@ function ListProblemsPage() {
                                             problem.classifications ?
                                                 Array.from(new Set(problem.classifications.map(classification => classification.name)))
                                                     .map((name, index) => (
-                                                        <span key={index} className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
+                                                        <span key={index} className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
                                                             {name}<br />
                                                         </span>
                                                     )) : ""
