@@ -60,8 +60,6 @@ const EditForm = () => {
         const fetchData = async () => {
             try {
                 const data = await apiService.fetchProblemById(problemId);
-                console.log(data);
-                console.log("dasdsad");
                 let topicClassificationList = await apiService.fetchTopicList();
                 setTopicClassificationList(topicClassificationList);
                 setTopicClassificationSelected(data.classifications);

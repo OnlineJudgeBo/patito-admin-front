@@ -30,7 +30,6 @@ async function fetchAPI(endpoint, { method = 'GET', body = null, params = {} } =
         };
 
         let response = await axios(options);
-        console.log(response);
         return response.data;
     } catch (error) {
         console.error("Error en la llamada a la API:", error);
@@ -55,7 +54,6 @@ async function postApiFile(endpoint, { method = 'GET', body = null, params = {} 
         };
 
         let response = await axios(options);
-        console.log(response);
         return response.data;
     } catch (error) {
         console.error("Error en la llamada a la API:", error);
