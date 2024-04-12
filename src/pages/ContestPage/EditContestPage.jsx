@@ -3,25 +3,25 @@ import { useToast } from "@/components/ui/use-toast";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
-import parse from 'html-react-parser';
+import { useAtom } from "jotai";
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useDebouncedCallback } from 'use-debounce';
+import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
+import { problemSelectAtom, userSelectAtom } from "../../context/problemList";
 import { apiService } from '../../services/apiService.js';
+import ProblemListComponent from "./ProblemListComponent.jsx";
+import UserListComponent from "./UserListComponent.jsx";
 
-const ContestForm = () => {
+const EditContestPage = () => {
+    const searchText = useAtom(problemSelectAtom);
+    const searchText2 = useAtom(userSelectAtom);
+
     const [userSuggestions, setUserSuggestions] = useState([]);
-    const [problemSuggestions, setProblemSuggestions] = useState([]);
-    const [problemsList, setProblemsList] = useState([]);
     const [userList, setUserList] = useState([]);
-    const [inputTmp, setInputTmp] = useState([]);
     const [inputUserTmp, setInputUserTmp] = useState([]);
-    const debouncedInputUserTmp = useDebouncedCallback((value) => {
-        handleUserSearch(value)
-    }, 1000);
+
     const [languageSuggestions, setLanguageSuggestions] = useState([]);
     const [selectedProblems, setSelectedProblems] = useState([]);
     const [selectedUsers, setSelectedUsers] = useState([]);
@@ -30,8 +30,8 @@ const ContestForm = () => {
     const autocompleteRef = useRef(null);
     const { toast } = useToast()
     const navigate = useNavigate();
-
-    const initialValues = {
+    const { contestId } = useParams();
+    const [initialValues, setInitialValues] = useState({
         title: '',
         description: '',
         startDate: '',
@@ -46,7 +46,7 @@ const ContestForm = () => {
         selectedLanguage: '',
         selectedProblemList: '',
         selectedLanguageList: '',
-    };
+    })
 
     const validationSchema = Yup.object().shape({
         title: Yup.string().required('Nombre del concurso requerido'),
@@ -75,32 +75,50 @@ const ContestForm = () => {
     }, []);
 
     useEffect(() => {
-        apiService.fetchProblems()
-            .then(data => {
-                let updatedProblemsList = data.map(problem => ({
-                    id: problem.problemId,
-                    name: problem.title + " <br> id: " + problem.problemId + " <br> Clasificación: " + problem.classifications.map(classification => classification.name + " ")
-                }));
-                setProblemsList(updatedProblemsList);
+        apiService.get('contests/' + contestId).then(data => {
+            let startDate = data.startTime.split("T");
+            let endDate = data.startTime.split("T");
+            setSelectedProblems(data.contestProblems)
+            setUserList(data.contestUsers)
+            debugger
+            setInitialValues({
+                title: data.title || '',
+                description: data.description || '',
+                startDate: startDate[0] || '',
+                startTime: startDate[1] || '',
+                endDate: endDate[0] || '',
+                endTime: endDate[1] || '',
+                problems: "" || '',
+                isPrivate: false || '',
+                users: "" || '',
+                selectedUser: data.selectedUser || '',
+                selectedProblem: data.selectedProblem || '',
+                selectedLanguage: data.language || '',
+                selectedProblemList: "" || '',
+                selectedLanguageList: "" || '',
             })
-            .catch(err => {
-                console.log(err);
-            });
-
-        apiService.fetchUserProfileList()
-            .then(data => {
-                let userData = data.map(user => ({
-                    id: user.userId,
-                    name: user.userProfile.nick + " " + user.userProfile.lastname + ` - (${user.userId})`
-                }));
-                setUserList(userData);
+            //setDescriptionData(data.description)
+            //setSelectedProblems([...selectedProblems, 1000])
+            console.log(data);
+            //debugger
+        }).catch((error) => {
+            toast({
+                variant: "destructive",
+                title: "Error al crear el contest",
+                description: "Error al crear el contest, revise todos los campos.",
             })
-            .catch(err => {
-                console.log(err);
-            });
-    }, []);
+            console.log(error);
+        })
+        //setSelectedProblems([1000]);
 
-    const handleSubmit = (values) => {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+
+    }, [contestId]);
+
+    const Submit = async (values) => {
         values.startDate = values.startDate + "T" + values.startTime + ":00"
         values.endDate = values.endDate + "T" + values.endTime + ":00"
 
@@ -117,7 +135,6 @@ const ContestForm = () => {
                 elements.push({ "problemId": user })
         });
         values.selectedProblem = elements;
-        debugger
         apiService.create('contests', values).then(data => {
             toast({
                 description: 'Contest agregado.',
@@ -133,22 +150,6 @@ const ContestForm = () => {
             })
             console.log(error);
         })
-    };
-
-    const handleUserSearch = async (searchTerm) => {
-        const filteredUsers = userList.filter(user =>
-            user.id.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !selectedUsers.some(selectedUser => selectedUser.id === user.id)
-        );
-        setUserSuggestions(filteredUsers);
-    };
-
-    const handleProblemSearch = async (searchTerm) => {
-        const filteredProblems = problemsList.filter(problem =>
-            problem.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !selectedProblems.some(selectedProblem => selectedProblem.id === problem.id)
-        );
-        setProblemSuggestions(filteredProblems);
     };
 
     const handleLanguageSearch = async (searchTerm) => {
@@ -174,32 +175,6 @@ const ContestForm = () => {
         formik.setFieldValue(fieldName, updatedDescription);
     }
 
-    const handleAddProblem = (formik, problem) => {
-        setSelectedProblems([...selectedProblems, problem]);
-        setProblemSuggestions([]);
-        updateHiddenInput(formik, [...selectedProblems, problem], 'selectedProblem')
-    };
-
-    const handleRemoveProblem = (formik, problem) => {
-        const updatedProblems = selectedProblems.filter(p => p.id !== problem.id);
-        updateHiddenInput(formik, updatedProblems, 'selectedProblem')
-        setSelectedProblems(updatedProblems);
-        setProblemSuggestions([]);
-    };
-
-    const handleAddUser = (formik, user) => {
-        setSelectedUsers([...selectedUsers, user]);
-        setUserSuggestions([]);
-        updateHiddenInput(formik, [...selectedUsers, user], 'selectedUser')
-    };
-
-    const handleRemoveUser = (formik, user) => {
-        const updatedUsers = selectedUsers.filter(u => u.id !== user.id);
-        updateHiddenInput(formik, updatedUsers, 'selectedUser')
-        setSelectedUsers(updatedUsers);
-        setUserSuggestions([]);
-    };
-
     const handleAddLanguage = (formik, language) => {
         setSelectedLanguages([...selectedLanguages, language]);
         setLanguageSuggestions([]);
@@ -213,16 +188,18 @@ const ContestForm = () => {
         setLanguageSuggestions([]);
     };
 
+
     return (
         <>
             <Toaster />
             <Formik
+                enableReinitialize="true"
                 initialValues={initialValues}
                 validationSchema={validationSchema}
-                onSubmit={handleSubmit}
+                onSubmit={Submit}
             >
                 {formik => (
-                    <Form className="ml-1">
+                    <Form>
                         <div className="flex divide-x divide-gray-200 w-full">
                             <div className="w-full p-4">
                                 <h1 className="text-3xl font-bold mb-10">Crear Concurso</h1>
@@ -244,7 +221,8 @@ const ContestForm = () => {
                                     <label htmlFor="title" className="block text-sm font-medium text-gray-700">Descripción</label>
                                     <CKEditor
                                         editor={ClassicEditor}
-                                        data={descriptionData}
+                                        //data={descriptionData}
+                                        data={JSON.stringify(searchText[0]) + JSON.stringify(searchText2[0])}
                                         config={{
                                             toolbar: {
                                                 shouldNotGroupWhenFull: true,
@@ -379,124 +357,10 @@ const ContestForm = () => {
                             </div>
 
                             <div className="w-3/5 p-10">
-                                <div className="mb-4">
-                                    <label htmlFor="selectedProblem" className="block text-sm font-medium text-gray-700">Seleccionar Problema</label>
-                                    <Field
-                                        type="hidden"
-                                        name="selectedProblem"
-                                        id="selectedProblem"
-                                    />
-                                    <Field
-                                        type="text"
-                                        autoComplete="off"
-                                        value={inputTmp}
-                                        name="selectedProblemList"
-                                        id="selectedProblemList"
-                                        placeholder="Ingrese el nombre del problema"
-                                        className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                        onChange={(e) => {
-                                            formik.setFieldValue('selectedProblem', e.target.value);
-                                            handleProblemSearch(e.target.value);
-                                            setInputTmp(e.target.value)
-                                        }}
-                                    />
-                                    {problemSuggestions.length > 0 && (
-                                        <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full shadow-md">
-                                            {problemSuggestions.map((problem) => (
-                                                <div
-                                                    key={problem.id}
-                                                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                    onClick={(e) => {
-                                                        handleAddProblem(formik, problem)
-                                                        setInputTmp("")
-                                                    }
-                                                    }
-                                                >
-                                                    {parse(problem.name)}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    <ErrorMessage name="selectedProblem" component="div" className="text-red-500 text-sm mt-1" />
-                                </div>
-
-                                {selectedProblems.length > 0 && (
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">Problemas Seleccionados</label>
-                                        {selectedProblems.map((problem) => (
-                                            <div key={problem.id} className="flex items-center mt-1">
-                                                <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{parse(problem.name)}</span>
-                                                <button
-                                                    type="button"
-                                                    className="text-red-500 hover:text-red-700"
-                                                    onClick={(e) => {
-                                                        handleRemoveProblem(formik, problem);
-                                                    }}> x
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                <ProblemListComponent problemSelectedList={selectedProblems} />
 
                                 {formik.values.isPrivate && (
-                                    <div className="mb-4">
-                                        <label htmlFor="selectedUser" className="block text-sm font-medium text-gray-700">Seleccionar Usuarios</label>
-                                        <Field
-                                            type="hidden"
-                                            name="selectedUser"
-                                            id="selectedUser"
-                                        />
-                                        <Field type="text"
-                                            autoComplete="off"
-                                            value={inputUserTmp}
-                                            id="selectedUser"
-                                            name="selectedUser"
-                                            placeholder="Ingrese el nombre del usuario"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                            onChange={(e) => {
-                                                formik.setFieldValue('selectedUser', e.target.value);
-                                                debouncedInputUserTmp(e.target.value)
-                                                //handleUserSearch(e.target.value);
-                                                setInputUserTmp(e.target.value)
-                                            }}
-                                        />
-                                        {userSuggestions.length > 0 && (
-                                            <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full shadow-md">
-                                                {userSuggestions.map((user) => (
-                                                    <div
-                                                        key={user.id}
-                                                        className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                        onClick={(e) => {
-                                                            handleAddUser(formik, user)
-                                                            setInputUserTmp("")
-                                                        }}
-                                                    >
-                                                        {parse(user.name)}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                        <ErrorMessage name="selectedUser" component="div" className="text-red-500 text-sm mt-1" />
-                                    </div>
-                                )}
-
-                                {formik.values.isPrivate && (
-                                    selectedUsers.length > 0 && (
-                                        <div className="mb-4">
-                                            <label className="block text-sm font-medium text-gray-700">Usuarios Seleccionados</label>
-                                            {selectedUsers.map((user) => (
-                                                <div key={user.id} className="flex items-center mt-1">
-                                                    <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{parse(user.name)}</span>
-                                                    <button
-                                                        type="button"
-                                                        className="text-red-500 hover:text-red-700"
-                                                        onClick={() => handleRemoveUser(formik, user)}
-                                                    > x
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )
+                                    <UserListComponent userSelectedList={userList} />
                                 )}
                             </div>
                         </div>
@@ -510,4 +374,4 @@ const ContestForm = () => {
     );
 };
 
-export default ContestForm;
+export default EditContestPage;

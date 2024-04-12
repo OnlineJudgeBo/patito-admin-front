@@ -1,5 +1,5 @@
 import parse from 'html-react-parser';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/apiService';
 
 function ListContestPage() {
@@ -113,7 +113,7 @@ function ListContestPage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900"
                                             target="_blank"
-                                            href={`https://jv.umsa.bo/oj/problem.php?id=${problem.userId}`}>
+                                            href={`/admin/contests/edit/${problem.contestId}`}>
                                             Editar
                                         </a>
                                     </td>

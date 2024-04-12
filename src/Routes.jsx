@@ -4,6 +4,7 @@ import PrivateRoute from './PrivateRoute';
 import Sidebar from './components/Sidebar';
 import UseAuth from './hooks/UseAuth';
 import CreateContestPage from './pages/ContestPage/CreateContestPage';
+import EditContestPage from './pages/ContestPage/EditContestPage';
 import ListContestPage from './pages/ContestPage/ListContestPage';
 import FileManagerPage from './pages/FileManagerPage/FileManagerPage';
 import IndexPage from './pages/IndexPage/IndexPage';
@@ -40,8 +41,9 @@ const App = () => {
                         <Route path="/admin/problems/edit/:problemId" element={<PrivateRoute><EditProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/rejudge" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
-                        <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
+                        <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+                        <Route path="/admin/contests/edit/:contestId" element={<PrivateRoute><EditContestPage /></PrivateRoute>} />
 
                         <Route path="/admin/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
                         <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
