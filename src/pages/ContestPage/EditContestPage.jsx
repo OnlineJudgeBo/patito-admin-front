@@ -1,33 +1,28 @@
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { useAtom } from "jotai";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
-import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
-import { problemSelectAtom, userSelectAtom } from "../../context/problemList";
+import { langSelectAtom, problemSelectAtom, userSelectAtom } from "../../context/problemList";
 import { apiService } from '../../services/apiService.js';
+import CkeditorComponent from "./CkeditorComponent";
+import LanguageListComponent from "./LanguageListComponent.jsx";
 import ProblemListComponent from "./ProblemListComponent.jsx";
 import UserListComponent from "./UserListComponent.jsx";
 
 const EditContestPage = () => {
     const searchText = useAtom(problemSelectAtom);
     const searchText2 = useAtom(userSelectAtom);
+    const searchText3 = useAtom(langSelectAtom);
 
-    const [userSuggestions, setUserSuggestions] = useState([]);
     const [userList, setUserList] = useState([]);
-    const [inputUserTmp, setInputUserTmp] = useState([]);
 
-    const [languageSuggestions, setLanguageSuggestions] = useState([]);
     const [selectedProblems, setSelectedProblems] = useState([]);
-    const [selectedUsers, setSelectedUsers] = useState([]);
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [descriptionData, setDescriptionData] = useState("")
-    const autocompleteRef = useRef(null);
     const { toast } = useToast()
     const navigate = useNavigate();
     const { contestId } = useParams();
@@ -38,14 +33,12 @@ const EditContestPage = () => {
         startTime: '',
         endDate: '',
         endTime: '',
-        problems: '',
+        //problems: '',
         isPrivate: false,
         users: '',
-        selectedUser: '',
+        selectedUser: [],
         selectedProblem: '',
         selectedLanguage: '',
-        selectedProblemList: '',
-        selectedLanguageList: '',
     })
 
     const validationSchema = Yup.object().shape({
@@ -55,32 +48,28 @@ const EditContestPage = () => {
         startTime: Yup.string().required('Hora de inicio requerida'),
         endDate: Yup.date().required('Fecha de fin requerida'),
         endTime: Yup.string().required('Hora de fin requerida'),
-        selectedLanguage: Yup.string().required('Seleccione mínimamente un lenguaje.'),
-        selectedProblem: Yup.string().required('Seleccione mínimamente un problema.'),
+        selectedProblem: Yup.string().min(2).required('Seleccione mínimamente un problema.'),
+        //selectedLanguage: Yup.string().min(2).required('Seleccione mínimamente un lenguaje.'),
+        //isPrivate: Yup.boolean(),
+        /*selectedUser: Yup.array()
+            .when('isPrivate', {
+                is: true,
+                then: Yup.array().min(1, 'Debe seleccionar al menos un usuario para concursos privados.'),
+                otherwise: Yup.array().notRequired()
+            })*/
     });
-
-    const handleClickOutside = (event) => {
-        if (autocompleteRef.current && !autocompleteRef.current.contains(event.target)) {
-            setUserSuggestions([]);
-            setProblemSuggestions([]);
-            setLanguageSuggestions([]);
-        }
-    };
-
-    useEffect(() => {
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
 
     useEffect(() => {
         apiService.get('contests/' + contestId).then(data => {
+
             let startDate = data.startTime.split("T");
             let endDate = data.startTime.split("T");
+
             setSelectedProblems(data.contestProblems)
             setUserList(data.contestUsers)
-            debugger
+            setSelectedLanguages(data.programmingLanguages)
+            setDescriptionData(data.description)
+
             setInitialValues({
                 title: data.title || '',
                 description: data.description || '',
@@ -88,19 +77,15 @@ const EditContestPage = () => {
                 startTime: startDate[1] || '',
                 endDate: endDate[0] || '',
                 endTime: endDate[1] || '',
-                problems: "" || '',
-                isPrivate: false || '',
-                users: "" || '',
+                //problems: "" || '',
+                isPrivate: data.private || '',
+                //users: "" || '',
                 selectedUser: data.selectedUser || '',
                 selectedProblem: data.selectedProblem || '',
                 selectedLanguage: data.language || '',
-                selectedProblemList: "" || '',
-                selectedLanguageList: "" || '',
+                //selectedProblemList: "" || '',
+                //selectedLanguageList: "" || '',
             })
-            //setDescriptionData(data.description)
-            //setSelectedProblems([...selectedProblems, 1000])
-            console.log(data);
-            //debugger
         }).catch((error) => {
             toast({
                 variant: "destructive",
@@ -109,33 +94,23 @@ const EditContestPage = () => {
             })
             console.log(error);
         })
-        //setSelectedProblems([1000]);
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-
     }, [contestId]);
 
     const Submit = async (values) => {
-        values.startDate = values.startDate + "T" + values.startTime + ":00"
-        values.endDate = values.endDate + "T" + values.endTime + ":00"
+        let sTime = values.startDate;
+        let eTime = values.endDate;
+        let selectedProblem = values.selectedProblem;
+        let selectedUser = values.selectedUser;
+        let selectedLanguage = values.selectedLanguage;
 
-        let elements = []
-        values.selectedUser.split(",").forEach(user => {
-            if (user.length > 0)
-                elements.push({ "userId": user })
-        });
-        values.selectedUser = elements;
+        values.startDate = values.startDate + "T" + values.startTime
+        values.endDate = values.endDate + "T" + values.endTime
+        values.selectedProblem = JSON.parse(values.selectedProblem)
+        values.selectedUser = JSON.parse(values.selectedUser)
+        values.selectedLanguage = JSON.parse(values.selectedLanguage)
+        values.isPrivate = values.isPrivate == 1 ? true : false
 
-        elements = []
-        values.selectedProblem.split(",").forEach(user => {
-            if (user.length > 0)
-                elements.push({ "problemId": user })
-        });
-        values.selectedProblem = elements;
-        apiService.create('contests', values).then(data => {
+        apiService.update('contests', contestId, values).then(data => {
             toast({
                 description: 'Contest agregado.',
             })
@@ -150,44 +125,12 @@ const EditContestPage = () => {
             })
             console.log(error);
         })
+        values.startDate = sTime;
+        values.endDate = eTime;
+        values.selectedProblem = selectedProblem;
+        values.selectedUser = selectedUser;
+        values.selectedLanguages = selectedLanguage;
     };
-
-    const handleLanguageSearch = async (searchTerm) => {
-        const exampleLanguages = [
-            { id: 1, name: 'java' },
-            { id: 2, name: 'c' },
-            { id: 3, name: 'python' },
-        ];
-
-        const filteredLanguages = exampleLanguages.filter(language =>
-            language.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !selectedLanguages.some(selectedLanguage => selectedLanguage.id === language.id)
-        );
-
-        setLanguageSuggestions(filteredLanguages);
-    };
-
-    const updateHiddenInput = (formik, data, fieldName) => {
-        let updatedDescription = "";
-        data.forEach(selectedLanguage => {
-            updatedDescription += `${selectedLanguage.id},`;
-        });
-        formik.setFieldValue(fieldName, updatedDescription);
-    }
-
-    const handleAddLanguage = (formik, language) => {
-        setSelectedLanguages([...selectedLanguages, language]);
-        setLanguageSuggestions([]);
-        updateHiddenInput(formik, [...selectedLanguages, language], 'selectedLanguage')
-    };
-
-    const handleRemoveLanguage = (formik, language) => {
-        let updatedLanguages = selectedLanguages.filter(lang => lang.id !== language.id);
-        updateHiddenInput(formik, updatedLanguages, 'selectedLanguage')
-        setSelectedLanguages(updatedLanguages);
-        setLanguageSuggestions([]);
-    };
-
 
     return (
         <>
@@ -217,40 +160,7 @@ const EditContestPage = () => {
                                     </label>
                                 </div>
 
-                                <div className="mb-4">
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Descripción</label>
-                                    <CKEditor
-                                        editor={ClassicEditor}
-                                        //data={descriptionData}
-                                        data={JSON.stringify(searchText[0]) + JSON.stringify(searchText2[0])}
-                                        config={{
-                                            toolbar: {
-                                                shouldNotGroupWhenFull: true,
-                                                items: [
-                                                    'fontColor', 'fontBackgroundColor', '|',
-                                                    'link', '|',
-                                                    'bold', 'italic', '|',
-                                                    'bulletedList', 'numberedList', '|',
-                                                    'code', 'codeBlock', '|',
-                                                    'insertTable', '|',
-                                                    'blockQuote', '|',
-                                                    'imageUpload', '|',
-                                                    'MathType', 'ChemType',
-                                                    'SourceEditing'
-                                                ]
-                                            },
-                                            extraPlugins: [UploadAdapter],
-                                            upload: {}
-                                        }}
-                                        onChange={(event, editor) => {
-                                            let data = editor.getData();
-                                            setDescriptionData(data);
-                                            formik.setFieldValue('description', data);
-                                        }}
-                                    />
-
-                                    <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
-                                </div>
+                                <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement={descriptionData} />
 
                                 <div className="flex mb-4 space-x-4">
                                     <div className="w-1/2">
@@ -298,69 +208,14 @@ const EditContestPage = () => {
                                         <ErrorMessage name="endTime" component="div" className="text-red-500 text-sm mt-1" />
                                     </div>
                                 </div>
-
-                                <div className="mb-4">
-                                    <label htmlFor="selectedLanguage" className="block text-sm font-medium text-gray-700">Seleccionar Lenguajes</label>
-                                    <Field
-                                        type="hidden"
-                                        name="selectedLanguage"
-                                        id="selectedLanguage" />
-                                    <Field
-                                        type="text"
-                                        autoComplete="off"
-                                        value=""
-                                        name="selectedLanguageList"
-                                        id="selectedLanguageList"
-                                        placeholder="Click para agregar un lenguaje"
-                                        className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                                        onClick={(e) => {
-                                            handleLanguageSearch(e.target.value);
-                                        }}
-                                    />
-
-                                    {languageSuggestions.length > 0 && (
-                                        <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 shadow-md">
-                                            {languageSuggestions.map((language) => (
-                                                <div
-                                                    key={language.id}
-                                                    className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                    onClick={(e) => {
-                                                        handleAddLanguage(formik, language)
-                                                    }
-                                                    }
-                                                >
-                                                    {language.name}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    <ErrorMessage name="selectedLanguage" component="div" className="text-red-500 text-sm mt-1" />
-                                </div>
-
-                                {selectedLanguages.length > 0 && (
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700">Lenguajes seleccionados</label>
-                                        {selectedLanguages.map((language) => (
-                                            <div key={language.id} className="flex items-center mt-1">
-                                                <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{language.name}</span>
-                                                <button
-                                                    type="button"
-                                                    className="text-red-500 hover:text-red-700"
-                                                    onClick={(e) => {
-                                                        handleRemoveLanguage(formik, language)
-                                                    }}> x
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={selectedLanguages} />
                             </div>
 
                             <div className="w-3/5 p-10">
-                                <ProblemListComponent problemSelectedList={selectedProblems} />
+                                <ProblemListComponent setFieldValue={formik.setFieldValue} problemSelectedList={selectedProblems} />
 
                                 {formik.values.isPrivate && (
-                                    <UserListComponent userSelectedList={userList} />
+                                    <UserListComponent setFieldValue={formik.setFieldValue} userSelectedList={userList} />
                                 )}
                             </div>
                         </div>

@@ -1,19 +1,15 @@
 
 import { ErrorMessage, Field } from 'formik';
 import parse from 'html-react-parser';
-import { useAtom } from "jotai";
 import React, { useEffect, useState } from 'react';
-import { problemSelectAtom } from "../../context/problemList";
 import { apiService } from '../../services/apiService';
 
-
-const ProblemListComponent = ({ problemSelectedList }) => {
+const ProblemListComponent = ({ setFieldValue, problemSelectedList }) => {
 
     const [inputTmp, setInputTmp] = useState([]);
     const [showSuggestionProblems, setShowSuggestionProblems] = useState([]);
-    const [userSelectedProblems, setUserSelectedProblems] = useAtom(problemSelectAtom);
+    const [userSelectedProblems, setUserSelectedProblems] = useState([]);
     const [problemList, setProblemList] = useState([]);
-
 
     useEffect(() => {
         apiService.fetchProblems()
@@ -28,6 +24,7 @@ const ProblemListComponent = ({ problemSelectedList }) => {
                     problemRawList.find(pf => pf.problemId === selectedProblem.problemId)
                 ).filter(problem => problem !== undefined);
                 setUserSelectedProblems(selectedProblems);
+                setFieldValue('selectedProblem', JSON.stringify(selectedProblems));
             })
             .catch(err => {
                 console.log(err);
@@ -45,18 +42,28 @@ const ProblemListComponent = ({ problemSelectedList }) => {
     const handleAddProblem = (problem) => {
         setUserSelectedProblems([...userSelectedProblems, problem]);
         setShowSuggestionProblems([]);
+        setFieldValue('selectedProblem', JSON.stringify([...userSelectedProblems, problem]));
     };
 
     const handleRemoveProblem = (problem) => {
         const updatedProblems = userSelectedProblems.filter(p => p.problemId !== problem.problemId);
         setUserSelectedProblems(updatedProblems);
         setShowSuggestionProblems([]);
+        if (updatedProblems.length == 0) {
+            setFieldValue('selectedProblem', "");
+        } else {
+            setFieldValue('selectedProblem', JSON.stringify(updatedProblems));
+        }
     };
 
-
+    const onBlurHandler = (event) => {
+        /*if (event.target.name != "selectedProblemList") {
+            setShowSuggestionProblems([]);
+        }*/
+    };
 
     return (<>
-        <div className="mb-4">
+        <div className="mb-4" onBlur={onBlurHandler}>
             <label htmlFor="selectedProblem" className="block text-sm font-medium text-gray-700">Seleccionar Problema</label>
             <Field
                 type="hidden"
@@ -66,9 +73,9 @@ const ProblemListComponent = ({ problemSelectedList }) => {
             <Field
                 type="text"
                 autoComplete="off"
-                value={inputTmp}
                 name="selectedProblemList"
                 id="selectedProblemList"
+                value={inputTmp}
                 placeholder="Ingrese el nombre del problema"
                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                 onChange={(e) => {
@@ -77,7 +84,7 @@ const ProblemListComponent = ({ problemSelectedList }) => {
                 }}
             />
             {showSuggestionProblems.length > 0 && (
-                <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 w-full shadow-md">
+                <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 shadow-md">
                     {showSuggestionProblems.map((problem) => (
                         <div
                             key={problem.problemId}
@@ -85,8 +92,7 @@ const ProblemListComponent = ({ problemSelectedList }) => {
                             onClick={(e) => {
                                 handleAddProblem(problem)
                                 setInputTmp("")
-                            }
-                            }
+                            }}
                         >
                             {parse(problem.name)}
                         </div>
