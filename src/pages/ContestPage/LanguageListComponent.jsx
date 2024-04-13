@@ -2,32 +2,28 @@
 import { ErrorMessage, Field } from 'formik';
 import parse from 'html-react-parser';
 import React, { useEffect, useState } from 'react';
-import { useDebouncedCallback } from 'use-debounce';
 import { apiService } from '../../services/apiService';
 
-
-const UserListComponent = ({ setFieldValue, userSelectedList }) => {
+const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
     const [inputTmp, setInputTmp] = useState([]);
     const [showSuggestionUsers, setShowSuggestionUsers] = useState([]);
-    const [userSelectedProblems, setUserSelectedProblems] = useState([]);
-    const [problemList, setProblemList] = useState([]);
-    const debouncedInputUserTmp = useDebouncedCallback((value) => {
-        handleProblemSearch(value)
-    }, 1000);
+    const [userElementSelected, setUserElementSelected] = useState([]);
+    const [valueList, setValueList] = useState([]);
 
     useEffect(() => {
-        apiService.fetchUserProfileList()
+        apiService.get('programmingLanguages')
             .then(data => {
-                let problemRawList = data.map(user => ({
-                    userId: user.userId,
-                    name: user.userProfile.nick + " " + user.userProfile.lastname + ` - (${user.userId})`
+                let problemRawList = data.map(problem => ({
+                    languageId: problem.languageId,
+                    name: problem.name
                 }));
-                setProblemList(problemRawList);
-                const selectedUsers = userSelectedList.map(selectedProblem =>
-                    problemRawList.find(pf => pf.userId === selectedProblem.userId)
+                setValueList(problemRawList);
+
+                const selectedProblems = userSelectedList.map(selectedProblem =>
+                    problemRawList.find(pf => pf.languageId === selectedProblem.languageId)
                 ).filter(problem => problem !== undefined);
-                setUserSelectedProblems(selectedUsers);
-                setFieldValue('selectedUser', JSON.stringify(selectedUsers));
+                setUserElementSelected(selectedProblems);
+                setFieldValue('selectedLanguage', JSON.stringify(selectedProblems));
             })
             .catch(err => {
                 console.log(err);
@@ -35,27 +31,27 @@ const UserListComponent = ({ setFieldValue, userSelectedList }) => {
     }, [userSelectedList]);
 
     const handleProblemSearch = async (searchTerm) => {
-        const filteredProblems = problemList.filter(problem =>
+        const filteredProblems = valueList.filter(problem =>
             problem.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !userSelectedProblems.some(selectedProblem => selectedProblem.userId === problem.userId)
+            !userElementSelected.some(language => language.languageId === problem.languageId)
         );
         setShowSuggestionUsers(filteredProblems);
     };
 
     const handleAddProblem = (problem) => {
-        setUserSelectedProblems([...userSelectedProblems, problem]);
+        setUserElementSelected([...userElementSelected, problem]);
         setShowSuggestionUsers([]);
-        setFieldValue('selectedUser', JSON.stringify([...userSelectedProblems, problem]));
+        setFieldValue('selectedLanguage', JSON.stringify([...userElementSelected, problem]));
     };
 
     const handleRemoveProblem = (problem) => {
-        const updatedProblems = userSelectedProblems.filter(p => p.userId !== problem.userId);
-        setUserSelectedProblems(updatedProblems);
+        const updatedProblems = userElementSelected.filter(p => p.languageId !== problem.languageId);
+        setUserElementSelected(updatedProblems);
         setShowSuggestionUsers([]);
         if (updatedProblems.length == 0) {
-            setFieldValue('selectedUser', "");
+            setFieldValue('selectedLanguage', "");
         } else {
-            setFieldValue('selectedUser', JSON.stringify(updatedProblems));
+            setFieldValue('selectedLanguage', JSON.stringify(updatedProblems));
         }
     };
 
@@ -65,31 +61,29 @@ const UserListComponent = ({ setFieldValue, userSelectedList }) => {
 
     return (<>
         <div className="mb-4" onBlur={onBlurHandler}>
-            <label htmlFor="selectedProblem" className="block text-sm font-medium text-gray-700">Seleccionar Usuarios</label>
+            <label htmlFor="language" className="block text-sm font-medium text-gray-700">Seleccionar Lenguajes</label>
             <Field
                 type="hidden"
-                name="selectedProblem"
-                id="selectedProblem"
+                name="selectedLanguage"
+                id="selectedLanguage"
             />
             <Field
                 type="text"
                 autoComplete="off"
                 value={inputTmp}
-                name="selectedUserList"
-                id="selectedUserList"
+                name="languageUserList"
+                id="languageUserList"
                 placeholder="Ingrese el nombre del problema"
                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                onChange={(e) => {
-                    //handleProblemSearch(e.target.value);
-                    debouncedInputUserTmp(e.target.value);
-                    setInputTmp(e.target.value);
+                onClick={(e) => {
+                    handleProblemSearch(e.target.value);
                 }}
             />
             {showSuggestionUsers.length > 0 && (
                 <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 shadow-md">
                     {showSuggestionUsers.map((problem) => (
                         <div
-                            key={problem.userId}
+                            key={problem.languageId}
                             className="p-2 hover:bg-gray-100 cursor-pointer"
                             onClick={(e) => {
                                 handleAddProblem(problem)
@@ -102,14 +96,14 @@ const UserListComponent = ({ setFieldValue, userSelectedList }) => {
                     ))}
                 </div>
             )}
-            <ErrorMessage name="selectedProblem" component="div" className="text-red-500 text-sm mt-1" />
+            <ErrorMessage name="language" component="div" className="text-red-500 text-sm mt-1" />
         </div>
 
-        {userSelectedProblems.length > 0 && (
+        {userElementSelected.length > 0 && (
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Usuarios Seleccionados</label>
-                {userSelectedProblems.map((problem, index) => (
-                    <div key={problem.userId + index} className="flex items-center mt-1">
+                <label className="block text-sm font-medium text-gray-700">Lenguajes Seleccionados</label>
+                {userElementSelected.map((problem, index) => (
+                    <div key={problem.languageId + index} className="flex items-center mt-1">
                         <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{parse(problem.name)}</span>
                         <button
                             type="button"
@@ -124,4 +118,4 @@ const UserListComponent = ({ setFieldValue, userSelectedList }) => {
         )}
     </>)
 }
-export default UserListComponent;
+export default LanguageListComponent;
