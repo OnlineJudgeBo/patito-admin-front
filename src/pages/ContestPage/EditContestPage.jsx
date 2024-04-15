@@ -48,7 +48,6 @@ const EditContestPage = () => {
 
     useEffect(() => {
         apiService.get('contests/' + contestId).then(data => {
-
             let startDate = data.startTime.split("T");
             let endDate = data.endTime.split("T");
 
@@ -83,15 +82,13 @@ const EditContestPage = () => {
         let eTime = values.endDate;
         let selectedProblem = values.selectedProblem;
         let selectedUser = values.selectedUser;
-        let selectedLanguage = values.selectedLanguage;
+        let selectedLanguage = values.selectedLanguages;
 
         values.startDate = values.startDate + "T" + values.startTime
         values.endDate = values.endDate + "T" + values.endTime
-
-
         values.selectedProblem = parseJSON(values.selectedProblem)
         values.selectedUser = parseJSON(values.selectedUser)
-        values.selectedLanguage = parseJSON(values.selectedLanguage)
+        values.selectedLanguages = parseJSON(values.selectedLanguages)
         values.isPrivate = values.isPrivate == 1 ? true : false
 
         apiService.update('contests', contestId, values).then(data => {

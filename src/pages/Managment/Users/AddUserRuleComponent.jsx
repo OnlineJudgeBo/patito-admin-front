@@ -22,7 +22,6 @@ export function AddUserRuleComponent({ title }) {
 
     const handleInputChange = (e) => {
         setInputValue(e.currentTarget.value);
-        console.log(e.currentTarget.value);
     };
 
     function miFuncionOnClick() {

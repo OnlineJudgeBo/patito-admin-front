@@ -19,12 +19,10 @@ const ManualUserAddComponent = ({ setFieldValue, userSelectedList }) => {
     const [inputText, setInputText] = useAtom(userSelectAtom);
 
     const onBlurHandler = (event) => {
-        console.log(event.target.value);
         setInputText(event.target.value);
     };
 
     const onChangeHandler = (event) => {
-        console.log(event.target.value);
         setInputText(event.target.value);
     };
 

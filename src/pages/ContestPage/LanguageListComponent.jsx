@@ -23,7 +23,7 @@ const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
                     problemRawList.find(pf => pf.languageId === selectedProblem.languageId)
                 ).filter(problem => problem !== undefined);
                 setUserElementSelected(selectedProblems);
-                setFieldValue('selectedLanguage', JSON.stringify(selectedProblems));
+                setFieldValue('selectedLanguages', JSON.stringify(selectedProblems));
             })
             .catch(err => {
                 console.log(err);
@@ -41,7 +41,7 @@ const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
     const handleAddProblem = (problem) => {
         setUserElementSelected([...userElementSelected, problem]);
         setShowSuggestionUsers([]);
-        setFieldValue('selectedLanguage', JSON.stringify([...userElementSelected, problem]));
+        setFieldValue('selectedLanguages', JSON.stringify([...userElementSelected, problem]));
     };
 
     const handleRemoveProblem = (problem) => {
@@ -49,9 +49,9 @@ const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
         setUserElementSelected(updatedProblems);
         setShowSuggestionUsers([]);
         if (updatedProblems.length == 0) {
-            setFieldValue('selectedLanguage', "");
+            setFieldValue('selectedLanguages', "");
         } else {
-            setFieldValue('selectedLanguage', JSON.stringify(updatedProblems));
+            setFieldValue('selectedLanguages', JSON.stringify(updatedProblems));
         }
     };
 

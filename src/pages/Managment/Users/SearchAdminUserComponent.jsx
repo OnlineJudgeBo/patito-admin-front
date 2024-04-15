@@ -28,13 +28,11 @@ export function SearchAdminUserComponent({ userId }) {
                     })
                     );
                     setUserList(userList);
-                    console.log(userList);
                 })
                 .catch(err => {
                     console.log(err);
                 });
         }
-
     }, [userId]);
 
 
