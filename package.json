@@ -14,7 +14,7 @@
     "@aperturerobotics/chonky-icon-fontawesome": "^0.2.8",
     "@ckeditor/ckeditor5-build-classic": "^41.2.0",
     "@ckeditor/ckeditor5-react": "^6.2.0",
-    "@ckeditor/ckeditor5-source-editing": "^41.2.0",
+    "@ckeditor/ckeditor5-source-editing": "^41.3.0",
     "@ckeditor/ckeditor5-upload": "^41.2.0",
     "@hookform/resolvers": "^3.3.4",
     "@monaco-editor/react": "^4.6.0",

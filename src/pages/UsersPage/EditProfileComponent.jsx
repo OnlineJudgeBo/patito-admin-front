@@ -1,10 +1,10 @@
-import React from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFormik } from 'formik';
+import React from 'react';
+import * as Yup from 'yup';
 import { apiService } from '../../services/apiService';
 
 const createValidationSchema = ({ originalEmail, originalUsername }) => Yup.object().shape({
@@ -13,7 +13,7 @@ const createValidationSchema = ({ originalEmail, originalUsername }) => Yup.obje
         'El correo del usuario ya esta en uso',
         async (email, context) => {
             if (email === originalEmail) return true;
-            return await apiService.checkUserEmailAvailability({ "email": email , "userId":""});
+            return await apiService.checkUserEmailAvailability({ "email": email, "userId": "" });
         }
     ),
     username: Yup.string().required('Nombre de usuario requerido').test(
@@ -28,8 +28,9 @@ const createValidationSchema = ({ originalEmail, originalUsername }) => Yup.obje
     lastname: Yup.string().required('El apellido es requerido'),
 });
 
+
 export function EditProfileComponent({ email, username, name, lastname }) {
-    
+
     const handleClick = () => {
         formik.handleSubmit();
     };
@@ -42,8 +43,10 @@ export function EditProfileComponent({ email, username, name, lastname }) {
             lastname: lastname,
         },
         validationSchema: createValidationSchema({ originalEmail: email, originalUsername: username }),
-        onSubmit: (values, { setSubmitting }) => {
-            console.log(values);
+        onSubmit: (values) => {
+            apiService.update("users", username, values).then(data => {
+                window.location.reload();
+            })
         }
     });
 

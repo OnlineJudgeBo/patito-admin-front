@@ -1,18 +1,18 @@
-import React from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFormik } from 'formik';
+import React from 'react';
+import * as Yup from 'yup';
 import { apiService } from '../../services/apiService';
 
 const createValidationSchema = () => Yup.object().shape({
     password: Yup.string().required('La clave es requerida')
 });
 
-export function ChangePasswordComponent() {
-    
+export function ChangePasswordComponent({ userId }) {
+
     const handleClick = () => {
         formik.handleSubmit();
     };
@@ -23,7 +23,9 @@ export function ChangePasswordComponent() {
         },
         validationSchema: createValidationSchema(),
         onSubmit: (values, { setSubmitting }) => {
-            console.log(values);
+            apiService.update("Users/changePassword", userId, values).then(data => {
+                window.location.reload();
+            })
         }
     });
 

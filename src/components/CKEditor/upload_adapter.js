@@ -1,27 +1,27 @@
+import { apiService } from '../../services/apiService';
+
 export default class MyUploadAdapter {
     constructor(loader) {
         this.loader = loader;
     }
 
     upload() {
-        return this.loader.file.then(
-            (file) =>
-                new Promise((resolve, reject) => {
-                    const toBase64 = (file) =>
-                        new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.readAsDataURL(file);
-                            reader.onload = () => resolve(reader.result);
-                            reader.onerror = (error) => reject(error);
+        return this.loader.file.then(file => {
+            return new Promise((resolve, reject) => {
+                const data = new FormData();
+                data.append('file', file);
+
+                apiService.postFile("FileManager/cloud-storage", data)
+                    .then(result => {
+                        resolve({
+                            default: result
                         });
-                    const base64_image = toBase64(file).then((data) => {
-                        return resolve({
-                            default: data
-                        });
+                    })
+                    .catch(error => {
+                        reject('Error al cargar el archivo.');
+                        console.error('Error uploading image:', error);
                     });
-                    this.loader.uploaded = true;
-                    return base64_image;
-                })
-        );
+            });
+        });
     }
 }

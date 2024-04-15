@@ -1,23 +1,19 @@
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import { ErrorMessage, Field, Form, Formik } from 'formik';
-import { useAtom } from "jotai";
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
-import { langSelectAtom, problemSelectAtom, userSelectAtom } from "../../context/problemList";
 import { apiService } from '../../services/apiService.js';
+import { parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
-import LanguageListComponent from "./LanguageListComponent.jsx";
-import ProblemListComponent from "./ProblemListComponent.jsx";
-import UserListComponent from "./UserListComponent.jsx";
+import LanguageListComponent from "./LanguageListComponent";
+import ManualUserAddComponent from "./ManualUserAddComponent";
+import ProblemListComponent from "./ProblemListComponent";
+import UserListComponent from "./UserListComponent";
 
 const EditContestPage = () => {
-    const searchText = useAtom(problemSelectAtom);
-    const searchText2 = useAtom(userSelectAtom);
-    const searchText3 = useAtom(langSelectAtom);
-
     const [userList, setUserList] = useState([]);
 
     const [selectedProblems, setSelectedProblems] = useState([]);
@@ -33,12 +29,11 @@ const EditContestPage = () => {
         startTime: '',
         endDate: '',
         endTime: '',
-        //problems: '',
-        isPrivate: false,
+        isPrivate: '',
         users: '',
         selectedUser: [],
-        selectedProblem: '',
-        selectedLanguage: '',
+        selectedProblem: [],
+        selectedLanguage: [],
     })
 
     const validationSchema = Yup.object().shape({
@@ -49,27 +44,18 @@ const EditContestPage = () => {
         endDate: Yup.date().required('Fecha de fin requerida'),
         endTime: Yup.string().required('Hora de fin requerida'),
         selectedProblem: Yup.string().min(2).required('Seleccione mínimamente un problema.'),
-        //selectedLanguage: Yup.string().min(2).required('Seleccione mínimamente un lenguaje.'),
-        //isPrivate: Yup.boolean(),
-        /*selectedUser: Yup.array()
-            .when('isPrivate', {
-                is: true,
-                then: Yup.array().min(1, 'Debe seleccionar al menos un usuario para concursos privados.'),
-                otherwise: Yup.array().notRequired()
-            })*/
     });
 
     useEffect(() => {
         apiService.get('contests/' + contestId).then(data => {
 
             let startDate = data.startTime.split("T");
-            let endDate = data.startTime.split("T");
+            let endDate = data.endTime.split("T");
 
             setSelectedProblems(data.contestProblems)
             setUserList(data.contestUsers)
             setSelectedLanguages(data.programmingLanguages)
             setDescriptionData(data.description)
-
             setInitialValues({
                 title: data.title || '',
                 description: data.description || '',
@@ -77,14 +63,10 @@ const EditContestPage = () => {
                 startTime: startDate[1] || '',
                 endDate: endDate[0] || '',
                 endTime: endDate[1] || '',
-                //problems: "" || '',
-                isPrivate: data.private || '',
-                //users: "" || '',
+                isPrivate: data.private,
                 selectedUser: data.selectedUser || '',
                 selectedProblem: data.selectedProblem || '',
                 selectedLanguage: data.language || '',
-                //selectedProblemList: "" || '',
-                //selectedLanguageList: "" || '',
             })
         }).catch((error) => {
             toast({
@@ -105,9 +87,11 @@ const EditContestPage = () => {
 
         values.startDate = values.startDate + "T" + values.startTime
         values.endDate = values.endDate + "T" + values.endTime
-        values.selectedProblem = JSON.parse(values.selectedProblem)
-        values.selectedUser = JSON.parse(values.selectedUser)
-        values.selectedLanguage = JSON.parse(values.selectedLanguage)
+
+
+        values.selectedProblem = parseJSON(values.selectedProblem)
+        values.selectedUser = parseJSON(values.selectedUser)
+        values.selectedLanguage = parseJSON(values.selectedLanguage)
         values.isPrivate = values.isPrivate == 1 ? true : false
 
         apiService.update('contests', contestId, values).then(data => {
@@ -125,6 +109,7 @@ const EditContestPage = () => {
             })
             console.log(error);
         })
+
         values.startDate = sTime;
         values.endDate = eTime;
         values.selectedProblem = selectedProblem;
@@ -154,7 +139,14 @@ const EditContestPage = () => {
 
                                 <div className="mb-4">
                                     <label htmlFor="isPrivate" className="inline-flex relative items-center cursor-pointer">
-                                        <Field type="checkbox" id="isPrivate" name="isPrivate" className="sr-only peer" />
+                                        <Field
+                                            type="checkbox"
+                                            id="isPrivate"
+                                            name="isPrivate"
+                                            className="sr-only peer"
+                                            checked={formik.values.isPrivate}
+                                            onChange={() => formik.setFieldValue('isPrivate', !formik.values.isPrivate)}
+                                        />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                         <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Privado?</span>
                                     </label>
@@ -214,10 +206,17 @@ const EditContestPage = () => {
                             <div className="w-3/5 p-10">
                                 <ProblemListComponent setFieldValue={formik.setFieldValue} problemSelectedList={selectedProblems} />
 
-                                {formik.values.isPrivate && (
+                                {formik.values.isPrivate == true && (
                                     <UserListComponent setFieldValue={formik.setFieldValue} userSelectedList={userList} />
                                 )}
                             </div>
+                            {formik.values.isPrivate == true && (
+                                <div className="w-3/5 p-10">
+                                    <ManualUserAddComponent />
+                                </div>
+                            )}
+
+
                         </div>
                         <button
                             type="submit"

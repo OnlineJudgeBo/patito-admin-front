@@ -48,6 +48,12 @@ const ContestForm = () => {
         selectedLanguageList: '',
     };
 
+    function UploadAdapterPlugin(editor) {
+        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+            return new UploadAdapter(loader);
+        };
+    }
+
     const validationSchema = Yup.object().shape({
         title: Yup.string().required('Nombre del concurso requerido'),
         description: Yup.string().required('Descripción requerida'),
@@ -261,7 +267,7 @@ const ContestForm = () => {
                                                     'SourceEditing'
                                                 ]
                                             },
-                                            extraPlugins: [UploadAdapter],
+                                            extraPlugins: [UploadAdapterPlugin],
                                             upload: {}
                                         }}
                                         onChange={(event, editor) => {

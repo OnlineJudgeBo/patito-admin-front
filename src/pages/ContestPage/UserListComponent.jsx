@@ -1,16 +1,19 @@
 
 import { ErrorMessage, Field } from 'formik';
 import parse from 'html-react-parser';
+import { useAtom } from "jotai";
 import React, { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
+import { userSelectAtom } from "../../context/manager";
 import { apiService } from '../../services/apiService';
-
 
 const UserListComponent = ({ setFieldValue, userSelectedList }) => {
     const [inputTmp, setInputTmp] = useState([]);
     const [showSuggestionUsers, setShowSuggestionUsers] = useState([]);
     const [userSelectedProblems, setUserSelectedProblems] = useState([]);
     const [problemList, setProblemList] = useState([]);
+    const [manualUserList, setManualUserList] = useAtom(userSelectAtom);
+
     const debouncedInputUserTmp = useDebouncedCallback((value) => {
         handleProblemSearch(value)
     }, 1000);
@@ -28,6 +31,7 @@ const UserListComponent = ({ setFieldValue, userSelectedList }) => {
                 ).filter(problem => problem !== undefined);
                 setUserSelectedProblems(selectedUsers);
                 setFieldValue('selectedUser', JSON.stringify(selectedUsers));
+                setManualUserList(selectedUsers?.map(u => u.userId).join("\n"));
             })
             .catch(err => {
                 console.log(err);
@@ -43,9 +47,11 @@ const UserListComponent = ({ setFieldValue, userSelectedList }) => {
     };
 
     const handleAddProblem = (problem) => {
-        setUserSelectedProblems([...userSelectedProblems, problem]);
+        let selectedValues = [...userSelectedProblems, problem];
+        setUserSelectedProblems(selectedValues);
         setShowSuggestionUsers([]);
-        setFieldValue('selectedUser', JSON.stringify([...userSelectedProblems, problem]));
+        setFieldValue('selectedUser', JSON.stringify(selectedValues));
+        setManualUserList(selectedValues?.map(u => u.userId).join("\n"));
     };
 
     const handleRemoveProblem = (problem) => {
@@ -54,8 +60,10 @@ const UserListComponent = ({ setFieldValue, userSelectedList }) => {
         setShowSuggestionUsers([]);
         if (updatedProblems.length == 0) {
             setFieldValue('selectedUser', "");
+            setManualUserList("");
         } else {
             setFieldValue('selectedUser', JSON.stringify(updatedProblems));
+            setManualUserList(updatedProblems?.map(u => u.userId).join("\n"));
         }
     };
 
