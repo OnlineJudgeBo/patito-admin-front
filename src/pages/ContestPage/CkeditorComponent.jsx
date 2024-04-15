@@ -4,8 +4,8 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { ErrorMessage } from 'formik';
 import { useAtom } from "jotai";
 import { useEffect } from 'react';
-import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
-import { ckEditorAtom } from "../../context/problemList";
+import UploadAdapter from "../../components/CKEditor/upload_adapter";
+import { ckEditorAtom } from "../../context/manager";
 
 const CkeditorComponent = ({ setFieldValue, valueElement }) => {
     const [ckEditorValue, setCkeditorValue] = useAtom(ckEditorAtom);
@@ -19,6 +19,12 @@ const CkeditorComponent = ({ setFieldValue, valueElement }) => {
         setCkeditorValue(data);
         setFieldValue('description', data);
     };
+
+    function UploadAdapterPlugin(editor) {
+        editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+            return new UploadAdapter(loader);
+        };
+    }
 
     return (
         <div className="mb-4">
@@ -42,7 +48,7 @@ const CkeditorComponent = ({ setFieldValue, valueElement }) => {
                             'SourceEditing'
                         ]
                     },
-                    extraPlugins: [UploadAdapter],
+                    extraPlugins: [UploadAdapterPlugin],
                     upload: {}
                 }}
                 onChange={handleEditorChange}

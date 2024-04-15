@@ -108,7 +108,7 @@ function ListContestPage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{parse(problem.title)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.startTime}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.endTime}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.defunct == "N" ? "Publico" : "Privado"}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.private == false ? "Publico" : "Privado"}</td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900"

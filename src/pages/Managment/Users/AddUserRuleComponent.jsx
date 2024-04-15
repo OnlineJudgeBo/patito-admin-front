@@ -2,19 +2,18 @@ import { Button } from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
+    DialogTrigger
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusIcon } from "@radix-ui/react-icons";
-import { useState, useEffect } from "react";
-import { SearchAdminUserComponent } from "./SearchAdminUserComponent"
-import { userSelectAtom } from "../../../context/manager"
 import { useAtomValue } from "jotai";
+import { useState } from "react";
+import { userSelectAtom } from "../../../context/manager";
+import { SearchAdminUserComponent } from "./SearchAdminUserComponent";
 
 export function AddUserRuleComponent({ title }) {
 
@@ -33,7 +32,7 @@ export function AddUserRuleComponent({ title }) {
     return (
         <Dialog>
             <div className="space-y-1">
-                <DialogTrigger>
+                <DialogTrigger asChild>
                     <Button variant="outline" className="bg-gray-700 text-white">
                         <PlusIcon className="h-5 w-5 mr-2" />
                         {title}
@@ -64,7 +63,7 @@ export function AddUserRuleComponent({ title }) {
                             className="md:text-right font-medium">
                             Username
                         </Label>
-                        <SearchAdminUserComponent userId={inputValue}/>
+                        <SearchAdminUserComponent userId={inputValue} />
                     </div>
                 </div>
                 <DialogFooter className="mt-4">

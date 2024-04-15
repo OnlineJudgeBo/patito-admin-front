@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { AddUserRuleComponent } from './AddUserRuleComponent';
 import { UserAdminList } from './UserAdminList';
 

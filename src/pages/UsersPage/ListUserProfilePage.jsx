@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/apiService';
-import { EditProfileComponent } from './EditProfileComponent';
 import { ChangePasswordComponent } from './ChangePasswordComponent';
 import { DeleteAccountComponent } from './DeleteAccountComponent';
+import { EditProfileComponent } from './EditProfileComponent';
 
 function ListUserProfilePage() {
     const [problems, setProblems] = useState([]);
@@ -119,15 +119,15 @@ function ListUserProfilePage() {
                                             username={problem.userId}
                                             name={problem.userProfile.nick}
                                             lastname={problem.userProfile.lastname}
-                                            />
+                                        />
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <ChangePasswordComponent/>
+                                        <ChangePasswordComponent userId={problem.userId} />
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <DeleteAccountComponent user_id={problem.userId}/>
+                                        <DeleteAccountComponent user_id={problem.userId} />
                                     </td>
                                 </tr>
                             ))}
