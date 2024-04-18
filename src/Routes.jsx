@@ -48,7 +48,7 @@ const App = () => {
                         <Route path="/admin/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
                         <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
-                        <Route path="/admin/fileManager/:problemId" element={<FileManagerPage />} />
+                        <Route path="/admin/fileManager/:problemId" element={<PrivateRoute><FileManagerPage /></PrivateRoute>} />
 
                         <Route path="/admin/logout" element={<LogoutPage />} />
                         <Route path="/admin/login" element={<LoginPage />} />
