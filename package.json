@@ -33,6 +33,7 @@
     "ckeditor5-build-classic-simple-upload-adapter-image-resize": "^1.0.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "dotenv": "^16.4.5",
     "echarts": "^5.5.0",
     "echarts-for-react": "^3.0.2",
     "formik": "^2.4.5",

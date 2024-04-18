@@ -3,13 +3,14 @@ import UseAuth from './hooks/UseAuth';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, isLoading } = UseAuth();
+    const authRedirectUrl = process.env.REACT_APP_AUTH_REDIRECT_URL;
 
     if (isLoading) {
         return <div>Cargando...</div>;
     }
 
     if (!isAuthenticated) {
-        window.location.href = "http://localhost:8080/oj";
+        window.location.href = authRedirectUrl;
         return null;
     }
 

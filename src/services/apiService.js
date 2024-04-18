@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const BASE_URL = 'http://localhost:5043/api';
+const BASE_URL = process.env.API_URL;
 
 function getCookie(name) {
     const nameEQ = name + "=";
