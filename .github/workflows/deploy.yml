@@ -46,7 +46,7 @@ jobs:
         run: ssh-keyscan -p ${{ vars.DEV_SSH_PORT }} -H ${{ vars.DEV_SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Login to the GitHub Packages Docker Registry
-        run: ssh ${{ vars.DEV_SSH_USERNAME }}@${{ vars.DEV_SSH_HOST }} -p ${{ vars.DEV_SSH_PORT }} "echo ${{ secrets.DOCKER_REGISTRY_TOKEN }} | docker login ghcr.io -u ${{ vars.DOCKER_REGISTRY_USER }}" --password-stdin
+        run: ssh -t ${{ vars.DEV_SSH_USERNAME }}@${{ vars.DEV_SSH_HOST }} -p ${{ vars.DEV_SSH_PORT }} "echo ${{ secrets.DOCKER_REGISTRY_TOKEN }} | docker login ghcr.io -u ${{ vars.DOCKER_REGISTRY_USER }}" --password-stdin
 
       - name: Run docker-compose
         continue-on-error: true
