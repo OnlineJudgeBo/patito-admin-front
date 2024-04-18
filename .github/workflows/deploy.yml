@@ -50,7 +50,7 @@ jobs:
 
       - name: Run docker-compose
         continue-on-error: true
-        run: ssh ${{ vars.DEV_SSH_USERNAME }}@${{ vars.DEV_SSH_HOST }} "cd patito/admin-ui && chmod +x deploy.sh && ./deploy.sh"
+        run: ssh ${{ vars.DEV_SSH_USERNAME }}@${{ vars.DEV_SSH_HOST }} "cd /var/www/patito2.0/admin-ui && chmod +x deploy.sh && ./deploy.sh"
 
       - name: Delete unused images
         run: ssh ${{ vars.DEV_SSH_USERNAME }}@${{ vars.DEV_SSH_HOST }} "docker image prune -f"
