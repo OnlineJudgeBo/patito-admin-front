@@ -37,15 +37,13 @@ jobs:
     needs: docker-package
     if: ${{github.ref == 'refs/heads/main'}}
     steps:
-      - name: Adding Known Hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p ${{ vars.DEV_SSH_PORT }} -H ${{ vars.DEV_SSH_HOST }} > ~/.ssh/known_hosts
-
       - name: Setup SSH connection
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DEV_SSH_SECRET }}
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ vars.DEV_SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Login to the GitHub Packages Docker Registry
         run: ssh ${{ vars.DEV_SSH_USERNAME }}@${{ vars.DEV_SSH_HOST }} -p ${{ vars.DEV_SSH_PORT }} "echo ${{ secrets.DOCKER_REGISTRY_TOKEN }} | docker login ghcr.io -u ${{ vars.DOCKER_REGISTRY_USER }}" --password-stdin
