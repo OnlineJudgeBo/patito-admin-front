@@ -18,7 +18,7 @@ export function DisableAdminUserComponent({ userId, roleId }) {
 
     const disableAdmin = async () => {
         await apiService.delete(`users/${userId}/role/${roleId}`).then(response => {
-            navigate('/admin/management/users');
+            navigate('/admin2/management/users');
         })
     };
 
