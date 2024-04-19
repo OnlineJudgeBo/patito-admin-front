@@ -96,7 +96,7 @@ const EditContestPage = () => {
                 description: 'Contest agregado.',
             })
             setTimeout(() => {
-                navigate('/admin/contests');
+                navigate('/admin2/contests');
             }, 2000);
         }).catch((error) => {
             toast({
