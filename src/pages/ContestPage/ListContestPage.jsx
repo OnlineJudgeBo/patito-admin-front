@@ -113,7 +113,7 @@ function ListContestPage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900"
                                             target="_blank"
-                                            href={`/admin2/contests/edit/${problem.contestId}`}>
+                                            href={`/admin/contests/edit/${problem.contestId}`}>
                                             Editar
                                         </a>
                                     </td>
