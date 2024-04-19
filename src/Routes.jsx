@@ -33,25 +33,25 @@ const App = () => {
                 )}
                 <div className='flex-1 p-4 ml-5 mt-1'>
                     <Routes>
-                        <Route path="/admin2" element={<PrivateRoute><IndexPage /></PrivateRoute>} />
-                        <Route path="/admin2/users" element={<PrivateRoute><ListUserProfilePage /></PrivateRoute>} />
-                        <Route path="/admin2/problems" element={<PrivateRoute><ListProblemPage /></PrivateRoute>} />
+                        <Route path="/admin" element={<PrivateRoute><IndexPage /></PrivateRoute>} />
+                        <Route path="/admin/users" element={<PrivateRoute><ListUserProfilePage /></PrivateRoute>} />
+                        <Route path="/admin/problems" element={<PrivateRoute><ListProblemPage /></PrivateRoute>} />
 
-                        <Route path="/admin2/problems/add" element={<PrivateRoute><CreateProblemPage /></PrivateRoute>} />
-                        <Route path="/admin2/problems/edit/:problemId" element={<PrivateRoute><EditProblemPage /></PrivateRoute>} />
-                        <Route path="/admin2/problems/rejudge" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+                        <Route path="/admin/problems/add" element={<PrivateRoute><CreateProblemPage /></PrivateRoute>} />
+                        <Route path="/admin/problems/edit/:problemId" element={<PrivateRoute><EditProblemPage /></PrivateRoute>} />
+                        <Route path="/admin/problems/rejudge" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
-                        <Route path="/admin2/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
-                        <Route path="/admin2/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
-                        <Route path="/admin2/contests/edit/:contestId" element={<PrivateRoute><EditContestPage /></PrivateRoute>} />
+                        <Route path="/admin/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
+                        <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+                        <Route path="/admin/contests/edit/:contestId" element={<PrivateRoute><EditContestPage /></PrivateRoute>} />
 
-                        <Route path="/admin2/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
-                        <Route path="/admin2/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+                        <Route path="/admin/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
+                        <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
-                        <Route path="/admin2/fileManager/:problemId" element={<PrivateRoute><FileManagerPage /></PrivateRoute>} />
+                        <Route path="/admin/fileManager/:problemId" element={<PrivateRoute><FileManagerPage /></PrivateRoute>} />
 
-                        <Route path="/admin2/logout" element={<LogoutPage />} />
-                        <Route path="/admin2/login" element={<LoginPage />} />
+                        <Route path="/admin/logout" element={<LogoutPage />} />
+                        <Route path="/admin/login" element={<LoginPage />} />
                     </Routes>
                 </div>
             </div>

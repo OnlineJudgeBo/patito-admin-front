@@ -26,7 +26,7 @@ const EditForm = () => {
                 description: 'Problema actualizado correctamente.',
             });
             setTimeout(() => {
-                navigate('/admin2/problems/');
+                navigate('/admin/problems/');
             }, 2000);
         } catch (error) {
             toast({

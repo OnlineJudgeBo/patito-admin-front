@@ -22,7 +22,7 @@ const CreateProblemPage = () => {
                 description: 'Problema creado correctamente.',
             })
             setTimeout(() => {
-                navigate('/admin2/problems/');
+                navigate('/admin/problems/');
             }, 2000);
         }).catch((error) => {
             toast({
