@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/admin2/',
+  base: '/admin/',
   plugins: [react()],
   resolve: {
     alias: {
