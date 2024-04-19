@@ -27,7 +27,7 @@ const Sidebar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/admin/users" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin2/users" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/person-lines-fill.svg" className="w-5 h-5" alt="Gestión de Usuarios Icon" />
                             </span>
@@ -37,7 +37,7 @@ const Sidebar = () => {
 
                     <div className="px-6 text-xs text-gray-600 mt-4">Problemas</div>
                     <li>
-                        <Link to="/admin/problems" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin2/problems" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/journal-code.svg" className="w-5 h-5" alt="Problemas Icon" />
                             </span>
@@ -45,7 +45,7 @@ const Sidebar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/admin/problems/add" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin2/problems/add" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/plus-circle-fill.svg" className="w-5 h-5" alt="Agregar Problema Icon" />
                             </span>
@@ -55,7 +55,7 @@ const Sidebar = () => {
 
                     <div className="px-6 text-xs text-gray-600 mt-4">Concursos</div>
                     <li>
-                        <Link to="/admin/contests" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin2/contests" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/trophy-fill.svg" className="w-5 h-5" alt="Concursos Icon" />
                             </span>
@@ -63,7 +63,7 @@ const Sidebar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/admin/contests/add" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin2/contests/add" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/plus-circle-fill.svg" className="w-5 h-5" alt="Crear Concurso Icon" />                            </span>
                             <span className="ml-2 text-sm font-medium">Crear Concurso</span>
@@ -71,7 +71,7 @@ const Sidebar = () => {
                     </li>
                     <div className="px-6 text-xs text-gray-600 mt-4">Gestión</div>
                     <li>
-                        <Link to="/admin/management/users" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin2/management/users" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/person-lines-fill.svg" className="w-5 h-5" alt="Gestión de Usuarios Icon" />
                             </span>
@@ -79,7 +79,7 @@ const Sidebar = () => {
                         </Link>
                     </li>
                     <li>
-                        <Link to="/admin/logout" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin2/logout" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/box-arrow-right.svg" className="w-5 h-5" alt="Cerrar Sesión Icon" />                            </span>
                             <span className="ml-2 text-sm font-medium">Cerrar Sesión</span>

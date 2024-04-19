@@ -104,7 +104,7 @@ function ListProblemsPage() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900"
                                             target="_blank"
-                                            href={`/admin/problems/edit/${problem.problemId}`}>
+                                            href={`/admin2/problems/edit/${problem.problemId}`}>
                                             {problem.title}
                                         </a>
                                     </td>
@@ -137,10 +137,10 @@ function ListProblemsPage() {
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a className="text-blue-600 hover:text-blue-900" href={`/admin/fileManager/${problem.problemId}`}>Tes Data</a>
+                                        <a className="text-blue-600 hover:text-blue-900" href={`/admin2/fileManager/${problem.problemId}`}>Tes Data</a>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-4">
-                                        <a className="text-blue-600 hover:text-blue-900" href={`/admin/problems/edit/${problem.problemId}`}>Editar</a>
+                                        <a className="text-blue-600 hover:text-blue-900" href={`/admin2/problems/edit/${problem.problemId}`}>Editar</a>
                                         <a className="text-red-600 hover:text-red-900" href="#" onClick={(e) => { e.preventDefault(); alert('Función de borrar no implementada.'); }}>Borrar</a>
                                     </td>
                                 </tr>
