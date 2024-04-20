@@ -13,7 +13,7 @@ const FileManagerPage = () => {
     const [files, setFiles] = useState([]);
 
     useEffect(() => {
-        apiService.get(`files?problemId=` + problemId).then(data => {
+        apiService.get(`local-storage?problemId=` + problemId).then(data => {
             setFiles(data);
         }).catch((error) => {
             toast({
@@ -30,7 +30,7 @@ const FileManagerPage = () => {
             acceptedFiles.forEach(element => {
                 let formData = new FormData();
                 formData.append("file", element);
-                apiService.postFile(`files?problemId=${problemId}&fileName=${element.name}`, formData).then(data => {
+                apiService.postFile(`local-storage?problemId=${problemId}&fileName=${element.name}`, formData).then(data => {
                     toast({
                         variant: "success",
                         title: "Archivo Subido",
