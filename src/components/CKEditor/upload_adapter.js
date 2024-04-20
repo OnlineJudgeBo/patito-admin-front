@@ -11,7 +11,7 @@ export default class MyUploadAdapter {
                 const data = new FormData();
                 data.append('file', file);
 
-                apiService.postFile("FileManager/cloud-storage", data)
+                apiService.postFile("cloud-storage", data)
                     .then(result => {
                         resolve({
                             default: result
