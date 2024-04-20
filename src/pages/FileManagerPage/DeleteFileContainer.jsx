@@ -18,7 +18,7 @@ export function DeleteFileContainer({ fileName, problemId }) {
     const { toast } = useToast()
 
     const fetchFileContent = () => {
-        apiService.delete(`files?problemId=${problemId}&fileName=${fileName}`).then(data => {
+        apiService.delete(`local-storage?problemId=${problemId}&fileName=${fileName}`).then(data => {
             setContentFile(data);
             toast({
                 variant: "success",
