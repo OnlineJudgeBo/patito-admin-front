@@ -18,7 +18,7 @@ export function ViewFileContainer({ fileName, problemId }) {
     const { toast } = useToast()
 
     const fetchFileContent = () => {
-        apiService.get(`local-storage/content?problemId=${problemId}&fileName=${fileName}`).then(data => {
+        apiService.get(`FileManager/local-storage/content?problemId=${problemId}&fileName=${fileName}`).then(data => {
             setContentFile(data);
         }).catch((error) => {
             toast({

@@ -13,7 +13,7 @@ const FileManagerPage = () => {
     const [files, setFiles] = useState([]);
 
     useEffect(() => {
-        apiService.get(`local-storage?problemId=` + problemId).then(data => {
+        apiService.get(`FileManager/local-storage?problemId=` + problemId).then(data => {
             setFiles(data);
         }).catch((error) => {
             toast({
