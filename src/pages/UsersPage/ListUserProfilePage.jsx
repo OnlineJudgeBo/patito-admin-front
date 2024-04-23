@@ -1,23 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { apiService } from '../../services/apiService';
 import { ChangePasswordComponent } from './ChangePasswordComponent';
 import { DeleteAccountComponent } from './DeleteAccountComponent';
 import { EditProfileComponent } from './EditProfileComponent';
 
 function ListUserProfilePage() {
-    const [problems, setProblems] = useState([]);
+    const [users, setUsers] = useState([]);
     const [filter, setFilter] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [problemsPerPage] = useState(500);
+    const [usersPerPage] = useState(500);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
     useEffect(() => {
-        apiService.fetchUserProfileList()
+        fetchUsers();
+    }, []);
+
+    useEffect(() => {
+        if (filter.length > 2) {
+            fetchUsers(filter);
+        }
+    }, [filter]);
+
+    const fetchUsers = useCallback((searchTerm = '') => {
+        setIsLoading(true);
+        apiService.fetchUserProfileList({ searchTerm })
             .then(data => {
-                console.log(data);
-                setProblems(data);
+                let userList = data.map(user => ({
+                    userId: user.userId,
+                    email: user.userProfile.email,
+                    nick: user.userProfile.nick,
+                    lastname: user.userProfile.lastname
+                }))
+                setUsers(userList);
                 setIsLoading(false);
             })
             .catch(err => {
@@ -26,54 +42,38 @@ function ListUserProfilePage() {
             });
     }, []);
 
-    const getNestedValue = (obj, path) => {
-        return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-    }
-
-    const sortedAndFilteredProblems = React.useMemo(() => {
-        let sortableItems = [...problems];
-        if (sortConfig.key !== null) {
-            sortableItems.sort((a, b) => {
-                const aValue = getNestedValue(a, sortConfig.key);
-                const bValue = getNestedValue(b, sortConfig.key);
-                if (aValue < bValue) {
-                    return sortConfig.direction === 'ascending' ? -1 : 1;
-                }
-                if (aValue > bValue) {
-                    return sortConfig.direction === 'ascending' ? 1 : -1;
-                }
-                return 0;
-            });
-        }
-        return filter ? sortableItems.filter(problem =>
-            problem.userId.toLowerCase().includes(filter.toLowerCase()) ||
-            (problem.userProfile.email && problem.userProfile.email.toLowerCase().includes(filter.toLowerCase())) ||
-            (problem.userProfile.nick && problem.userProfile.nick.toLowerCase().includes(filter.toLowerCase())) ||
-            (problem.userProfile.lastname && problem.userProfile.lastname.toLowerCase().includes(filter.toLowerCase()))
-        ) : sortableItems;
-
-
-    }, [problems, sortConfig, filter]);
-
-    const indexOfLastProblem = currentPage * problemsPerPage;
-    const indexOfFirstProblem = indexOfLastProblem - problemsPerPage;
-    const currentProblems = sortedAndFilteredProblems.slice(indexOfFirstProblem, indexOfLastProblem);
-
-    const paginate = pageNumber => setCurrentPage(pageNumber);
-
-    const requestSort = (key) => {
-        let direction = 'ascending';
-        if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-            direction = 'descending';
-        }
-        setSortConfig({ key, direction });
+    const handleFilterChange = (event) => {
+        setFilter(event.target.value);
     };
 
+    const sortedUsers = useMemo(() => {
+        return [...users].sort((a, b) => {
+            const aValue = a[sortConfig.key];
+            const bValue = b[sortConfig.key];
+            if (aValue < bValue) {
+                return sortConfig.direction === 'ascending' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return sortConfig.direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+        });
+    }, [users, sortConfig]);
 
-    const pageNumbers = [];
-    for (let i = 1; i <= Math.ceil(sortedAndFilteredProblems.length / problemsPerPage); i++) {
-        pageNumbers.push(i);
-    }
+    const currentUsers = useMemo(() => {
+        const indexOfLastUser = currentPage * usersPerPage;
+        const indexOfFirstUser = indexOfLastUser - usersPerPage;
+        return sortedUsers.slice(indexOfFirstUser, indexOfLastUser);
+    }, [currentPage, usersPerPage, sortedUsers]);
+
+    const paginate = useCallback((pageNumber) => setCurrentPage(pageNumber), []);
+
+    const requestSort = (key) => {
+        setSortConfig((prevConfig) => ({
+            key,
+            direction: prevConfig.key === key && prevConfig.direction === 'ascending' ? 'descending' : 'ascending'
+        }));
+    };
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
@@ -81,7 +81,8 @@ function ListUserProfilePage() {
                 <input
                     type="text"
                     placeholder="Buscar por nombre o nombre de usuario..."
-                    onChange={(e) => setFilter(e.target.value)}
+                    value={filter}
+                    onChange={handleFilterChange}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
             </div>
@@ -95,49 +96,40 @@ function ListUserProfilePage() {
                     <table className="table-auto w-full border-collapse">
                         <thead className="bg-gray-700 text-white">
                             <tr>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.email')}>Correo▲▼</th>
+                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('email')}>Correo▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userId')}>Nombre de Usuario▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.nick')}>Nombre▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.lastname')}>Apellido▲▼</th>
+                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('nick')}>Nombre▲▼</th>
+                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('lastname')}>Apellido▲▼</th>
                                 <th className="px-4 py-2">Editar</th>
                                 <th className="px-4 py-2">Cambiar Clave</th>
                                 <th className="px-4 py-2">Desactivar</th>
-
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {currentProblems.map((problem) => (
-                                <tr key={problem.userId}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.userProfile.email}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.userId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.userProfile.nick}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.userProfile.lastname}</td>
-
+                            {currentUsers.map((user) => (
+                                <tr key={user.userId}>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.userId}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.nick}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.lastname}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <EditProfileComponent
-                                            email={problem.userProfile.email}
-                                            username={problem.userId}
-                                            name={problem.userProfile.nick}
-                                            lastname={problem.userProfile.lastname}
-                                        />
+                                        <EditProfileComponent user={user} />
                                     </td>
-
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <ChangePasswordComponent userId={problem.userId} />
+                                        <ChangePasswordComponent userId={user.userId} />
                                     </td>
-
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <DeleteAccountComponent user_id={problem.userId} />
+                                        <DeleteAccountComponent userId={user.userId} />
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                    {sortedAndFilteredProblems.length === 0 && <div className="text-center my-4">No se encontraron problemas con esos criterios de búsqueda.</div>}
+                    {sortedUsers.length === 0 && <div className="text-center my-4">No se encontraron usuarios con esos criterios de búsqueda.</div>}
                     <nav className="flex justify-center mt-4">
-                        {pageNumbers.map(number => (
-                            <a key={number} onClick={() => paginate(number)} href="#!" className="mx-1 px-3 py-2 bg-gray-200 text-gray-700 rounded cursor-pointer">
-                                {number}
+                        {new Array(Math.ceil(sortedUsers.length / usersPerPage)).fill().map((_, idx) => (
+                            <a key={idx + 1} onClick={() => paginate(idx + 1)} href="#!" className="mx-1 px-3 py-2 bg-gray-200 text-gray-700 rounded cursor-pointer">
+                                {idx + 1}
                             </a>
                         ))}
                     </nav>

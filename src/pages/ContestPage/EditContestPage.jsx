@@ -19,6 +19,7 @@ const EditContestPage = () => {
     const [selectedProblems, setSelectedProblems] = useState([]);
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [descriptionData, setDescriptionData] = useState("")
+    const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast()
     const navigate = useNavigate();
     const { contestId } = useParams();
@@ -46,6 +47,7 @@ const EditContestPage = () => {
     });
 
     useEffect(() => {
+        setIsLoading(true);
         apiService.get('contests/' + contestId).then(data => {
             let startDate = data.startTime.split("T");
             let endDate = data.endTime.split("T");
@@ -66,6 +68,7 @@ const EditContestPage = () => {
                 selectedProblem: data.selectedProblem || '',
                 selectedLanguage: data.language || '',
             })
+            setIsLoading(false);
         }).catch((error) => {
             toast({
                 variant: "destructive",
@@ -115,111 +118,119 @@ const EditContestPage = () => {
 
     return (
         <>
-            <Toaster />
-            <Formik
-                enableReinitialize="true"
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                onSubmit={Submit}
-            >
-                {formik => (
-                    <Form>
-                        <div className="flex divide-x divide-gray-200 w-full">
-                            <div className="w-full p-4">
-                                <h1 className="text-3xl font-bold mb-10">Crear Concurso</h1>
-                                <div className="mb-4">
-                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">Nombre del Concurso</label>
-                                    <Field type="text" id="title" name="title" placeholder="Ingrese el nombre del concurso" className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
-                                    <ErrorMessage name="title" component="div" className="text-red-500 text-sm mt-1" />
-                                </div>
+            {isLoading ? (
+                <div className="text-center">
+                    <p>Cargando...</p>
+                </div>
+            ) : (
+                <>
+                    <Toaster />
+                    <Formik
+                        enableReinitialize="true"
+                        initialValues={initialValues}
+                        validationSchema={validationSchema}
+                        onSubmit={Submit}
+                    >
+                        {formik => (
+                            <Form>
+                                <div className="flex divide-x divide-gray-200 w-full">
+                                    <div className="w-full p-4">
+                                        <h1 className="text-3xl font-bold mb-10">Crear Concurso</h1>
+                                        <div className="mb-4">
+                                            <label htmlFor="title" className="block text-sm font-medium text-gray-700">Nombre del Concurso</label>
+                                            <Field type="text" id="title" name="title" placeholder="Ingrese el nombre del concurso" className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                            <ErrorMessage name="title" component="div" className="text-red-500 text-sm mt-1" />
+                                        </div>
 
-                                <div className="mb-4">
-                                    <label htmlFor="isPrivate" className="inline-flex relative items-center cursor-pointer">
-                                        <Field
-                                            type="checkbox"
-                                            id="isPrivate"
-                                            name="isPrivate"
-                                            className="sr-only peer"
-                                            checked={formik.values.isPrivate}
-                                            onChange={() => formik.setFieldValue('isPrivate', !formik.values.isPrivate)}
-                                        />
-                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                        <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Privado?</span>
-                                    </label>
-                                </div>
+                                        <div className="mb-4">
+                                            <label htmlFor="isPrivate" className="inline-flex relative items-center cursor-pointer">
+                                                <Field
+                                                    type="checkbox"
+                                                    id="isPrivate"
+                                                    name="isPrivate"
+                                                    className="sr-only peer"
+                                                    checked={formik.values.isPrivate}
+                                                    onChange={() => formik.setFieldValue('isPrivate', !formik.values.isPrivate)}
+                                                />
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                                <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Privado?</span>
+                                            </label>
+                                        </div>
 
-                                <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement={descriptionData} />
+                                        <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement={descriptionData} />
 
-                                <div className="flex mb-4 space-x-4">
-                                    <div className="w-1/2">
-                                        <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
-                                        <Field
-                                            type="date"
-                                            id="startDate"
-                                            name="startDate"
-                                            placeholder="Ingrese la fecha de inicio"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
-                                        <ErrorMessage name="startDate" component="div" className="text-red-500 text-sm mt-1" />
+                                        <div className="flex mb-4 space-x-4">
+                                            <div className="w-1/2">
+                                                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
+                                                <Field
+                                                    type="date"
+                                                    id="startDate"
+                                                    name="startDate"
+                                                    placeholder="Ingrese la fecha de inicio"
+                                                    className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                                <ErrorMessage name="startDate" component="div" className="text-red-500 text-sm mt-1" />
+                                            </div>
+
+                                            <div className="w-1/2">
+                                                <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Hora de Inicio</label>
+                                                <Field
+                                                    type="time"
+                                                    id="startTime"
+                                                    name="startTime"
+                                                    placeholder="Ingrese la hora de inicio"
+                                                    className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                                <ErrorMessage name="startTime" component="div" className="text-red-500 text-sm mt-1" />
+                                            </div>
+                                        </div>
+
+                                        <div className="flex mb-4 space-x-4">
+                                            <div className="w-1/2">
+                                                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">Fecha de Fin</label>
+                                                <Field
+                                                    type="date"
+                                                    id="endDate"
+                                                    name="endDate"
+                                                    placeholder="Ingrese la fecha de fin"
+                                                    className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                                <ErrorMessage name="endDate" component="div" className="text-red-500 text-sm mt-1" />
+                                            </div>
+                                            <div className="w-1/2">
+                                                <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">Hora de Fin</label>
+                                                <Field
+                                                    type="time"
+                                                    id="endTime"
+                                                    name="endTime"
+                                                    placeholder="Ingrese la hora de fin"
+                                                    className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                                <ErrorMessage name="endTime" component="div" className="text-red-500 text-sm mt-1" />
+                                            </div>
+                                        </div>
+                                        <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={selectedLanguages} />
                                     </div>
 
-                                    <div className="w-1/2">
-                                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Hora de Inicio</label>
-                                        <Field
-                                            type="time"
-                                            id="startTime"
-                                            name="startTime"
-                                            placeholder="Ingrese la hora de inicio"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
-                                        <ErrorMessage name="startTime" component="div" className="text-red-500 text-sm mt-1" />
+                                    <div className="w-3/5 p-10">
+                                        <ProblemListComponent setFieldValue={formik.setFieldValue} problemSelectedList={selectedProblems} />
+
+                                        {formik.values.isPrivate == true && (
+                                            <UserListComponent setFieldValue={formik.setFieldValue} userSelectedList={userList} />
+                                        )}
                                     </div>
+                                    {formik.values.isPrivate == true && (
+                                        <div className="w-3/5 p-10">
+                                            <ManualUserAddComponent />
+                                        </div>
+                                    )}
+
+
                                 </div>
-
-                                <div className="flex mb-4 space-x-4">
-                                    <div className="w-1/2">
-                                        <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">Fecha de Fin</label>
-                                        <Field
-                                            type="date"
-                                            id="endDate"
-                                            name="endDate"
-                                            placeholder="Ingrese la fecha de fin"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
-                                        <ErrorMessage name="endDate" component="div" className="text-red-500 text-sm mt-1" />
-                                    </div>
-                                    <div className="w-1/2">
-                                        <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">Hora de Fin</label>
-                                        <Field
-                                            type="time"
-                                            id="endTime"
-                                            name="endTime"
-                                            placeholder="Ingrese la hora de fin"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
-                                        <ErrorMessage name="endTime" component="div" className="text-red-500 text-sm mt-1" />
-                                    </div>
-                                </div>
-                                <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={selectedLanguages} />
-                            </div>
-
-                            <div className="w-3/5 p-10">
-                                <ProblemListComponent setFieldValue={formik.setFieldValue} problemSelectedList={selectedProblems} />
-
-                                {formik.values.isPrivate == true && (
-                                    <UserListComponent setFieldValue={formik.setFieldValue} userSelectedList={userList} />
-                                )}
-                            </div>
-                            {formik.values.isPrivate == true && (
-                                <div className="w-3/5 p-10">
-                                    <ManualUserAddComponent />
-                                </div>
-                            )}
-
-
-                        </div>
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar</button>
-                    </Form>
-                )}
-            </Formik>
+                                <button
+                                    type="submit"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar</button>
+                            </Form>
+                        )}
+                    </Formik>
+                </>
+            )}
         </>
     );
 };
