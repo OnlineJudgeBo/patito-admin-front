@@ -2,7 +2,7 @@
 import { ErrorMessage, Field } from 'formik';
 import parse from 'html-react-parser';
 import { useAtom } from "jotai";
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { userSelectAtom } from "../../context/manager";
 import { apiService } from '../../services/apiService';
@@ -19,31 +19,31 @@ const UserListComponent = ({ setFieldValue, userSelectedList }) => {
     }, 1000);
 
     useEffect(() => {
-        apiService.fetchUserProfileList()
-            .then(data => {
-                let problemRawList = data.map(user => ({
-                    userId: user.userId,
-                    name: user.userProfile.nick + " " + user.userProfile.lastname + ` - (${user.userId})`
-                }));
-                setProblemList(problemRawList);
-                const selectedUsers = userSelectedList.map(selectedProblem =>
-                    problemRawList.find(pf => pf.userId === selectedProblem.userId)
-                ).filter(problem => problem !== undefined);
-                setUserSelectedProblems(selectedUsers);
-                setFieldValue('selectedUser', JSON.stringify(selectedUsers));
-                setManualUserList(selectedUsers?.map(u => u.userId).join("\n"));
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        let problemRawList = userSelectedList.map(user => ({
+            userId: user.userId,
+            //name: user.userProfile?.nick + " " + user.userProfile?.lastname + ` - (${user.userId})`
+            name: user.userId
+        }));
+        setProblemList(problemRawList);
+        setUserSelectedProblems(problemRawList);
+        setFieldValue('selectedUser', JSON.stringify(problemRawList));
+        setManualUserList(problemRawList?.map(u => u.userId).join("\n"));
     }, [userSelectedList]);
 
     const handleProblemSearch = async (searchTerm) => {
-        const filteredProblems = problemList.filter(problem =>
-            problem.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !userSelectedProblems.some(selectedProblem => selectedProblem.userId === problem.userId)
-        );
-        setShowSuggestionUsers(filteredProblems);
+        apiService.fetchUserProfileList({ searchTerm })
+            .then(data => {
+                let userList = data.map(user => ({
+                    userId: user.userId,
+                    name: (user.userProfile.nick + " " + user.userProfile.lastname) + ` - (${user.userId})`
+                }))
+                setShowSuggestionUsers(userList);
+                //setIsLoading(false);
+            })
+            .catch(err => {
+                //setError(err.message);
+                //setIsLoading(false);
+            });
     };
 
     const handleAddProblem = (problem) => {

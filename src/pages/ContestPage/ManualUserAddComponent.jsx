@@ -30,7 +30,7 @@ const ManualUserAddComponent = ({ setFieldValue, userSelectedList }) => {
         <div className="mb-4" onBlur={onBlurHandler}>
             <label htmlFor="language" className="block text-sm font-medium text-gray-700">Adicionar Usuarios</label>
             <div className="grid w-full gap-1.5">
-                <Label htmlFor="message">Si ya tienes una lista de usuarios, simplemente cópiala desde donde la tengas y pégala en el cuadro de texto proporcionado debajo</Label>
+                <Label htmlFor="message">Por favor, copia y pega la lista de usuarios en el siguiente campo de texto.</Label>
                 <Textarea id="manualUserList" onChange={onChangeHandler} value={inputText} />
             </div>
         </div>
