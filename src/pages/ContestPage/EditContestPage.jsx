@@ -1,10 +1,12 @@
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import { ErrorMessage, Field, Form, Formik } from 'formik';
+import { useAtom } from "jotai";
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
+import { userSelectAtom } from "../../context/manager";
 import { apiService } from '../../services/apiService.js';
 import { parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
@@ -16,6 +18,7 @@ import UserListComponent from "./UserListComponent";
 const EditContestPage = () => {
     const [userList, setUserList] = useState([]);
 
+    const [inputText, setInputText] = useAtom(userSelectAtom);
     const [selectedProblems, setSelectedProblems] = useState([]);
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [descriptionData, setDescriptionData] = useState("")
@@ -35,6 +38,7 @@ const EditContestPage = () => {
         selectedUser: [],
         selectedProblem: [],
         selectedLanguage: [],
+        manualUserList: ''
     })
 
     const validationSchema = Yup.object().shape({
@@ -67,6 +71,7 @@ const EditContestPage = () => {
                 selectedUser: data.selectedUser || '',
                 selectedProblem: data.selectedProblem || '',
                 selectedLanguage: data.language || '',
+                manualUserList: ''
             })
             setIsLoading(false);
         }).catch((error) => {
@@ -92,6 +97,7 @@ const EditContestPage = () => {
         values.selectedUser = parseJSON(values.selectedUser)
         values.selectedLanguages = parseJSON(values.selectedLanguages)
         values.isPrivate = values.isPrivate == 1 ? true : false
+        values.manualUserList = inputText;
 
         apiService.update('contests', contestId, values).then(data => {
             toast({
