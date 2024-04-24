@@ -66,6 +66,7 @@ export const apiService = {
     fetchProblemById: (id) => fetchAPI(`problems/${id}`, { method: 'GET' }),
     fetchTopicList: () => fetchAPI(`topics`, { method: 'GET' }),
     fetchUserProfileList: (searchQuery) => fetchAPI(`users`, { method: 'GET', params: searchQuery }),
+    fetchProblemList: (searchQuery) => fetchAPI(`problems`, { method: 'GET', params: searchQuery }),
     checkUsernameAvailability: (userId) => fetchAPI(`users/UsernameIsAvailable`, { method: 'POST', body: userId }),
     checkUserEmailAvailability: (email) => fetchAPI(`users/UserEmailIsAvailable`, { method: 'POST', body: email }),
     fetchRoles: () => fetchAPI(`Roles`),
