@@ -31,7 +31,7 @@ const ManualUserAddComponent = ({ setFieldValue, userSelectedList }) => {
             <label htmlFor="language" className="block text-sm font-medium text-gray-700">Adicionar Usuarios</label>
             <div className="grid w-full gap-1.5">
                 <Label htmlFor="message">Por favor, copia y pega la lista de usuarios en el siguiente campo de texto.</Label>
-                <Textarea id="manualUserList" onChange={onChangeHandler} value={inputText} />
+                <Textarea id="manualUserList" onChange={onChangeHandler} value={inputText} rows={20} />
             </div>
         </div>
     )
