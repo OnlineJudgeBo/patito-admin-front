@@ -12,31 +12,34 @@ const ProblemListComponent = ({ setFieldValue, problemSelectedList }) => {
     const [problemList, setProblemList] = useState([]);
 
     useEffect(() => {
-        apiService.fetchProblems()
-            .then(data => {
-                let problemRawList = data.map(problem => ({
-                    problemId: problem.problemId,
-                    name: problem.title + " <br> id: " + problem.problemId + " <br> Clasificación: " + problem.classifications.map(classification => classification.name + " ")
-                }));
-                setProblemList(problemRawList);
-
-                const selectedProblems = problemSelectedList.map(selectedProblem =>
-                    problemRawList.find(pf => pf.problemId === selectedProblem.problemId)
-                ).filter(problem => problem !== undefined);
-                setUserSelectedProblems(selectedProblems);
-                setFieldValue('selectedProblem', JSON.stringify(selectedProblems));
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        if (problemSelectedList.length > 0) {
+            let problemRawList = problemSelectedList.map(problem => ({
+                problemId: problem.problemId,
+                name: problem.problemId + "<br>"
+                //name: problem.title + " <br> id: " + problem.problemId + " <br> Clasificación: " + problem.classifications.map(classification => classification.name + " ")
+            }));
+            setUserSelectedProblems(problemRawList);
+            setFieldValue('selectedProblem', JSON.stringify(problemRawList));
+        }
     }, [problemSelectedList]);
 
     const handleProblemSearch = async (searchTerm) => {
-        const filteredProblems = problemList.filter(problem =>
-            problem.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !userSelectedProblems.some(selectedProblem => selectedProblem.problemId === problem.problemId)
-        );
-        setShowSuggestionProblems(filteredProblems);
+        apiService.fetchProblemList({ searchTerm })
+            .then(data => {
+                let userList = data.map(problem => ({
+                    problemId: problem.problemId,
+                    name: problem.title + " <br> id: " + problem.problemId + " <br> Clasificación: " + problem.classifications.map(classification => classification.name + " ")
+                }))
+                setShowSuggestionProblems(userList);
+                //setShowSuggestionUsers(userList);
+                //setIsLoading(false);
+            })
+            .catch(err => {
+                console.log(err);
+                //debugger
+                //setError(err.message);
+                //setIsLoading(false);
+            });
     };
 
     const handleAddProblem = (problem) => {
