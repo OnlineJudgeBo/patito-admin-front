@@ -67,7 +67,7 @@ const ProblemListComponent = ({ setFieldValue, problemSelectedList }) => {
 
     return (<>
         <div className="mb-4" onBlur={onBlurHandler}>
-            <label htmlFor="selectedProblem" className="block text-sm font-medium text-gray-700">Seleccionar Problema</label>
+            <label htmlFor="selectedProblem" className="block text-sm font-medium text-gray-700">Escriba el nombre del problema o id</label>
             <Field
                 type="hidden"
                 name="selectedProblem"

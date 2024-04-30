@@ -73,7 +73,7 @@ const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
                 value={inputTmp}
                 name="languageUserList"
                 id="languageUserList"
-                placeholder="Ingrese el nombre del problema"
+                placeholder="Click para agregar un lenguaje"
                 className="mt-1 p-2 border border-gray-300 rounded-md w-full"
                 onClick={(e) => {
                     handleProblemSearch(e.target.value);
