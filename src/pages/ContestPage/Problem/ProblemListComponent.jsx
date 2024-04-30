@@ -24,7 +24,7 @@ const ProblemListComponent = () => {
                             //label: response[0]?.title + " <br> id: " + response[0].problemId + " <br> Clasificación: " + response[0]?.classifications.map(classification => classification.name + " ")
                         });
                     } else {
-                        setErrorMessages(prev => [...prev, `Usuario1 "${problem.problemId}" no encontrado`]);
+                        setErrorMessages(prev => [...prev, `Problema "${problem.problemId}" no encontrado`]);
                     }
                 } catch (error) {
                     console.error('Error al verificar usuarios:', error);

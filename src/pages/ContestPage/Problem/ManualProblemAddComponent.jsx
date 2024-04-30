@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAtom } from "jotai";
@@ -41,10 +40,6 @@ const ManualProblemAddComponent = () => {
                 onBlur={onBlurHandler}
                 value={inputText}
                 rows={20} />
-            <Button
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                onClick={onBlurHandler}
-            >Validar lista</Button>
         </div>
     );
 }
