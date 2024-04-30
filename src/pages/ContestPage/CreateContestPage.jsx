@@ -11,9 +11,9 @@ import { apiService } from '../../services/apiService.js';
 import { parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
 import LanguageListComponent from "./LanguageListComponent";
-import ManualUserAddComponent from "./ManualUserAddComponent";
 import ProblemListComponent from "./ProblemListComponent";
-import UserListComponent from "./UserListComponent";
+import ManualUserAddComponent from "./User/ManualUserAddComponent";
+import UserListComponent from "./User/UserListComponent";
 
 const CreateContestPage = () => {
     const [userList, setUserList] = useState([]);
