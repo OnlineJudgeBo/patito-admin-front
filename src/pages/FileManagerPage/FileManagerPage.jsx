@@ -30,7 +30,7 @@ const FileManagerPage = () => {
             acceptedFiles.forEach(element => {
                 let formData = new FormData();
                 formData.append("file", element);
-                apiService.postFile(`local-storage?problemId=${problemId}&fileName=${element.name}`, formData).then(data => {
+                apiService.postFile(`FileManager/local-storage?problemId=${problemId}&fileName=${element.name}`, formData).then(data => {
                     toast({
                         variant: "success",
                         title: "Archivo Subido",
