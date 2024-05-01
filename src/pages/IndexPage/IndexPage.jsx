@@ -1,105 +1,81 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { apiService } from '../../services/apiService';
 import EChartsComponent from './EChartsComponent';
+import LanguageCharts from './LanguageCharts';
 
-const stackedBarOptions = {
-    tooltip: {
-        trigger: 'axis',
-        axisPointer: {            
-            type: 'shadow'        
-        }
-    },
-    legend: {
-        data: ['Resueltos', 'No Resueltos', 'Total']
-    },
-    xAxis: {
-        type: 'category',
-        data: ['Problemas']
-    },
-    yAxis: {
-        type: 'value'
-    },
-    series: [
-        {
-            name: 'Resueltos',
-            type: 'bar',
-            stack: 'total',
-            data: [320]
-        },
-        {
-            name: 'No Resueltos',
-            type: 'bar',
-            stack: 'total',
-            data: [120]
-        },
-        {
-            name: 'Total',
-            type: 'bar',
-            data: [440],
-            emphasis: {
-                focus: 'series'
-            }
-        }
-    ]
-};
-
-const lineChartOptions = {
-    xAxis: {
-        type: 'category',
-        data: ['00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00']
-    },
-    yAxis: {
-        type: 'value'
-    },
-    series: [{
-        data: [120, 200, 150, 80, 70, 110, 130, 90, 150, 130, 120, 130, 140, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260],
-        type: 'line'
-    }]
-};
-
-const pieChartOptions = {
+const IndexPage = () => {
+  const [lineChartOptions, setLineChartOptions] = useState({
     title: {
-      text: 'Distribución de Lenguajes de Programación',
+      text: 'Total de Envíos por Mes y Año',
       left: 'center'
     },
     tooltip: {
-      trigger: 'item'
+      trigger: 'axis'
     },
     legend: {
-      orient: 'vertical',
-      left: 'left',
+      data: ['Total Envíos'],
+      left: 'left'
     },
-    series: [
-      {
-        name: 'Lenguajes',
-        type: 'pie',
-        radius: '50%',
+    xAxis: {
+      type: 'category',
+      data: [],
+      name: 'Mes/Año',
+      nameLocation: 'middle',
+      nameGap: 30
+    },
+    yAxis: {
+      type: 'value',
+      name: 'Número de Envíos',
+      nameLocation: 'middle',
+      nameGap: 50
+    },
+    series: [{
+      name: 'Total Envíos',
+      data: [],
+      type: 'line',
+      smooth: true,
+      markPoint: {
         data: [
-          { value: 1048, name: 'JavaScript' },
-          { value: 735, name: 'Python' },
-          { value: 580, name: 'Java' },
-          { value: 484, name: 'C++' },
-          { value: 300, name: 'Otros' }
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        }
+          { type: 'max', name: 'Máximo' },
+          { type: 'min', name: 'Mínimo' }
+        ]
+      },
+      markLine: {
+        data: [
+          { type: 'average', name: 'Promedio' }
+        ]
       }
-    ]
-  };
+    }]
+  });
 
-  /*
-          <EChartsComponent options={lineChartOptions} />
-        <EChartsComponent options={stackedBarOptions} />
-        <EChartsComponent options={pieChartOptions} />
-        */
-const IndexPage = () => (
+  useEffect(() => {
+
+    apiService.get("Statics/GetLast365DaysSubmissionsByMonth").then(data => {
+      const dataJson = JSON.parse(data);
+
+      const months = dataJson.map(item => `${item.Month}/${item.Year}`);
+      const submissions = dataJson.map(item => item.TotalSubmissions);
+
+      setLineChartOptions(prevOptions => ({
+        ...prevOptions,
+        xAxis: {
+          ...prevOptions.xAxis,
+          data: months
+        },
+        series: [{
+          ...prevOptions.series[0],
+          data: submissions
+        }]
+      }));
+    })
+  }, []);
+
+  return (
     <div>
-
+      <EChartsComponent options={lineChartOptions} />
+      <LanguageCharts />
     </div>
-);
+  );
+};
 
 export default IndexPage;
