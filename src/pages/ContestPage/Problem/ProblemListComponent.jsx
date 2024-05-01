@@ -24,7 +24,10 @@ const ProblemListComponent = () => {
                             //label: response[0]?.title + " <br> id: " + response[0].problemId + " <br> Clasificación: " + response[0]?.classifications.map(classification => classification.name + " ")
                         });
                     } else {
-                        setErrorMessages(prev => [...prev, `Problema "${problem.problemId}" no encontrado`]);
+                        setErrorMessages(prev => [...prev, `Problema "${problem.problemId}" eliminado de la lista porque no es un problema válido.`]);
+                        setTimeout(() => {
+                            setProblemList(problemList.filter(value => value.problemId !== problem.problemId));
+                        }, 3000);
                     }
                 } catch (error) {
                     console.error('Error al verificar usuarios:', error);
@@ -60,8 +63,8 @@ const ProblemListComponent = () => {
             callback(options.sort((a, b) => a.label.localeCompare(b.label)));
             setErrorMessages([]);
         } catch (err) {
-            console.error('Error al cargar la lista de usuarios:', err);
-            setErrorMessages([`Error al cargar la lista de usuarios: ${err.message}`]);
+            console.error('Error al cargar la lista de problemas:', err);
+            setErrorMessages([`Error al cargar la lista de problemas: ${err.message}`]);
             callback([]);
         }
     };

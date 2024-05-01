@@ -107,7 +107,7 @@ const EditContestPage = () => {
 
         apiService.update('contests', contestId, values).then(data => {
             toast({
-                description: 'Contest agregado.',
+                description: 'Contest actualizado.',
             })
             setTimeout(() => {
                 navigate('/admin/contests');
@@ -147,7 +147,7 @@ const EditContestPage = () => {
                             <Form>
                                 <div className="flex divide-x divide-gray-200 w-full">
                                     <div className="w-full p-4">
-                                        <h1 className="text-3xl font-bold mb-10">Crear Concurso</h1>
+                                        <h1 className="text-3xl font-bold mb-10">Edición de concurso</h1>
                                         <div className="mb-4">
                                             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Nombre del Concurso</label>
                                             <Field type="text" id="title" name="title" placeholder="Ingrese el nombre del concurso" className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
