@@ -6,6 +6,7 @@ import UseAuth from './hooks/UseAuth';
 import CreateContestPage from './pages/ContestPage/CreateContestPage';
 import EditContestPage from './pages/ContestPage/EditContestPage';
 import ListContestPage from './pages/ContestPage/ListContestPage';
+import FileManagerAcPage from './pages/FileManagerPage/FileManagerAcPage';
 import FileManagerPage from './pages/FileManagerPage/FileManagerPage';
 import IndexPage from './pages/IndexPage/IndexPage';
 import LoginPage from './pages/LoginPage/LoginPage';
@@ -49,6 +50,7 @@ const App = () => {
                         <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
                         <Route path="/admin/fileManager/:problemId" element={<PrivateRoute><FileManagerPage /></PrivateRoute>} />
+                        <Route path="/admin/fileManager/:problemId/ac" element={<PrivateRoute><FileManagerAcPage /></PrivateRoute>} />
 
                         <Route path="/admin/logout" element={<LogoutPage />} />
                         <Route path="/admin/login" element={<LoginPage />} />
