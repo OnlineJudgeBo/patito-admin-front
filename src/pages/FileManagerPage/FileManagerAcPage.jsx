@@ -54,7 +54,7 @@ const FileManagerAcPage = () => {
         <div className="container mx-auto p-4">
             <div className="mt-5">
                 <h2 className="text-center font-bold mb-4">Archivos</h2>
-                <div className="grid grid-cols-3 gap-4"> {/* Ajusta aquí para cambiar el número de columnas y el espacio */}
+                <div className="grid grid-cols-3 gap-4">
                     {outFiles.map((file, index) => (
                         <div key={index} className="border rounded-lg p-4 bg-blue-100 border-blue-500 flex items-center justify-between">
                             <span className="text-sm font-semibold truncate">{file.name}</span>
