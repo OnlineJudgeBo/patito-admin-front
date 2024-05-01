@@ -1,19 +1,16 @@
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import React, { useCallback, useEffect, useState } from "react";
-import { useDropzone } from "react-dropzone";
 import { useParams } from "react-router-dom";
 import { apiService } from "../../services/apiService";
-import { DeleteFileContainer } from "./DeleteFileContainer";
 import { ViewFileContainer } from "./ViewFileContainer";
 
-const FileManagerPage = () => {
+const FileManagerAcPage = () => {
     const { toast } = useToast()
     const { problemId } = useParams();
     const [files, setFiles] = useState([]);
 
     useEffect(() => {
-        apiService.get(`FileManager/local-storage?problemId=` + problemId).then(data => {
+        apiService.get(`FileManager/local-storage/ac?problemId=${problemId}`).then(data => {
             setFiles(data);
         }).catch((error) => {
             toast({
@@ -51,48 +48,26 @@ const FileManagerPage = () => {
         }
     }, []);
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop });
-
-    const inFiles = files.filter(file => file.name.endsWith(".in"));
     const outFiles = files.filter(file => !file.name.endsWith(".in"));
 
     return (
         <div className="container mx-auto p-4">
-            <Toaster />
-            <div {...getRootProps()} className="flex justify-center items-center p-10 border-2 border-dashed border-gray-400 cursor-pointer">
-                <input {...getInputProps()} />
-                <p>Arrastra archivos aquí o haz clic para seleccionar</p>
-            </div>
-            <div className="flex flex-wrap mt-5 gap-10">
-                {/* .in */}
-                <div className="flex-1">
-                    <h2 className="text-center font-bold mb-4">Archivos .IN</h2>
-                    {inFiles.map((file, index) => (
-                        <div key={index} className={`border rounded-lg p-4 flex justify-between items-center bg-blue-100 border-blue-500`}>
-                            <span className="text-sm font-semibold truncate">{file.name}</span>
-                            <div className="flex space-x-2">
-                                <ViewFileContainer fileName={file.name} problemId={problemId} />
-                                <DeleteFileContainer fileName={file.name} problemId={problemId} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                {/* .out */}
-                <div className="flex-1">
-                    <h2 className="text-center font-bold mb-4">Archivos .OUT</h2>
+            <div className="mt-5">
+                <h2 className="text-center font-bold mb-4">Archivos</h2>
+                <div className="grid grid-cols-3 gap-4"> {/* Ajusta aquí para cambiar el número de columnas y el espacio */}
                     {outFiles.map((file, index) => (
-                        <div key={index} className={`border rounded-lg p-4 flex justify-between items-center bg-blue-100 border-blue-500`}>
+                        <div key={index} className="border rounded-lg p-4 bg-blue-100 border-blue-500 flex items-center justify-between">
                             <span className="text-sm font-semibold truncate">{file.name}</span>
                             <div className="flex space-x-2">
-                                <ViewFileContainer fileName={file.name} problemId={problemId} />
-                                <DeleteFileContainer fileName={file.name} problemId={problemId} />
+                                <ViewFileContainer fileName={"ac/" + file.name} problemId={problemId} />
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
         </div>
+
     );
 };
 
-export default FileManagerPage;
+export default FileManagerAcPage;
