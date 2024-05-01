@@ -93,6 +93,7 @@ function ListProblemsPage() {
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('accepted')}>Resuelto por▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('topic')}>Tema▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('classification')}>Clasificación▲▼</th>
+                                <th className="px-4 py-2">Soluciones</th>
                                 <th className="px-4 py-2">TestData</th>
                                 <th className="px-4 py-2">Acciones</th>
                             </tr>
@@ -134,7 +135,9 @@ function ListProblemsPage() {
                                                     )) : ""
                                         }
                                     </td>
-
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <a className="text-blue-600 hover:text-blue-900" href={`/admin/fileManager/${problem.problemId}/ac`}>Soluciones</a>
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900" href={`/admin/fileManager/${problem.problemId}`}>Tes Data</a>
                                     </td>
