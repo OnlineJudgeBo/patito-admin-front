@@ -24,7 +24,10 @@ const UserListComponent = () => {
                             //label: `${user.userId} - (${user.userProfile?.nick} ${user.userProfile?.lastname})`
                         });
                     } else {
-                        setErrorMessages(prev => [...prev, `Usuario1 "${user.userId}" no encontrado`]);
+                        setErrorMessages(prev => [...prev, `Usuario "${user.userId}" eliminado de la lista porque no es un usuario válido.`]);
+                        setTimeout(() => {
+                            setUserList(userList.filter(value => value.userId !== user.userId));
+                        }, 3000);
                     }
                 } catch (error) {
                     console.error('Error al verificar usuarios:', error);

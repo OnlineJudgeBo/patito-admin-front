@@ -1,3 +1,4 @@
+import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import { ErrorMessage, Field, Form, Formik } from 'formik';
@@ -6,30 +7,45 @@ import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
-import { userSelectAtom } from "../../context/manager";
 import { apiService } from '../../services/apiService.js';
 import { parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
 import LanguageListComponent from "./LanguageListComponent";
-import ProblemListComponent from "./ProblemListComponent";
-import ManualUserAddComponent from "./User/ManualUserAddComponent";
-import UserListComponent from "./User/UserListComponent";
+
+import ManualUserAddComponent from "./User/ManualUserAddComponent.jsx";
+import UserListComponent from "./User/UserListComponent.jsx";
+
+import { problemSelectAtom, userSelectAtom } from "../../context/manager";
+import ManualProblemAddComponent from "./Problem/ManualProblemAddComponent";
+import ProblemListComponent from "./Problem/ProblemListComponent";
+
+const getCurrentTime = () => {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+};
+
 
 const CreateContestPage = () => {
+    const [userListAtom, setUserListAtom] = useAtom(userSelectAtom);
+    const [inputProblemTextAtom, setInputProblemTextAtom] = useAtom(problemSelectAtom);
     const [userList, setUserList] = useState([]);
-    const [manualUser, setManualUser] = useAtom(userSelectAtom);
     const [selectedProblems, setSelectedProblems] = useState([]);
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [descriptionData, setDescriptionData] = useState("")
     const { toast } = useToast()
     const navigate = useNavigate();
+    const today = new Date();
+    const currentDate = today.toISOString().substring(0, 10);
+
     const [initialValues, setInitialValues] = useState({
         title: '',
         description: '',
-        startDate: '',
-        startTime: '',
-        endDate: '',
-        endTime: '',
+        startDate: currentDate,
+        startTime: getCurrentTime(),
+        endDate: currentDate,
+        endTime: getCurrentTime(),
         isPrivate: '',
         users: '',
         selectedUser: [],
@@ -44,7 +60,7 @@ const CreateContestPage = () => {
         startTime: Yup.string().required('Hora de inicio requerida'),
         endDate: Yup.date().required('Fecha de fin requerida'),
         endTime: Yup.string().required('Hora de fin requerida'),
-        selectedProblem: Yup.string().min(2).required('Seleccione mínimamente un problema.'),
+        //selectedProblem: Yup.string().min(2).required('Seleccione mínimamente un problema.'),
     });
 
     const Submit = async (values) => {
@@ -54,13 +70,16 @@ const CreateContestPage = () => {
         let selectedUser = values.selectedUser;
         let selectedLanguage = values.selectedLanguages;
 
-        values.manualUserList = manualUser;
         values.startDate = values.startDate + "T" + values.startTime
         values.endDate = values.endDate + "T" + values.endTime
         values.selectedProblem = parseJSON(values.selectedProblem)
         values.selectedUser = parseJSON(values.selectedUser)
         values.selectedLanguages = parseJSON(values.selectedLanguages)
         values.isPrivate = values.isPrivate == 1 ? true : false
+        if (values.isPrivate == 1) {
+            values.manualUserList = userListAtom.map(user => user.userId).join(",")
+        }
+        values.selectedProblem = inputProblemTextAtom//.map(user => user.problemId)
 
         apiService.create('contests', values).then(data => {
             toast({
@@ -77,7 +96,6 @@ const CreateContestPage = () => {
             })
             console.log(error);
         })
-
         values.startDate = sTime;
         values.endDate = eTime;
         values.selectedProblem = selectedProblem;
@@ -96,12 +114,6 @@ const CreateContestPage = () => {
             >
                 {formik => (
                     <Form>
-                        <Field
-                            type="hidden"
-                            id="manualUserList"
-                            name="manualUserList"
-                            value={manualUser}
-                        />
                         <div className="flex divide-x divide-gray-200 w-full">
                             <div className="w-full p-4">
                                 <h1 className="text-3xl font-bold mb-10">Crear Concurso</h1>
@@ -177,18 +189,34 @@ const CreateContestPage = () => {
                                 <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={selectedLanguages} />
                             </div>
 
-                            <div className="w-3/5 p-10">
-                                <ProblemListComponent setFieldValue={formik.setFieldValue} problemSelectedList={selectedProblems} />
-
-                                {formik.values.isPrivate == true && (
-                                    <UserListComponent setFieldValue={formik.setFieldValue} userSelectedList={userList} />
+                            <div className="w-3/5">
+                                <div className="flex divide-x divide-gray-200 w-full">
+                                    <div className="w-full p-4">
+                                        <h1 className="text-3xl font-bold mb-10">Agregar problemas</h1>
+                                        <div className="mb-2">
+                                            <ManualProblemAddComponent />
+                                            <Separator />
+                                            <ProblemListComponent />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="w-3/5">
+                                {formik.values.isPrivate === true && (
+                                    <>
+                                        <div className="flex divide-x divide-gray-200 w-full">
+                                            <div className="w-full p-4">
+                                                <h1 className="text-3xl font-bold mb-10">Agregar usuarios</h1>
+                                                <div className="mb-2">
+                                                    <ManualUserAddComponent />
+                                                    <Separator />
+                                                    <UserListComponent />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
                                 )}
                             </div>
-                            {formik.values.isPrivate == true && (
-                                <div className="w-3/5 p-10">
-                                    <ManualUserAddComponent />
-                                </div>
-                            )}
 
                         </div>
                         <button

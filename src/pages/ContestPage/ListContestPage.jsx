@@ -2,7 +2,7 @@ import parse from 'html-react-parser';
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/apiService';
 
-function ListContestPage() {
+function ListContestPage2() {
     const [problems, setProblems] = useState([]);
     const [filter, setFilter] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -141,4 +141,4 @@ function ListContestPage() {
     );
 }
 
-export default ListContestPage;
+export default ListContestPage2;
