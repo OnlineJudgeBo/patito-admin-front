@@ -9,7 +9,7 @@ const LanguageCharts = () => {
     apiService.get("Statics/GetSubmissionsByLanguageAsync").then(data => {
       const languageMap = {
         3: 'Java',
-        11: 'C++',
+        16: 'C++',
         19: 'Python'
       };
       const languageData = JSON.parse(data).map(item => ({
