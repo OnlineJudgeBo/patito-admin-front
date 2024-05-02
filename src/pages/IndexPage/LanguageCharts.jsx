@@ -7,8 +7,16 @@ const LanguageCharts = () => {
 
   useEffect(() => {
     apiService.get("Statics/GetSubmissionsByLanguageAsync").then(data => {
-      const languageData = JSON.parse(data);
-      console.log(languageData);
+      const languageMap = {
+        3: 'Java',
+        11: 'C++',
+        19: 'Python'
+      };
+      const languageData = JSON.parse(data).map(item => ({
+        ...item,
+        Language: languageMap[item.Language] || 'Other'
+      }));
+
       setBarChartOptions({
         title: {
           text: 'Envíos por Lenguaje de Programación',
@@ -18,6 +26,14 @@ const LanguageCharts = () => {
           trigger: 'axis',
           axisPointer: {
             type: 'shadow'
+          },
+          formatter: function (params) {
+            let displayText = `${params[0].name}<br/>`;
+            params.forEach(param => {
+              const value = param.value.toLocaleString();
+              displayText += `${param.seriesName}: ${value}<br/>`;
+            });
+            return displayText;
           }
         },
         xAxis: {
@@ -31,8 +47,18 @@ const LanguageCharts = () => {
         },
         series: [{
           name: 'Envíos',
-          data: languageData.map(item => item.TotalSubmissions),
-          type: 'bar'
+          data: languageData.map(item => ({
+            value: item.TotalSubmissions,
+            name: item.Language
+          })),
+          type: 'bar',
+          label: {
+            show: true,
+            position: 'top',
+            formatter: function (params) {
+              return params.value.toLocaleString();
+            }
+          }
         }]
       });
     });
