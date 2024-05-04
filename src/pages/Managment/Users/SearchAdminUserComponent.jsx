@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
     Select,
     SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
     SelectGroup,
-    SelectLabel
-} from "@/components/ui/select"
-import { apiService } from "../../../services/apiService";
-import { userSelectAtom } from "../../../context/manager";
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select";
 import { useAtom } from "jotai";
+import { userSelectAtom } from "../../../context/manager";
+import { apiService } from "../../../services/apiService";
 
 export function SearchAdminUserComponent({ userId }) {
 

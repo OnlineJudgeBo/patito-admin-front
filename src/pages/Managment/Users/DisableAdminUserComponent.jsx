@@ -10,15 +10,12 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from 'react-router-dom';
 import { apiService } from "../../../services/apiService";
 
 export function DisableAdminUserComponent({ userId, roleId }) {
-    const navigate = useNavigate();
-
     const disableAdmin = async () => {
         await apiService.delete(`users/${userId}/role/${roleId}`).then(response => {
-            navigate('/admin/management/users');
+            window.location.reload();
         })
     };
 
