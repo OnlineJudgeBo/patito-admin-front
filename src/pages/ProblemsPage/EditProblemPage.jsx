@@ -95,8 +95,8 @@ const EditForm = () => {
         TimeLimit: Yup.number().required('El límite de tiempo es obligatorio').positive('Debe ser positivo'),
         Input: Yup.string().required('La descripción de la entrada es obligatoria'),
         Output: Yup.string().required('La descripción de la salida es obligatoria'),
-        SampleInput: Yup.string().required('La entrada de ejemplo es obligatoria'),
-        SampleOutput: Yup.string().required('La salida de ejemplo es obligatoria'),
+        //SampleInput: Yup.string().required('La entrada de ejemplo es obligatoria'),
+        //SampleOutput: Yup.string().required('La salida de ejemplo es obligatoria'),
     });
 
     const formik = useFormik({
