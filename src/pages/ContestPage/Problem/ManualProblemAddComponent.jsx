@@ -12,7 +12,7 @@ const ManualProblemAddComponent = () => {
     useEffect(() => {
         let value = []
         if (inputText.includes(",") === true) {
-            value = inputText.split(",").map(problemId => ({ problemId }))
+            value = inputText.split(",").map(problemId => ({ problemId: problemId.trim() }));
             let problemList = value.map(problem => `${problem.problemId}`).join("\n");
             setInputText(problemList);
             setListTextAtom(value);

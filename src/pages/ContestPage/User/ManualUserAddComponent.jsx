@@ -12,7 +12,7 @@ const ManualUserAddComponent = () => {
     useEffect(() => {
         let value = []
         if (inputText.includes(",") === true) {
-            value = inputText.split(",").map(userId => ({ userId }))
+            value = inputText.split(",").map(userId => ({ userId: userId.trim() }));
             let userList = value.map(user => `${user.userId}`).join("\n");
             setInputText(userList);
             setListTextAtom(value);
