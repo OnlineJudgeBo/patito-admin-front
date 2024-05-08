@@ -16,22 +16,23 @@ const UserListComponent = () => {
             for (const user of userList) {
                 if (!user.userId || user.userId.includes(",")) continue;
                 try {
-                    const response = await apiService.fetchUserProfileList({ searchTerm: user.userId });
+                    let userId = user.userId.trim();
+                    const response = await apiService.fetchUserProfileList({ searchTerm: userId });
                     if (response.length > 0) {
                         validUsers.push({
-                            value: user.userId,
-                            label: `${user.userId}`
+                            value: userId,
+                            label: `${userId}`
                             //label: `${user.userId} - (${user.userProfile?.nick} ${user.userProfile?.lastname})`
                         });
                     } else {
-                        setErrorMessages(prev => [...prev, `Usuario "${user.userId}" eliminado de la lista porque no es un usuario válido.`]);
+                        setErrorMessages(prev => [...prev, `Usuario "${userId}" eliminado de la lista porque no es un usuario válido.`]);
                         setTimeout(() => {
-                            setUserList(userList.filter(value => value.userId !== user.userId));
+                            setUserList(userList.filter(value => value.userId !== userId));
                         }, 3000);
                     }
                 } catch (error) {
                     console.error('Error al verificar usuarios:', error);
-                    setErrorMessages(prev => [...prev, `Error con usuario "${user.userId}": ${error.message}`]);
+                    setErrorMessages(prev => [...prev, `Error con usuario "${userId}": ${error.message}`]);
                 }
             }
             setSelectedUsers(validUsers);
