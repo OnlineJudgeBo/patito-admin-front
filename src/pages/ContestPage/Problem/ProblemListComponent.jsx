@@ -16,7 +16,8 @@ const ProblemListComponent = () => {
             for (const problem of problemList) {
                 if (!problem.problemId || problem.problemId.toString().includes(",")) continue;
                 try {
-                    const response = await apiService.fetchProblemList({ searchTerm: problem.problemId });
+                    let problemId = problem.problemId.trim();
+                    const response = await apiService.fetchProblemList({ searchTerm: problemId });
                     if (response.length > 0) {
                         validProblems.push({
                             value: response[0].problemId,
@@ -24,14 +25,14 @@ const ProblemListComponent = () => {
                             //label: response[0]?.title + " <br> id: " + response[0].problemId + " <br> Clasificación: " + response[0]?.classifications.map(classification => classification.name + " ")
                         });
                     } else {
-                        setErrorMessages(prev => [...prev, `Problema "${problem.problemId}" eliminado de la lista porque no es un problema válido.`]);
+                        setErrorMessages(prev => [...prev, `Problema "${problemId}" eliminado de la lista porque no es un problema válido.`]);
                         setTimeout(() => {
-                            setProblemList(problemList.filter(value => value.problemId !== problem.problemId));
+                            setProblemList(problemList.filter(value => value.problemId !== problemId));
                         }, 3000);
                     }
                 } catch (error) {
                     console.error('Error al verificar usuarios:', error);
-                    setErrorMessages(prev => [...prev, `Error con usuario "${problem.problemId}": ${error.message}`]);
+                    setErrorMessages(prev => [...prev, `Error con usuario "${problemId}": ${error.message}`]);
                 }
             }
             setSelectedProblems(validProblems);
