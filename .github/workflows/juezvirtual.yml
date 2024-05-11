@@ -1,0 +1,56 @@
+name: OnlineJudge - admin
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: 'main'
+
+jobs:
+  docker-package:
+    needs: build
+    runs-on: ubuntu-latest 
+    permissions: write-all
+    if: ${{github.ref == 'refs/heads/main'}}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Login to Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build Docker images
+      run: |
+        cp .env.jv.umsa.bo .env
+        cp .env.jv.umsa.bo .env.production
+        docker build . --build-arg --rm -t ghcr.io/onlinejudgebo/onlinejudgebo-admin-ui:development
+    - name: Push Docker image to registry
+      run: |
+        docker push ghcr.io/onlinejudgebo/onlinejudgebo-admin-ui:development
+
+  deploy-juezvirtual:
+    runs-on: ubuntu-latest
+    needs: docker-package
+    if: ${{github.ref == 'refs/heads/main'}}
+    steps:
+      - name: Setup SSH connection
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEV_SSH_SECRET_OJ }}
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -p ${{ vars.DEV_SSH_PORT_OJ }} -H ${{ vars.DEV_SSH_HOST_OJ }} >> ~/.ssh/known_hosts
+
+      - name: Login to the GitHub Packages Docker Registry
+        run: ssh -tt -p ${{ vars.DEV_SSH_PORT_OJ }} ${{ vars.DEV_SSH_USERNAME_OJ }}@${{ vars.DEV_SSH_HOST_OJ }} "echo ${{ secrets.DOCKER_REGISTRY_TOKEN }} | docker login ghcr.io -u ${{ vars.DOCKER_REGISTRY_USER }}" --password-stdin
+
+      - name: Run docker-compose
+        continue-on-error: true
+        run: ssh -tt -p ${{ vars.DEV_SSH_PORT_OJ }} ${{ vars.DEV_SSH_USERNAME_OJ }}@${{ vars.DEV_SSH_HOST_OJ }} "cd /var/www/admin-ui && chmod +x deploy.sh && ./deploy.sh"
+
+      - name: Delete unused images
+        run: ssh -tt -p ${{ vars.DEV_SSH_PORT_OJ }} ${{ vars.DEV_SSH_USERNAME_OJ }}@${{ vars.DEV_SSH_HOST_OJ }} "docker image prune -f"
+
+      - name: Logout from the GitHub Packages Docker Registry
+        run: ssh -tt -p ${{ vars.DEV_SSH_PORT_OJ }} ${{ vars.DEV_SSH_USERNAME_OJ }}@${{ vars.DEV_SSH_HOST_OJ }} "docker logout ghcr.io"
