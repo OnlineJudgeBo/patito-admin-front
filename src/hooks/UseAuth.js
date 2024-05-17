@@ -1,32 +1,30 @@
-// Ajusta la importación de jwt-decode
-import {jwtDecode} from 'jwt-decode'; 
 import Cookies from 'js-cookie';
-import { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import { useEffect, useState } from 'react';
 
 const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Usa Cookies.get para obtener el token de accessToken
     const getToken = () => Cookies.get('accessToken');
 
-    // Verifica si el token ha expirado
     const isTokenExpired = (token) => {
         try {
-            const decoded = jwtDecode(token); // Decodifica el token JWT
+            const decoded = jwtDecode(token);
             return decoded.exp < Date.now() / 1000;
         } catch (error) {
-            //window.location.href = "jv.umsa.bo/oj";
-            return true; // Si hay un error al decodificar, considera el token como expirado
+            return true;
         }
     };
 
-    // Verifica si el usuario está autenticado
     useEffect(() => {
-        const token = getToken(); // Obtén el token
-        const tokenIsValid = token && !isTokenExpired(token); // Verifica si el token es válido y no ha expirado
+        const token = getToken();
+        const tokenIsValid = token && !isTokenExpired(token);
+        if (!tokenIsValid) {
+            window.location.href = '../oj/logout.php';
+        }
         setIsAuthenticated(tokenIsValid);
-        setIsLoading(false); // Actualiza el estado de carga
+        setIsLoading(false);
     }, []);
 
     return { isAuthenticated, isLoading };
