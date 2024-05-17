@@ -23,10 +23,10 @@ jobs:
       run: |
         cp .env.juezvirtual .env
         cp .env.juezvirtual .env.production
-        docker build . --build-arg --rm -t ghcr.io/onlinejudgebo/onlinejudgebo-admin-ui:development
+        docker build . --build-arg --rm -t ghcr.io/onlinejudgebo/onlinejudgebo-admin-ui:juezvirtual
     - name: Push Docker image to registry
       run: |
-        docker push ghcr.io/onlinejudgebo/onlinejudgebo-admin-ui:development
+        docker push ghcr.io/onlinejudgebo/onlinejudgebo-admin-ui:juezvirtual
 
   deploy-juezvirtual:
     runs-on: ubuntu-latest
