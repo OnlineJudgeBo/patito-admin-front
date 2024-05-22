@@ -13,7 +13,6 @@ function ListProblemsPage() {
     useEffect(() => {
         apiService.fetchProblems()
             .then(data => {
-                console.log(data);
                 setProblems(data);
                 setIsLoading(false);
             })
@@ -36,7 +35,9 @@ function ListProblemsPage() {
                 return 0;
             });
         }
+
         return filter ? sortableItems.filter(problem =>
+            problem.problemId.toString().includes(filter.toLowerCase()) ||
             problem.title.toLowerCase().includes(filter.toLowerCase()) ||
             problem.classifications.some(classification =>
                 classification.topic.name.toLowerCase().includes(filter.toLowerCase()) ||
@@ -88,7 +89,7 @@ function ListProblemsPage() {
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('problemId')}>Id</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('title')}>Nombre▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('inDate')}>Fecha de Creación▲▼</th>
-                                <th className="px-4 py-2">Se puede usar? ▲▼</th>
+                                <th className="px-4 py-2">Esta en uso? ▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('submit')}>Intentos▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('accepted')}>Resuelto por▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('topic')}>Tema▲▼</th>
