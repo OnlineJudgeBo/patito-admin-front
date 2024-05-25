@@ -16,7 +16,7 @@ const ProblemListComponent = () => {
             for (const problem of problemList) {
                 if (!problem.problemId || problem.problemId.toString().includes(",")) continue;
                 try {
-                    let problemId = problem.problemId.trim();
+                    let problemId = problem.problemId + " ".trim();
                     const response = await apiService.fetchProblemList({ searchTerm: problemId });
                     if (response.length > 0) {
                         validProblems.push({
@@ -31,8 +31,8 @@ const ProblemListComponent = () => {
                         }, 3000);
                     }
                 } catch (error) {
-                    console.error('Error al verificar usuarios:', error);
-                    setErrorMessages(prev => [...prev, `Error con usuario "${problemId}": ${error.message}`]);
+                    console.error('Error al verificar el problema:', error);
+                    setErrorMessages(prev => [...prev, `Error con el problema "${problem.problemId}": ${error.message}`]);
                 }
             }
             setSelectedProblems(validProblems);
