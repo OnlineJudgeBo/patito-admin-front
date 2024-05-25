@@ -6,6 +6,7 @@ import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from 'yup';
+import './CKEditorStyle.css';
 
 import '../../components/CKEditor/ckeditor.css';
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
