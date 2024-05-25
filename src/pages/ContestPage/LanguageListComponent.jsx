@@ -1,121 +1,85 @@
-
-import { ErrorMessage, Field } from 'formik';
-import parse from 'html-react-parser';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import AsyncSelect from 'react-select/async';
 import { apiService } from '../../services/apiService';
 
 const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
-    const [inputTmp, setInputTmp] = useState([]);
-    const [showSuggestionUsers, setShowSuggestionUsers] = useState([]);
-    const [userElementSelected, setUserElementSelected] = useState([]);
-    const [valueList, setValueList] = useState([]);
+    const [selectedLanguages, setSelectedLanguages] = useState([]);
+    const [errorMessages, setErrorMessages] = useState([]);
 
     useEffect(() => {
-        apiService.get('programmingLanguages')
-            .then(data => {
-                let problemRawList = data.map(problem => ({
-                    languageId: problem.languageId,
-                    name: problem.name
-                }));
-                setValueList(problemRawList);
+        if (userSelectedList == "") {
+            return
+        }
 
-                const selectedProblems = userSelectedList.map(selectedProblem =>
-                    problemRawList.find(pf => pf.languageId === selectedProblem.languageId)
-                ).filter(problem => problem !== undefined);
-                setUserElementSelected(selectedProblems);
-                setFieldValue('selectedLanguages', JSON.stringify(selectedProblems));
-            })
-            .catch(err => {
-                console.log(err);
-            });
+        const options = userSelectedList.map(language => ({
+            value: language.languageId,
+            label: language.name
+        }));
+
+        const formattedLanguages = userSelectedList.map((language) => ({
+            languageId: language.languageId,
+        }));
+
+        setFieldValue('selectedLanguages', JSON.stringify(formattedLanguages));
+        setSelectedLanguages(options)
     }, [userSelectedList]);
 
-    const handleProblemSearch = async (searchTerm) => {
-        const filteredProblems = valueList.filter(problem =>
-            problem.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            !userElementSelected.some(language => language.languageId === problem.languageId)
-        );
-        setShowSuggestionUsers(filteredProblems);
-    };
-
-    const handleAddProblem = (problem) => {
-        setUserElementSelected([...userElementSelected, problem]);
-        setShowSuggestionUsers([]);
-        setFieldValue('selectedLanguages', JSON.stringify([...userElementSelected, problem]));
-    };
-
-    const handleRemoveProblem = (problem) => {
-        const updatedProblems = userElementSelected.filter(p => p.languageId !== problem.languageId);
-        setUserElementSelected(updatedProblems);
-        setShowSuggestionUsers([]);
-        if (updatedProblems.length == 0) {
-            setFieldValue('selectedLanguages', "");
-        } else {
-            setFieldValue('selectedLanguages', JSON.stringify(updatedProblems));
+    const loadOptions = async (inputValue, callback) => {
+        try {
+            return await apiService.get("programmingLanguages").then((data) => {
+                const options = data.map(language => ({
+                    value: language.languageId,
+                    label: language.name
+                }));
+                return options
+            })
+        } catch (err) {
+            console.error('Error loading language list:', err);
+            setErrorMessages([`Error loading language list: ${err.message}`]);
+            callback([]);
         }
     };
 
-    const onBlurHandler = (event) => {
-        //setShowSuggestionUsers([]);
+    const handleInputChange = (newValue, actionMeta) => {
+        if (actionMeta.action === 'remove-value') {
+            setSelectedLanguages(current => {
+                const updatedLanguages = current.filter(language => language.value !== actionMeta.removedValue.value);
+                const formattedLanguages = updatedLanguages.map((language) => ({
+                    languageId: language.value,
+                }));
+                setFieldValue('selectedLanguages', JSON.stringify(formattedLanguages));
+                return updatedLanguages;
+            });
+        } else {
+            const updatedLanguages = newValue || [];
+            setSelectedLanguages(updatedLanguages);
+            const formattedLanguages = updatedLanguages.map((language) => ({
+                languageId: language.value,
+            }));
+            setFieldValue('selectedLanguages', JSON.stringify(formattedLanguages));
+        }
     };
 
-    return (<>
-        <div className="mb-4" onBlur={onBlurHandler}>
-            <label htmlFor="language" className="block text-sm font-medium text-gray-700">Seleccionar Lenguajes</label>
-            <Field
-                type="hidden"
-                name="selectedLanguage"
-                id="selectedLanguage"
+
+    return (
+        <div className="mb-4">
+            <label htmlFor="selectedLanguages" className="block text-sm font-medium text-gray-700">Select Language</label>
+            <AsyncSelect
+                isMulti
+                loadOptions={loadOptions}
+                defaultOptions
+                onChange={handleInputChange}
+                value={selectedLanguages}
+                placeholder="Click para seleccionar un lenguaje."
+                className="text-base w-full"
             />
-            <Field
-                type="text"
-                autoComplete="off"
-                value={inputTmp}
-                name="languageUserList"
-                id="languageUserList"
-                placeholder="Click para agregar un lenguaje"
-                className="mt-1 p-2 border border-gray-300 rounded-md w-full"
-                onClick={(e) => {
-                    handleProblemSearch(e.target.value);
-                }}
-            />
-            {showSuggestionUsers.length > 0 && (
-                <div className="absolute z-10 bg-white border border-gray-300 rounded-md mt-1 shadow-md">
-                    {showSuggestionUsers.map((problem) => (
-                        <div
-                            key={problem.languageId}
-                            className="p-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={(e) => {
-                                handleAddProblem(problem)
-                                setInputTmp("")
-                            }
-                            }
-                        >
-                            {parse(problem.name)}
-                        </div>
-                    ))}
+            {errorMessages.length > 0 && (
+                <div className="text-red-500 text-sm mt-1">
+                    {errorMessages[0]} {/* Display only the most recent error */}
                 </div>
             )}
-            <ErrorMessage name="language" component="div" className="text-red-500 text-sm mt-1" />
         </div>
-
-        {userElementSelected.length > 0 && (
-            <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Lenguajes Seleccionados</label>
-                {userElementSelected.map((problem, index) => (
-                    <div key={problem.languageId + index} className="flex items-center mt-1">
-                        <span className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2">{parse(problem.name)}</span>
-                        <button
-                            type="button"
-                            className="text-red-500 hover:text-red-700"
-                            onClick={(e) => {
-                                handleRemoveProblem(problem);
-                            }}> x
-                        </button>
-                    </div>
-                ))}
-            </div>
-        )}
-    </>)
+    );
 }
+
 export default LanguageListComponent;

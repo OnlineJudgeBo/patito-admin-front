@@ -6,6 +6,7 @@ import { useAtom } from "jotai";
 import { useEffect } from 'react';
 import UploadAdapter from "../../components/CKEditor/upload_adapter";
 import { ckEditorAtom } from "../../context/manager";
+import './CKEditorStyle.css';
 
 const CkeditorComponent = ({ setFieldValue, valueElement }) => {
     const [ckEditorValue, setCkeditorValue] = useAtom(ckEditorAtom);
