@@ -10,6 +10,7 @@ import '../../components/CKEditor/ckeditor.css';
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
 import TopicClassificationComponent from '../../components/TopicClassification/TopicClassification.jsx';
 import { apiService } from '../../services/apiService';
+import './CKEditorStyle.css';
 
 const CreateProblemPage = () => {
 
