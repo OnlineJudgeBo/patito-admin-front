@@ -144,6 +144,14 @@ function ListProblemsPage() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-4">
                                         <a className="text-blue-600 hover:text-blue-900" href={`/admin/problems/edit/${problem.problemId}`}>Editar</a>
+                                        <a className="text-blue-600 hover:text-blue-900" href="#" onClick={(e) => {
+                                            e.preventDefault();
+                                            if (confirm("¿Está seguro de volver a juzgar todos los envíos?")) {
+                                                apiService.get(`judge/rejudge/problem/${problem.problemId}`).then(data => {
+                                                    window.location.reload();
+                                                })
+                                            }
+                                        }}>Rejudge</a>
                                         <a className="text-red-600 hover:text-red-900" href="#" onClick={(e) => {
                                             e.preventDefault();
                                             apiService.delete(`problems/${problem.problemId}`).then(data => {
