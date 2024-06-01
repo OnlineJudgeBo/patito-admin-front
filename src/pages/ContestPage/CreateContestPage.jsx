@@ -70,8 +70,8 @@ const CreateContestPage = () => {
         let selectedUser = values.selectedUser;
         let selectedLanguage = values.selectedLanguages;
 
-        values.startDate = values.startDate + "T" + values.startTime
-        values.endDate = values.endDate + "T" + values.endTime
+        values.startDate = values.startDate + " " + values.startTime
+        values.endDate = values.endDate + " " + values.endTime
         values.selectedProblem = parseJSON(values.selectedProblem)
         values.selectedUser = parseJSON(values.selectedUser)
         values.selectedLanguages = parseJSON(values.selectedLanguages)

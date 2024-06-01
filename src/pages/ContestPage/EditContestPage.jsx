@@ -57,8 +57,8 @@ const EditContestPage = () => {
     useEffect(() => {
         setIsLoading(true);
         apiService.get('contests/' + contestId).then(data => {
-            let startDate = data.startTime.split("T");
-            let endDate = data.endTime.split("T");
+            let startDate = data.startTime.split(" ");
+            let endDate = data.endTime.split(" ");
             setUserListAtom(data.contestUsers)
             setSelectedProblems(data.contestProblems)
             //setUserList(data.contestUsers)
@@ -96,8 +96,8 @@ const EditContestPage = () => {
         let selectedUser = values.selectedUser;
         let selectedLanguage = values.selectedLanguages;
 
-        values.startDate = values.startDate + "T" + values.startTime
-        values.endDate = values.endDate + "T" + values.endTime
+        values.startDate = values.startDate + " " + values.startTime
+        values.endDate = values.endDate + " " + values.endTime
         values.selectedUser = parseJSON(values.selectedUser)
         values.selectedLanguages = parseJSON(values.selectedLanguages)
         values.isPrivate = values.isPrivate == 1 ? true : false
@@ -115,8 +115,8 @@ const EditContestPage = () => {
         }).catch((error) => {
             toast({
                 variant: "destructive",
-                title: "Error al crear el contest",
-                description: "Error al crear el contest, revise todos los campos.",
+                title: "Error al editar el contest",
+                description: "Error al editar el contest, revise todos los campos.",
             })
             console.log(error);
         })
