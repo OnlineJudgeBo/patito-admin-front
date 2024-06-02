@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
 import { problemSelectAtom, userSelectAtom } from "../../context/manager";
 import { apiService } from '../../services/apiService.js';
-import { parseJSON } from '../../utils/Utils';
+import { fixTimeFormat, parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
 import LanguageListComponent from "./LanguageListComponent";
 
@@ -96,8 +96,8 @@ const EditContestPage = () => {
         let selectedUser = values.selectedUser;
         let selectedLanguage = values.selectedLanguages;
 
-        values.startDate = values.startDate + " " + values.startTime
-        values.endDate = values.endDate + " " + values.endTime
+        values.startDate = values.startDate + " " + fixTimeFormat(values.startTime)
+        values.endDate = values.endDate + " " + fixTimeFormat(values.endTime)
         values.selectedUser = parseJSON(values.selectedUser)
         values.selectedLanguages = parseJSON(values.selectedLanguages)
         values.isPrivate = values.isPrivate == 1 ? true : false
@@ -109,6 +109,8 @@ const EditContestPage = () => {
             toast({
                 description: 'Contest actualizado.',
             })
+            setUserListAtom("");
+            setInputProblemTextAtom("");
             setTimeout(() => {
                 navigate('/admin/contests');
             }, 2000);
