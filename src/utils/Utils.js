@@ -13,3 +13,10 @@ export const parseJSON = input => {
     }
 };
 
+export const fixTimeFormat = (currentTime) => {
+    let date = currentTime.split(":").length
+    if (date == 2) {
+        return currentTime + ":00";
+    }
+    return currentTime;
+}

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
 import { apiService } from '../../services/apiService.js';
-import { parseJSON } from '../../utils/Utils';
+import { fixTimeFormat, parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
 import LanguageListComponent from "./LanguageListComponent";
 
@@ -25,7 +25,6 @@ const getCurrentTime = () => {
     const minutes = now.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
 };
-
 
 const CreateContestPage = () => {
     const [userListAtom, setUserListAtom] = useAtom(userSelectAtom);
@@ -70,8 +69,8 @@ const CreateContestPage = () => {
         let selectedUser = values.selectedUser;
         let selectedLanguage = values.selectedLanguages;
 
-        values.startDate = values.startDate + " " + values.startTime
-        values.endDate = values.endDate + " " + values.endTime
+        values.startDate = values.startDate + " " + fixTimeFormat(values.startTime)
+        values.endDate = values.endDate + " " + fixTimeFormat(values.endTime)
         values.selectedProblem = parseJSON(values.selectedProblem)
         values.selectedUser = parseJSON(values.selectedUser)
         values.selectedLanguages = parseJSON(values.selectedLanguages)
@@ -85,6 +84,8 @@ const CreateContestPage = () => {
             toast({
                 description: 'Contest agregado.',
             })
+            setUserListAtom("");
+            setInputProblemTextAtom("");
             setTimeout(() => {
                 navigate('/admin/contests');
             }, 2000);
