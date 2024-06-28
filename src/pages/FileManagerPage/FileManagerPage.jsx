@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -58,7 +57,6 @@ const FileManagerPage = () => {
 
     return (
         <div className="container mx-auto p-4">
-            <Toaster />
             <div {...getRootProps()} className="flex justify-center items-center p-10 border-2 border-dashed border-gray-400 cursor-pointer">
                 <input {...getInputProps()} />
                 <p>Arrastra archivos aquí o haz clic para seleccionar</p>

@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from '@ckeditor/ckeditor5-react';
@@ -117,7 +116,6 @@ const CreateProblemPage = () => {
     }
     return (
         <form onSubmit={formik.handleSubmit} className='mx-10 my-10'>
-            <Toaster />
             <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
                 Edición de problema.
             </h2>
