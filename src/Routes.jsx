@@ -15,6 +15,7 @@ import UserAdminPage from './pages/Managment/Users/UserAdminPage';
 import CreateProblemPage from './pages/ProblemsPage/CreateProblemPage';
 import EditProblemPage from './pages/ProblemsPage/EditProblemPage';
 import ListProblemPage from './pages/ProblemsPage/ListProblemPage';
+import TopicsClassificationsPage from './pages/TopicsClassificationsPage/TopicsClassificationsPage';
 import ListUserProfilePage from './pages/UsersPage/ListUserProfilePage';
 
 const App = () => {
@@ -41,6 +42,8 @@ const App = () => {
                         <Route path="/admin/problems/add" element={<PrivateRoute><CreateProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/edit/:problemId" element={<PrivateRoute><EditProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/rejudge" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+
+                        <Route path="admin/topicsClassifications" element={<PrivateRoute><TopicsClassificationsPage /></PrivateRoute>} />
 
                         <Route path="/admin/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
