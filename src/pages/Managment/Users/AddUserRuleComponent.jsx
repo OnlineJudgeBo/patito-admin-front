@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { ErrorMessage, Field, Form, Formik } from 'formik';
@@ -76,7 +75,6 @@ export function AddUserRuleComponent({ title }) {
             {({ submitForm, isValid, validateForm }) => (
                 <Form>
                     <Dialog>
-                        <Toaster />
                         <DialogTrigger asChild>
                             <Button variant="outline" className="bg-gray-700 text-white">
                                 <PlusIcon className="h-5 w-5 mr-2" />

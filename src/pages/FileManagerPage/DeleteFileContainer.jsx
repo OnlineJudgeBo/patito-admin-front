@@ -8,7 +8,6 @@ import {
     DialogTitle,
     DialogTrigger
 } from "@/components/ui/dialog";
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import React, { useState } from "react";
 import { apiService } from "../../services/apiService";
@@ -37,7 +36,6 @@ export function DeleteFileContainer({ fileName, problemId }) {
 
     return (
         <Dialog>
-            <Toaster />
             <DialogTrigger asChild>
                 <Button className="bg-red-100 border-red-500" variant="outline" onClick={fetchFileContent}>Borrar</Button>
             </DialogTrigger>

@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { CKEditor } from '@ckeditor/ckeditor5-react';
@@ -126,7 +125,6 @@ const EditForm = () => {
     }
     return (
         <form onSubmit={formik.handleSubmit}>
-            <Toaster />
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
                 <label htmlFor="problem-title" className="block text-xl font-semibold mb-2">Título</label>
                 <input id="problem-title" name="Title" type="text"

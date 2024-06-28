@@ -1,5 +1,4 @@
 import { Separator } from "@/components/ui/separator";
-import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { useAtom } from "jotai";
@@ -138,7 +137,6 @@ const EditContestPage = () => {
                 </div>
             ) : (
                 <>
-                    <Toaster />
                     <Formik
                         enableReinitialize="true"
                         initialValues={initialValues}
