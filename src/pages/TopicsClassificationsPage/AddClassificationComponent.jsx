@@ -38,14 +38,25 @@ export function AddClassificationComponent({ topicId }) {
             }
             data.classifications.push(n);
         });
-        let response = await apiService.create("topics/" + topicId + "/classification", data)
-        debugger
-        const classifications = response.map(classification => ({
-            topicId: topic.topicId,
-            name: topic.name,
-            classifications: topic.classifications,
-        }));
-        debugger
+        try {
+            let response = await apiService.create("topics/" + topicId + "/classification", data)
+            const classifications = response.map(classification => ({
+                topicId: topic.topicId,
+                name: topic.name,
+                classifications: topic.classifications,
+            }));
+            toast({
+                description: 'Clasificación agregada.',
+            })
+        } catch (err) {
+            toast({
+                variant: "destructive",
+                title: "Error al crear la clasificación",
+                description: err.toString(),
+            });
+        }
+
+
 
         Swal.fire({
             icon: 'success',
@@ -53,9 +64,6 @@ export function AddClassificationComponent({ topicId }) {
             showConfirmButton: false,
             timer: 1500
         });
-        console.log(topicId);
-        console.log(values);
-        debugger
         resetForm();
     };
 
