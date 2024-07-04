@@ -9,21 +9,25 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { ErrorMessage, Field, FieldArray, Form, Formik } from 'formik';
 import React from 'react';
-import Swal from 'sweetalert2';
 import * as Yup from 'yup';
 import { apiService } from "../../services/apiService";
 
 export function AddClassificationComponent({ topicId }) {
+    const { toast } = useToast()
+
     const initialValues = {
         topicId: topicId,
         classifications: [''],
     };
 
     const validationSchema = Yup.object().shape({
-        classifications: Yup.array().of(Yup.string().required('Nombre de la clasificación requerido')),
+        classifications: Yup.array()
+            .of(Yup.string().required('Nombre de la clasificación requerido'))
+            .max(12, 'No puede haber más de 12 clasificaciones')
     });
 
     const handleSubmit = async (values, { resetForm }) => {
@@ -39,15 +43,11 @@ export function AddClassificationComponent({ topicId }) {
             data.classifications.push(n);
         });
         try {
-            let response = await apiService.create("topics/" + topicId + "/classification", data)
-            const classifications = response.map(classification => ({
-                topicId: topic.topicId,
-                name: topic.name,
-                classifications: topic.classifications,
-            }));
+            await apiService.create("topics/" + topicId + "/classification", data)
             toast({
-                description: 'Clasificación agregada.',
+                description: 'Clasificación agregada con éxito',
             })
+            window.location.reload();
         } catch (err) {
             toast({
                 variant: "destructive",
@@ -55,15 +55,6 @@ export function AddClassificationComponent({ topicId }) {
                 description: err.toString(),
             });
         }
-
-
-
-        Swal.fire({
-            icon: 'success',
-            title: 'Clasificación agregada con éxito',
-            showConfirmButton: false,
-            timer: 1500
-        });
         resetForm();
     };
 
