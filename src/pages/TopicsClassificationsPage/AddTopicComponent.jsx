@@ -21,7 +21,10 @@ export function AddTopicComponent() {
     };
 
     const validationSchema = Yup.object().shape({
-        topicName: Yup.string().required('Nombre del tema requerido'),
+        topicName: Yup.string()
+            .required('El nombre del tema es requerido.')
+            .min(4, 'Cada nombre de tema debe tener al menos 4 caracteres.')
+            .max(50, 'Cada nombre de tema no debe tener más de 50 caracteres.')
     });
 
     const handleSubmit = (values, { resetForm }) => {
