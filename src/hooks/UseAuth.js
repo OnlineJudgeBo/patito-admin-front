@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
+const CLIENT_URL = import.meta.env.VITE_REACT_APP_AUTH_REDIRECT_URL;
 
 const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,7 +22,7 @@ const useAuth = () => {
         const token = getToken();
         const tokenIsValid = token && !isTokenExpired(token);
         if (!tokenIsValid) {
-            window.location.href = '../oj/logout.php';
+            window.location.href = CLIENT_URL + "logout.php";
         }
         setIsAuthenticated(tokenIsValid);
         setIsLoading(false);
