@@ -26,8 +26,12 @@ export function AddClassificationComponent({ topicId }) {
 
     const validationSchema = Yup.object().shape({
         classifications: Yup.array()
-            .of(Yup.string().required('Nombre de la clasificación requerido'))
-            .max(12, 'No puede haber más de 12 clasificaciones')
+            .of(
+                Yup.string()
+                    .required('Nombre de la clasificación requerido')
+                    .min(2, 'La clasificación debería de tener mínimamente 2 caracteres.')
+                    .max(12, 'El tamaño de la clasificación no debe ser mas de 12 caracteres.')
+            )
     });
 
     const handleSubmit = async (values, { resetForm }) => {
