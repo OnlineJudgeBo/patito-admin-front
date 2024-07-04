@@ -38,7 +38,7 @@ function TopicsClassificationsPage() {
             <AddTopicComponent></AddTopicComponent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {topics.map((item, index) => (
-                    <TopicCard key={item.topicId} title={item.name} topics={item.classifications} />
+                    <TopicCard key={item.topicId} title={item.name} topics={item.classifications} topicId={item.topicId} />
                 ))}
             </div>
         </div>
