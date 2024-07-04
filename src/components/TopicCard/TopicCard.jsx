@@ -4,9 +4,10 @@ import { Input } from '@/components/ui/input';
 import { useToast } from "@/components/ui/use-toast";
 import React, { useState } from 'react';
 import { FaEdit } from 'react-icons/fa';
+import { AddClassificationComponent } from '../../pages/TopicsClassificationsPage/AddClassificationComponent';
 import { apiService } from "../../services/apiService";
 
-const TopicCard = ({ title, topics }) => {
+const TopicCard = ({ title, topics, topicId }) => {
     const [editIndex, setEditIndex] = useState(null);
     const [editName, setEditName] = useState('');
     const { toast } = useToast()
@@ -52,8 +53,8 @@ const TopicCard = ({ title, topics }) => {
                                         onChange={(e) => setEditName(e.target.value)}
                                         className="border rounded p-1"
                                     />
-                                    <Button onClick={() => handleSaveClick(index, topic)} variant="success">Save</Button>
-                                    <Button onClick={handleCancelClick} className="secondary">Cancel</Button>
+                                    <Button onClick={() => handleSaveClick(index, topic)} variant="success">Guardar</Button>
+                                    <Button onClick={handleCancelClick} className="secondary">Cancelar</Button>
                                 </div>
                             ) : (
                                 <>
@@ -62,14 +63,12 @@ const TopicCard = ({ title, topics }) => {
                                         <Button onClick={() => handleEditClick(index, topic.name)} variant="outline">
                                             <FaEdit />
                                         </Button>
-                                        {/*<Button variant="destructive" className="ml-2">
-                                            <FaTrash />
-                                        </Button>*/}
                                     </div>
                                 </>
                             )}
                         </li>
                     ))}
+                    <AddClassificationComponent topicId={topicId}></AddClassificationComponent>
                 </ul>
             </CardContent>
         </Card>
