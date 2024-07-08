@@ -35,7 +35,10 @@ const FileManagerPage = () => {
                         title: "Archivo Subido",
                         description: "Se subió el archivo",
                     });
-                    window.location.reload();
+                    setFiles(currentFiles => [
+                        ...currentFiles,
+                        { name: data.fileName, type: "file", path: '/' + data.fileName }
+                    ]);
                 }).catch((error) => {
                     toast({
                         variant: "destructive",
@@ -50,7 +53,7 @@ const FileManagerPage = () => {
         }
     }, []);
 
-    const { getRootProps, getInputProps } = useDropzone({ onDrop });
+    const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: true });
 
     const inFiles = files.filter(file => file.name.endsWith(".in"));
     const outFiles = files.filter(file => !file.name.endsWith(".in"));
