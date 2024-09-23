@@ -10,7 +10,7 @@ const PrivateRoute = ({ children }) => {
     }
 
     if (!isAuthenticated) {
-        window.location.href = authRedirectUrl + "logout.php";
+        window.location.href = authRedirectUrl + "/logout.php";
         return null;
     }
 
