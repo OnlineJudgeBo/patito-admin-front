@@ -22,7 +22,7 @@ const useAuth = () => {
         const token = getToken();
         const tokenIsValid = token && !isTokenExpired(token);
         if (!tokenIsValid) {
-            window.location.href = CLIENT_URL + "logout.php";
+            window.location.href = CLIENT_URL + "/logout.php";
         }
         setIsAuthenticated(tokenIsValid);
         setIsLoading(false);
