@@ -8,7 +8,7 @@ export default function LogoutPage() {
 
     useEffect(() => {
         Cookies.remove('accessToken', { path: '/' });
-        window.location.href = CLIENT_URL + "logout.php";
+        window.location.href = CLIENT_URL + "/logout.php";
     }, [navigate]);
 
     return <div>Cerrando sesión...</div>;
