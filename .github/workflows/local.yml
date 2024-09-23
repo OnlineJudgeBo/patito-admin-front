@@ -21,8 +21,8 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build Docker images
       run: |
-        cp -f .env.local .env
-        cp -f .env.local .env.production
+        cp -f .env.localhost .env
+        cp -f .env.localhost .env.production
         docker build . --build-arg --rm -t ghcr.io/onlinejudgebo/onlinejudgebo-admin-ui:local
     - name: Push Docker image to registry
       run: |
