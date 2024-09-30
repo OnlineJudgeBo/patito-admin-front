@@ -8,7 +8,7 @@ function ListContestPage2() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [problemsPerPage] = useState(20);
+    const [problemsPerPage] = useState(100);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
 
     useEffect(() => {
