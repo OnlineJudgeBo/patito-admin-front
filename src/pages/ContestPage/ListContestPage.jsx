@@ -1,6 +1,7 @@
 import parse from 'html-react-parser';
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/apiService';
+import { PromoteComponent } from './PromoteComponent';
 
 function ListContestPage2() {
     const [problems, setProblems] = useState([]);
@@ -94,10 +95,11 @@ function ListContestPage2() {
                         <thead className="bg-gray-700 text-white">
                             <tr>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.email')}>Id</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userId')}>Titulo▲▼</th>
+                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userId')}>Nombre</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.nick')}>Fecha de Inicio▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.lastname')}>Fecha de Fin▲▼</th>
-                                <th className="px-4 py-2">Tipo de concurso</th>
+                                <th className="px-4 py-2">Publico/Privado</th>
+                                <th className="px-4 py-2">Promover a Practica</th>
                                 <th className="px-4 py-2">Editar</th>
                             </tr>
                         </thead>
@@ -114,7 +116,9 @@ function ListContestPage2() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.startTime}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.endTime}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.private == false ? "Publico" : "Privado"}</td>
-
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <PromoteComponent contestId={problem.contestId} />
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900"
                                             target="_blank"
