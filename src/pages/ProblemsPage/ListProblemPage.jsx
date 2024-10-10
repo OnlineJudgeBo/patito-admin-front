@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../../services/apiService';
+import { ChangeStatusComponent } from './ChangeStatusComponent';
 
 function ListProblemsPage() {
     const [problems, setProblems] = useState([]);
@@ -88,10 +89,10 @@ function ListProblemsPage() {
                             <tr>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('problemId')}>Id</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('title')}>Nombre▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('inDate')}>Fecha de Creación▲▼</th>
-                                <th className="px-4 py-2">Esta en uso? ▲▼</th>
+                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('inDate')}>Creación▲▼</th>
+                                <th className="px-4 py-2">En uso? ▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('submit')}>Intentos▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('accepted')}>Resuelto por▲▼</th>
+                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('accepted')}>Resuelto▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('topic')}>Tema▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('classification')}>Clasificación▲▼</th>
                                 <th className="px-4 py-2">Soluciones</th>
@@ -110,7 +111,9 @@ function ListProblemsPage() {
                                         </a>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(problem.inDate).toLocaleDateString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.defunct === 'Y' ? 'No' : 'Sí'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <ChangeStatusComponent problemId={problem.problemId} initialDefunct={problem.defunct}></ChangeStatusComponent>
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.submit}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.accepted}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

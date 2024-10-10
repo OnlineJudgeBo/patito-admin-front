@@ -24,7 +24,7 @@ async function fetchAPI(endpoint, { method = 'GET', body = null, params = {} } =
             method: method,
             headers: headers,
             url: `${BASE_URL}/${endpoint}`,
-            data: body ? body : undefined,
+            data: body ? body : "",
             params: params
         };
 
@@ -72,7 +72,7 @@ export const apiService = {
     fetchRoles: () => fetchAPI(`Roles`),
 
     create: (endpoint, body) => fetchAPI(endpoint, { method: 'POST', body: body }),
-    update: (endpoint, id, body) => fetchAPI(`${endpoint}/${id}`, { method: 'PUT', body: body }),
+    update: (endpoint, id, body) => fetchAPI(`${endpoint}/${id}`, { method: 'PUT', body: body ? body : "" }),
     get: (endpoint) => fetchAPI(`${endpoint}`, { method: 'GET' }),
     delete: (endpoint) => fetchAPI(`${endpoint}`, { method: 'DELETE' }),
     postFile: (endpoint, formData) => postApiFile(`${endpoint}`, { method: 'POST', body: formData }),
