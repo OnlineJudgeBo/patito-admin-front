@@ -293,6 +293,39 @@ const EditForm = () => {
                 ) : null}
             </div>
 
+            {/* Hits */}
+            <div className="mb-6">
+                <label htmlFor="problem-notes" className="block text-xl font-semibold mb-2">Notas/Consejos</label>
+                <CKEditor
+                    editor={ClassicEditor}
+                    config={{
+                        toolbar: {
+                            shouldNotGroupWhenFull: true,
+                            items: [
+                                'fontColor', 'fontBackgroundColor', '|',
+                                'link', '|',
+                                'bold', 'italic', '|',
+                                'bulletedList', 'numberedList', '|',
+                                'code', 'codeBlock', '|',
+                                'insertTable', '|',
+                                'blockQuote', '|',
+                                'imageUpload', '|',
+                                'MathType', 'ChemType',
+                                'SourceEditing'
+                            ]
+                        },
+                        extraPlugins: [UploadAdapterPlugin],
+                        upload: {
+                        }
+                    }}
+                    data={formik.values.Hint}
+                    onChange={(event, editor) => formik.setFieldValue('Hint', editor.getData())}
+                />
+                {formik.touched.Hint && formik.errors.Hint ? (
+                    <div className="text-red-500">{formik.errors.Hint}</div>
+                ) : null}
+            </div>
+
             {/* Author */}
             <div className="mb-6">
                 <label htmlFor="problem-author" className="block text-xl font-semibold mb-2">Autor</label>
@@ -304,16 +337,6 @@ const EditForm = () => {
                 ) : null}
             </div>
 
-            {/* Hits */}
-            <div className="mb-6">
-                <label htmlFor="problem-notes" className="block text-xl font-semibold mb-2">Notas/Consejos</label>
-                <textarea id="problem-notes" name="Hint" rows="3"
-                    className="form-textarea mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    value={formik.values.Hint} onChange={formik.handleChange} onBlur={formik.handleBlur} />
-                {formik.touched.Hint && formik.errors.Hint ? (
-                    <div className="text-red-500">{formik.errors.Hint}</div>
-                ) : null}
-            </div>
 
             <div className="flex justify-end">
                 <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
