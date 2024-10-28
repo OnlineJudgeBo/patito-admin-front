@@ -43,16 +43,16 @@ export function AddTopicComponent() {
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
         >
-            {({ submitForm, isValid, validateForm, isSubmitting }) => (
-                <Form>
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant="outline" className="bg-gray-700 text-white">
-                                <PlusIcon className="h-5 w-5 mr-2" />
-                                Agregar Tema
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-xl bg-white rounded-lg shadow p-6">
+            {({ isSubmitting }) => (
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" className="bg-gray-700 text-white">
+                            <PlusIcon className="h-5 w-5 mr-2" />
+                            Agregar Tema
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-xl bg-white rounded-lg shadow p-6">
+                        <Form>
                             <DialogHeader>
                                 <DialogTitle className="text-lg font-semibold">Agregar Tema</DialogTitle>
                             </DialogHeader>
@@ -67,15 +67,16 @@ export function AddTopicComponent() {
                             </div>
                             <DialogFooter className="mt-4">
                                 <Button
+                                    type="submit"
                                     className="ml-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting ? 'Agregando...' : 'Agregar'}
                                 </Button>
                             </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
-                </Form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
             )}
         </Formik>
     );
