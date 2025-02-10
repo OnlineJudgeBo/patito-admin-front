@@ -2,18 +2,19 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
 
-const getLogoutURL = () => {
+const redirectLogoutURL = () => {
     const hostname = window.location.hostname;
-    console.log(hostname)
+    let url = "";
     if (hostname === "juezvirtual.local") {
-        return "https://juezvirtual.local/oj/logout.php";
+        url = "https://juezvirtual.local/oj/logout.php";
     } else if (hostname === "juezvirtual.local") {
-        return "https://juezvirtual.local/logout.php";
+        url = "https://juezvirtual.local/logout.php";
     } else if (hostname === "jv.umsa.bo") {
-        return "http://jv.umsa.bo/logout.php";
+        url = "http://jv.umsa.bo/logout.php";
     } else {
-        return "/logout.php";
+        url = "/logout.php";
     }
+    return url;
 };
 
 const useAuth = () => {
@@ -35,7 +36,7 @@ const useAuth = () => {
         const token = getToken();
         const tokenIsValid = token && !isTokenExpired(token);
         if (!tokenIsValid) {
-            window.location.href = getLogoutURL();
+            window.location.href = redirectLogoutURL();
         }
         setIsAuthenticated(tokenIsValid);
         setIsLoading(false);
