@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 const getLogoutURL = () => {
     const hostname = window.location.hostname;
-
+    console.log(hostname)
     if (hostname === "juezvirtual.local") {
         return "https://juezvirtual.local/oj/logout.php";
     } else if (hostname === "juezvirtual.local") {
