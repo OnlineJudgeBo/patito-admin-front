@@ -1,7 +1,20 @@
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
-const CLIENT_URL = import.meta.env.VITE_REACT_APP_AUTH_REDIRECT_URL;
+
+const getLogoutURL = () => {
+    const hostname = window.location.hostname;
+
+    if (hostname === "juezvirtual.local") {
+        return "https://juezvirtual.local/oj/logout.php";
+    } else if (hostname === "juezvirtual.local") {
+        return "https://juezvirtual.local/logout.php";
+    } else if (hostname === "jv.umsa.bo") {
+        return "http://jv.umsa.bo/logout.php";
+    } else {
+        return "/logout.php";
+    }
+};
 
 const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,7 +35,7 @@ const useAuth = () => {
         const token = getToken();
         const tokenIsValid = token && !isTokenExpired(token);
         if (!tokenIsValid) {
-            window.location.href = CLIENT_URL + "/logout.php";
+            window.location.href = getLogoutURL();
         }
         setIsAuthenticated(tokenIsValid);
         setIsLoading(false);
