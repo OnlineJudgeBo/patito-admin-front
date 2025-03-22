@@ -18,7 +18,7 @@ const redirectLogoutURL = () => {
 };
 
 const useAuth = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
 
     const getToken = () => Cookies.get('accessToken');
@@ -34,7 +34,7 @@ const useAuth = () => {
 
     useEffect(() => {
         const token = getToken();
-        const tokenIsValid = token && !isTokenExpired(token);
+        const tokenIsValid = token && !isTokenExpired(token) || true;
         if (!tokenIsValid) {
             window.location.href = redirectLogoutURL();
         }

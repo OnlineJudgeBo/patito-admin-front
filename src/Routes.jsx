@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import Sidebar from './components/Sidebar';
@@ -15,8 +14,10 @@ import UserAdminPage from './pages/Managment/Users/UserAdminPage';
 import CreateProblemPage from './pages/ProblemsPage/CreateProblemPage';
 import EditProblemPage from './pages/ProblemsPage/EditProblemPage';
 import ListProblemPage from './pages/ProblemsPage/ListProblemPage';
+import SchedulePage from './pages/Schedule/SchedulePage';
 import TopicsClassificationsPage from './pages/TopicsClassificationsPage/TopicsClassificationsPage';
 import ListUserProfilePage from './pages/UsersPage/ListUserProfilePage';
+
 
 const App = () => {
     const { isAuthenticated, isLoading } = UseAuth();
@@ -39,11 +40,13 @@ const App = () => {
                         <Route path="/admin/users" element={<PrivateRoute><ListUserProfilePage /></PrivateRoute>} />
                         <Route path="/admin/problems" element={<PrivateRoute><ListProblemPage /></PrivateRoute>} />
 
+                        <Route path="/admin/schedules" element={<PrivateRoute><SchedulePage /></PrivateRoute>} />
+
                         <Route path="/admin/problems/add" element={<PrivateRoute><CreateProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/edit/:problemId" element={<PrivateRoute><EditProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/rejudge" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
-                        <Route path="admin/topicsClassifications" element={<PrivateRoute><TopicsClassificationsPage /></PrivateRoute>} />
+                        <Route path="/admin/topicsClassifications" element={<PrivateRoute><TopicsClassificationsPage /></PrivateRoute>} />
 
                         <Route path="/admin/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
