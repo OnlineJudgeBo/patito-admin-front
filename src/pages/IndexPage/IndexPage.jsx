@@ -51,10 +51,8 @@ const IndexPage = () => {
   useEffect(() => {
 
     apiService.get("Statics/GetLast365DaysSubmissionsByMonth").then(data => {
-      const dataJson = JSON.parse(data);
-
-      const months = dataJson.map(item => `${item.Month}/${item.Year}`);
-      const submissions = dataJson.map(item => item.TotalSubmissions);
+      const months = data.map(item => `${item.Month}/${item.Year}`);
+      const submissions = data.map(item => item.TotalSubmissions);
 
       setLineChartOptions(prevOptions => ({
         ...prevOptions,
