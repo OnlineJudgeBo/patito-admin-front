@@ -1,5 +1,7 @@
 import axios from 'axios';
-const BASE_URL = import.meta.env.VITE_API_URL;
+
+const BASE_URL = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/+$/, '');
+const DEFAULT_SITE_ID = Number(import.meta.env.VITE_SITE_ID ?? 1);
 
 function getCookie(name) {
     const nameEQ = name + "=";
@@ -13,17 +15,21 @@ function getCookie(name) {
 }
 
 async function fetchAPI(endpoint, { method = 'GET', body = null, params = {} } = {}) {
+    const token = getCookie('accessToken');
     const headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getCookie('accessToken')}`
     };
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
 
     try {
         const options = {
             method: method,
             headers: headers,
-            url: `${BASE_URL}/${endpoint}`,
+            url: `${BASE_URL}/${String(endpoint).replace(/^\/+/, '')}`,
             data: body ? body : "",
             params: params
         };
@@ -37,17 +43,21 @@ async function fetchAPI(endpoint, { method = 'GET', body = null, params = {} } =
 }
 
 async function postApiFile(endpoint, { method = 'GET', body = null, params = {} } = {}) {
+    const token = getCookie('accessToken');
     const headers = {
         'Accept': 'application/json',
-        'Authorization': `Bearer ${getCookie('accessToken')}`,
         "Content-Type": "multipart/form-data",
     };
+
+    if (token) {
+        headers.Authorization = `Bearer ${token}`;
+    }
 
     try {
         const options = {
             method: method,
             headers: headers,
-            url: `${BASE_URL}/${endpoint}`,
+            url: `${BASE_URL}/${String(endpoint).replace(/^\/+/, '')}`,
             data: body ? body : undefined,
             params: params
         };
@@ -70,6 +80,36 @@ export const apiService = {
     checkUsernameAvailability: (userId) => fetchAPI(`users/UsernameIsAvailable`, { method: 'POST', body: userId }),
     checkUserEmailAvailability: (email) => fetchAPI(`users/UserEmailIsAvailable`, { method: 'POST', body: email }),
     fetchRoles: () => fetchAPI(`Roles`),
+    fetchManageableAcademicCourses: (siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/manageable`, { method: 'GET' }),
+    fetchAcademicCourse: (courseId, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/${courseId}`, { method: 'GET' }),
+    createAcademicCourse: (body, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses`, { method: 'POST', body }),
+    fetchAcademicCourseMembers: (courseId, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/${courseId}/members`, { method: 'GET' }),
+    addAcademicCourseMember: (courseId, body, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/${courseId}/members`, { method: 'POST', body }),
+    removeAcademicCourseMember: (courseId, userId, siteId = DEFAULT_SITE_ID) =>
+        fetchAPI(`academic/sites/${siteId}/courses/${courseId}/members/${encodeURIComponent(userId)}`, { method: 'DELETE' }),
+    createAcademicCourseAssignment: (courseId, body, siteId = DEFAULT_SITE_ID) =>
+        fetchAPI(`academic/sites/${siteId}/courses/${courseId}/assignments`, { method: 'POST', body }),
+    updateAcademicCourseAssignment: (courseId, assignmentId, body, siteId = DEFAULT_SITE_ID) =>
+        fetchAPI(`academic/sites/${siteId}/courses/${courseId}/assignments/${assignmentId}`, { method: 'PUT', body }),
+    fetchAcademicCourseReport: (courseId, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/${courseId}/report`, { method: 'GET' }),
+    downloadAcademicCourseReportCsv: async (courseId, siteId = DEFAULT_SITE_ID) => {
+        const token = getCookie('accessToken');
+        const response = await axios({
+            method: 'GET',
+            url: `${BASE_URL}/academic/sites/${siteId}/courses/${courseId}/report.csv`,
+            headers: token
+                ? {
+                    'Accept': 'text/csv',
+                    'Authorization': `Bearer ${token}`
+                }
+                : {
+                    'Accept': 'text/csv'
+                },
+            responseType: 'blob'
+        });
+
+        return response.data;
+    },
 
     create: (endpoint, body) => fetchAPI(endpoint, { method: 'POST', body: body }),
     update: (endpoint, id, body) => fetchAPI(`${endpoint}/${id}`, { method: 'PUT', body: body ? body : "" }),

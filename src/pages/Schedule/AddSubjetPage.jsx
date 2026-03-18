@@ -18,8 +18,8 @@ export function AddSubjectPage() {
     const [teacherList, setTeacherList] = useState([]);
     const [subjectList, setSubjectList] = useState([]);
 
-    const [selectedSubject, setSelectedSubject] = useState(null);
-    const [selectedTeacher, setSelectedTeacher] = useState(null);
+    const [selectedSubject, setSelectedSubject] = useState("");
+    const [selectedTeacher, setSelectedTeacher] = useState("");
 
     const [newScheduleTime, setNewScheduleTime] = useState("");
     const [newScheduleDays, setNewScheduleDays] = useState([]);
@@ -47,23 +47,33 @@ export function AddSubjectPage() {
     }, []);
 
     const handleCreateSubject = (name) => {
-        if (!name.trim()) return;
-        const newSubject = { id: `id-subject-${Date.now()}`, name };
+        const normalizedName = name.trim();
 
-        setSubjectList((prevSubjects) => [...prevSubjects, newSubject]);
-        setSelectedSubject(newSubject.id);
+        if (!normalizedName) return;
+
+        apiService.create("schedule-management/subjects", { "subjectName": normalizedName })
+            .then((newSubject) => {
+                setSubjectList((prevSubjects) => [...prevSubjects, newSubject]);
+                setSelectedSubject(String(newSubject.id));
+            })
+            .catch((error) => {
+                console.error("Error al agregar la materia:", error);
+            });
     };
 
     const handleCreateTeacher = (name) => {
-        if (!name.trim()) return;
-        const newTeacher = {
-            id: `id-teach-${Date.now()}`,
-            name,
-            schedules: [],
-        };
+        const normalizedName = name.trim();
 
-        setTeacherList((prevTeacher) => [...prevTeacher, newTeacher]);
-        setSelectedTeacher(newTeacher.id);
+        if (!normalizedName) return;
+
+        apiService.create("schedule-management/teachers/teacher", { "teacherName": normalizedName })
+            .then((newTeacher) => {
+                setTeacherList((prevTeacher) => [...prevTeacher, newTeacher]);
+                setSelectedTeacher(String(newTeacher.id));
+            })
+            .catch((error) => {
+                console.error("Error al agregar el profesor:", error);
+            });
     };
 
     const handleSelectSubject = (value) => {
@@ -91,9 +101,13 @@ export function AddSubjectPage() {
     };
 
     const handleSubmit = () => {
+        if (!selectedSubject || !selectedTeacher || !newScheduleTime || newScheduleDays.length === 0) {
+            return;
+        }
+
         const newSubject = {
-            subject: selectedSubject,
-            teacher: selectedTeacher,
+            subject: Number(selectedSubject),
+            teacher: Number(selectedTeacher),
             scheduleDays: newScheduleDays,
             scheduleTime: newScheduleTime
         };

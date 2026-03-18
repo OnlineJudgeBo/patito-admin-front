@@ -2,6 +2,8 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute';
 import Sidebar from './components/Sidebar';
 import UseAuth from './hooks/UseAuth';
+import CourseAdminDetailPage from './pages/AcademicPage/CourseAdminDetailPage';
+import ListAcademicCoursePage from './pages/AcademicPage/ListAcademicCoursePage';
 import CreateContestPage from './pages/ContestPage/CreateContestPage';
 import EditContestPage from './pages/ContestPage/EditContestPage';
 import ListContestPage from './pages/ContestPage/ListContestPage';
@@ -47,6 +49,9 @@ const App = () => {
                         <Route path="/admin/problems/rejudge" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
                         <Route path="/admin/topicsClassifications" element={<PrivateRoute><TopicsClassificationsPage /></PrivateRoute>} />
+
+                        <Route path="/admin/academic/courses" element={<PrivateRoute><ListAcademicCoursePage /></PrivateRoute>} />
+                        <Route path="/admin/academic/courses/:courseId" element={<PrivateRoute><CourseAdminDetailPage /></PrivateRoute>} />
 
                         <Route path="/admin/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
