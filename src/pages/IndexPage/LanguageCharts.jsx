@@ -12,7 +12,7 @@ const LanguageCharts = () => {
         16: 'C++',
         19: 'Python'
       };
-      const languageData = JSON.parse(data).map(item => ({
+      const languageData = data.map(item => ({
         ...item,
         Language: languageMap[item.Language] || 'Other'
       }));

@@ -1,5 +1,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import React, { useCallback, useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { useParams } from "react-router-dom";
 import { apiService } from "../../services/apiService";
 import { ViewFileContainer } from "./ViewFileContainer";
@@ -9,7 +10,7 @@ const FileManagerAcPage = () => {
     const { problemId } = useParams();
     const [files, setFiles] = useState([]);
 
-    useEffect(() => {
+    const loadFiles = useCallback(() => {
         apiService.get(`FileManager/local-storage/ac?problemId=${problemId}`).then(data => {
             setFiles(data);
         }).catch((error) => {
@@ -20,20 +21,29 @@ const FileManagerAcPage = () => {
             })
             console.log(error);
         })
-    }, []);
+    }, [problemId, toast]);
+
+    useEffect(() => {
+        loadFiles();
+    }, [loadFiles]);
 
     const onDrop = useCallback(async (acceptedFiles) => {
         try {
             acceptedFiles.forEach(element => {
                 let formData = new FormData();
                 formData.append("file", element);
-                apiService.postFile(`local-storage?problemId=${problemId}&fileName=${element.name}`, formData).then(data => {
+                const targetFileName = encodeURIComponent(`ac/${element.name}`);
+
+                apiService.postFile(`FileManager/local-storage?problemId=${problemId}&fileName=${targetFileName}`, formData).then(data => {
                     toast({
                         variant: "success",
                         title: "Archivo Subido",
                         description: "Se subió el archivo",
                     });
-                    window.location.reload();
+                    setFiles(currentFiles => [
+                        ...currentFiles,
+                        { name: data.fileName, type: "file", path: `/ac/${data.fileName}` }
+                    ]);
                 }).catch((error) => {
                     toast({
                         variant: "destructive",
@@ -46,12 +56,18 @@ const FileManagerAcPage = () => {
         } catch (error) {
             console.error("Error uploading file:", error);
         }
-    }, []);
+    }, [problemId, toast]);
+
+    const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: true });
 
     const outFiles = files.filter(file => !file.name.endsWith(".in"));
 
     return (
         <div className="container mx-auto p-4">
+            <div {...getRootProps()} className="flex justify-center items-center p-10 border-2 border-dashed border-gray-400 cursor-pointer">
+                <input {...getInputProps()} />
+                <p>Arrastra soluciones aceptadas aquí o haz clic para seleccionar</p>
+            </div>
             <div className="mt-5">
                 <h2 className="text-center font-bold mb-4">Archivos</h2>
                 <div className="grid grid-cols-3 gap-4">

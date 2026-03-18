@@ -14,6 +14,7 @@ import { ErrorMessage, Field, Form, Formik } from 'formik';
 import React from 'react';
 import Swal from 'sweetalert2';
 import * as Yup from 'yup';
+import { apiService } from "../../services/apiService";
 
 export function AddTopicComponent() {
     const initialValues = {
@@ -27,14 +28,29 @@ export function AddTopicComponent() {
             .max(50, 'Cada nombre de tema no debe tener más de 50 caracteres.')
     });
 
-    const handleSubmit = (values, { resetForm }) => {
-        Swal.fire({
-            icon: 'success',
-            title: 'Tema agregado con éxito',
-            showConfirmButton: false,
-            timer: 1500
-        });
-        resetForm();
+    const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+        try {
+            await apiService.create("topics", {
+                name: values.topicName.trim(),
+            });
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Tema agregado con éxito',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            resetForm();
+            window.location.reload();
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo agregar el tema',
+                text: error?.response?.data ?? error?.message ?? 'Error inesperado.',
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
