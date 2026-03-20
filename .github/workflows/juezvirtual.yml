@@ -46,7 +46,7 @@ jobs:
 
       - name: Run docker-compose
         continue-on-error: true
-        run: ssh -tt -p ${{ vars.DEV_SSH_PORT_OJ }} ${{ vars.DEV_SSH_USERNAME_OJ }}@${{ vars.DEV_SSH_HOST_OJ }} "cd /var/www/admin-ui && chmod +x deploy.sh && ./deploy.sh"
+        run: ssh -tt -p ${{ vars.DEV_SSH_PORT_OJ }} ${{ vars.DEV_SSH_USERNAME_OJ }}@${{ vars.DEV_SSH_HOST_OJ }} "cd /var/www/new/new-admin && chmod +x deploy.sh && ./deploy.sh"
 
       - name: Delete unused images
         run: ssh -tt -p ${{ vars.DEV_SSH_PORT_OJ }} ${{ vars.DEV_SSH_USERNAME_OJ }}@${{ vars.DEV_SSH_HOST_OJ }} "docker image prune -f"
