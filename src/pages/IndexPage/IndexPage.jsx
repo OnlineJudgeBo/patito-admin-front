@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiService } from '../../services/apiService';
 import EChartsComponent from './EChartsComponent';
 import LanguageCharts from './LanguageCharts';
@@ -51,6 +51,7 @@ const IndexPage = () => {
   useEffect(() => {
 
     apiService.get("Statics/GetLast365DaysSubmissionsByMonth").then(data => {
+      data = JSON.parse(data)
       const months = data.map(item => `${item.Month}/${item.Year}`);
       const submissions = data.map(item => item.TotalSubmissions);
 
