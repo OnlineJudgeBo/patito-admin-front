@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiService } from '../../services/apiService';
 import EChartsComponent from './EChartsComponent';
 
@@ -7,6 +7,7 @@ const LanguageCharts = () => {
 
   useEffect(() => {
     apiService.get("Statics/GetSubmissionsByLanguageAsync").then(data => {
+      data = JSON.parse(data)
       const languageMap = {
         3: 'Java',
         16: 'C++',
