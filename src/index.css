@@ -76,3 +76,39 @@
     @apply bg-background text-foreground;
   }
 }
+
+.rich-content {
+  overflow-wrap: anywhere;
+}
+
+.rich-content p {
+  margin: 0.25rem 0;
+}
+
+.rich-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.rich-content .rich-math {
+  font-family: "Times New Roman", "Cambria Math", "STIX Two Math", serif;
+  color: inherit;
+}
+
+.rich-content .rich-math-inline {
+  display: inline-block;
+  padding: 0 0.1rem;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.rich-content .rich-math-display {
+  display: block;
+  margin: 0.5rem 0;
+  overflow-x: auto;
+  text-align: center;
+  font-style: italic;
+  white-space: nowrap;
+}
