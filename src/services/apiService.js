@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 const BASE_URL = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/+$/, '');
 const DEFAULT_SITE_ID = Number(import.meta.env.VITE_SITE_ID ?? 1);
@@ -12,6 +13,33 @@ function getCookie(name) {
         if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
+}
+
+function getTokenSiteId() {
+    const token = getCookie('accessToken');
+
+    if (!token) {
+        return null;
+    }
+
+    try {
+        const decoded = jwtDecode(token);
+        const rawSiteId = decoded?.site_id ?? decoded?.siteId;
+        const siteId = Number(rawSiteId);
+        return Number.isInteger(siteId) && siteId > 0 ? siteId : null;
+    } catch {
+        return null;
+    }
+}
+
+function getAcademicSiteId(siteId) {
+    const explicitSiteId = Number(siteId);
+
+    if (Number.isInteger(explicitSiteId) && explicitSiteId > 0) {
+        return explicitSiteId;
+    }
+
+    return getTokenSiteId() ?? DEFAULT_SITE_ID;
 }
 
 async function fetchAPI(endpoint, { method = 'GET', body = null, params = {} } = {}) {
@@ -80,23 +108,24 @@ export const apiService = {
     checkUsernameAvailability: (userId) => fetchAPI(`users/UsernameIsAvailable`, { method: 'POST', body: userId }),
     checkUserEmailAvailability: (email) => fetchAPI(`users/UserEmailIsAvailable`, { method: 'POST', body: email }),
     fetchRoles: () => fetchAPI(`Roles`),
-    fetchManageableAcademicCourses: (siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/manageable`, { method: 'GET' }),
-    fetchAcademicCourse: (courseId, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/${courseId}`, { method: 'GET' }),
-    createAcademicCourse: (body, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses`, { method: 'POST', body }),
-    fetchAcademicCourseMembers: (courseId, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/${courseId}/members`, { method: 'GET' }),
-    addAcademicCourseMember: (courseId, body, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/${courseId}/members`, { method: 'POST', body }),
-    removeAcademicCourseMember: (courseId, userId, siteId = DEFAULT_SITE_ID) =>
-        fetchAPI(`academic/sites/${siteId}/courses/${courseId}/members/${encodeURIComponent(userId)}`, { method: 'DELETE' }),
-    createAcademicCourseAssignment: (courseId, body, siteId = DEFAULT_SITE_ID) =>
-        fetchAPI(`academic/sites/${siteId}/courses/${courseId}/assignments`, { method: 'POST', body }),
-    updateAcademicCourseAssignment: (courseId, assignmentId, body, siteId = DEFAULT_SITE_ID) =>
-        fetchAPI(`academic/sites/${siteId}/courses/${courseId}/assignments/${assignmentId}`, { method: 'PUT', body }),
-    fetchAcademicCourseReport: (courseId, siteId = DEFAULT_SITE_ID) => fetchAPI(`academic/sites/${siteId}/courses/${courseId}/report`, { method: 'GET' }),
-    downloadAcademicCourseReportCsv: async (courseId, siteId = DEFAULT_SITE_ID) => {
+    fetchManageableAcademicCourses: (siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/manageable`, { method: 'GET' }),
+    fetchAcademicCourse: (courseId, siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/${courseId}`, { method: 'GET' }),
+    createAcademicCourse: (body, siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses`, { method: 'POST', body }),
+    fetchAcademicCourseMembers: (courseId, siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/${courseId}/members`, { method: 'GET' }),
+    addAcademicCourseMember: (courseId, body, siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/${courseId}/members`, { method: 'POST', body }),
+    removeAcademicCourseMember: (courseId, userId, siteId) =>
+        fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/${courseId}/members/${encodeURIComponent(userId)}`, { method: 'DELETE' }),
+    createAcademicCourseAssignment: (courseId, body, siteId) =>
+        fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/${courseId}/assignments`, { method: 'POST', body }),
+    updateAcademicCourseAssignment: (courseId, assignmentId, body, siteId) =>
+        fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/${courseId}/assignments/${assignmentId}`, { method: 'PUT', body }),
+    fetchAcademicCourseReport: (courseId, siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/${courseId}/report`, { method: 'GET' }),
+    downloadAcademicCourseReportCsv: async (courseId, siteId) => {
         const token = getCookie('accessToken');
+        const academicSiteId = getAcademicSiteId(siteId);
         const response = await axios({
             method: 'GET',
-            url: `${BASE_URL}/academic/sites/${siteId}/courses/${courseId}/report.csv`,
+            url: `${BASE_URL}/academic/sites/${academicSiteId}/courses/${courseId}/report.csv`,
             headers: token
                 ? {
                     'Accept': 'text/csv',

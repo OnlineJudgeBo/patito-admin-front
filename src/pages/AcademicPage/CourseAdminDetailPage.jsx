@@ -4,6 +4,7 @@ import AsyncSelect from 'react-select/async';
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import { SafeRichContent } from '../../components/SafeRichContent';
 import { apiService } from '../../services/apiService';
 import { fixTimeFormat } from '../../utils/Utils';
 
@@ -128,9 +129,12 @@ function buildAssignmentRequest({
 }
 
 function buildProblemOption(problem) {
+    const label = `${problem.problemId} - ${problem.title}`;
+
     return {
         value: Number(problem.problemId),
-        label: `${problem.problemId} - ${problem.title}`
+        label,
+        title: problem.title
     };
 }
 
@@ -221,6 +225,18 @@ function CourseAdminDetailPage() {
 
         return `${window.location.origin}/courses?invite=${encodeURIComponent(course.inviteCode)}`;
     }, [course]);
+
+    const totalAttemptsByAssignmentId = useMemo(() => {
+        const totals = new Map();
+
+        (report?.items || []).forEach((item) => {
+            (item.assignments || []).forEach((assignment) => {
+                totals.set(assignment.assignmentId, (totals.get(assignment.assignmentId) || 0) + (assignment.attempts || 0));
+            });
+        });
+
+        return totals;
+    }, [report]);
 
     const loadProblemOptions = async (inputValue) => {
         const query = inputValue?.trim() || '';
@@ -565,8 +581,8 @@ function CourseAdminDetailPage() {
                     <section className="bg-white border rounded-lg p-4 shadow-sm">
                         <div className="flex flex-wrap items-start justify-between gap-4">
                             <div>
-                                <h1 className="text-xl font-semibold text-gray-900">{course.name}</h1>
-                                <p className="mt-1 text-sm text-gray-600">{course.description || 'Este curso no tiene descripción.'}</p>
+                                <SafeRichContent html={course.name} className="text-xl font-semibold text-gray-900" />
+                                <SafeRichContent html={course.description || 'Este curso no tiene descripción.'} className="mt-1 text-sm text-gray-600" />
                             </div>
 
                             <div className="text-sm text-gray-600">
@@ -646,7 +662,7 @@ function CourseAdminDetailPage() {
                                                 <th className="px-3 py-2 text-left text-sm font-semibold">Tarea</th>
                                                 <th className="px-3 py-2 text-left text-sm font-semibold">Ventana</th>
                                                 <th className="px-3 py-2 text-right text-sm font-semibold">Problemas</th>
-                                                <th className="px-3 py-2 text-right text-sm font-semibold">Tus envíos</th>
+                                                <th className="px-3 py-2 text-right text-sm font-semibold">Envíos totales</th>
                                                 <th className="px-3 py-2 text-right text-sm font-semibold">Acción</th>
                                             </tr>
                                         </thead>
@@ -654,7 +670,10 @@ function CourseAdminDetailPage() {
                                             {(course.assignments || []).map((assignment) => (
                                                 <tr key={assignment.assignmentId} className={editingAssignmentId === assignment.assignmentId ? 'bg-blue-50' : 'hover:bg-gray-50'}>
                                                     <td className="px-3 py-2 text-sm text-gray-700">
-                                                        <div className="font-medium text-gray-900">{assignment.title}</div>
+                                                        <SafeRichContent html={assignment.title} className="font-medium text-gray-900" />
+                                                        {assignment.description && (
+                                                            <SafeRichContent html={assignment.description} className="mt-1 text-xs text-gray-500" />
+                                                        )}
                                                         <div className="text-xs text-gray-500">{assignment.statusLabel}</div>
                                                         {(assignment.problems || []).length > 0 && (
                                                             <div className="mt-1 text-xs text-gray-500">
@@ -667,7 +686,9 @@ function CourseAdminDetailPage() {
                                                         <div className="text-xs text-gray-500">{formatDateTime(assignment.lateDueAt || assignment.dueAt)}</div>
                                                     </td>
                                                     <td className="px-3 py-2 text-sm text-right text-gray-700">{assignment.problemCount}</td>
-                                                    <td className="px-3 py-2 text-sm text-right text-gray-700">{assignment.attemptsByCurrentUser}</td>
+                                                    <td className="px-3 py-2 text-sm text-right text-gray-700">
+                                                        {totalAttemptsByAssignmentId.get(assignment.assignmentId) ?? 0}
+                                                    </td>
                                                     <td className="px-3 py-2 text-sm text-right">
                                                         <button
                                                             type="button"
@@ -904,6 +925,9 @@ function CourseAdminDetailPage() {
                                                         isEditingAssignment ? setEditingAssignmentProblemErrors : setAssignmentProblemErrors
                                                     )}
                                                     value={currentAssignmentProblemOptions}
+                                                    formatOptionLabel={(problem) => (
+                                                        <SafeRichContent html={problem.label} className="text-sm text-gray-900" />
+                                                    )}
                                                     placeholder="Busca por id o título"
                                                     className="text-base w-full"
                                                     noOptionsMessage={() => 'Sin resultados'}
@@ -950,7 +974,7 @@ function CourseAdminDetailPage() {
                                                     <div className="flex flex-wrap gap-2">
                                                         {currentAssignmentProblemOptions.map((problem) => (
                                                             <span key={problem.value} className="rounded-full border bg-gray-50 px-3 py-1 text-xs text-gray-700">
-                                                                {problem.label}
+                                                                <SafeRichContent html={problem.label} />
                                                             </span>
                                                         ))}
                                                     </div>
@@ -1003,7 +1027,7 @@ function CourseAdminDetailPage() {
                                                 <th className="px-4 py-3 text-right text-sm font-semibold">AC</th>
                                                 {(report.assignments || []).map((assignment) => (
                                                     <th key={assignment.assignmentId} className="px-4 py-3 text-right text-sm font-semibold">
-                                                        {assignment.title}
+                                                        <SafeRichContent html={assignment.title} />
                                                     </th>
                                                 ))}
                                             </tr>
