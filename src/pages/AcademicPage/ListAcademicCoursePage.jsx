@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { SafeRichContent } from '../../components/SafeRichContent';
 import { apiService } from '../../services/apiService';
 
 function ListAcademicCoursePage() {
@@ -186,7 +187,10 @@ function ListAcademicCoursePage() {
                                 {courses.map((course) => (
                                     <tr key={course.courseId} className="hover:bg-gray-50">
                                         <td className="px-4 py-3 text-sm text-gray-700">
-                                            <div className="font-medium text-gray-900">{course.name}</div>
+                                            <SafeRichContent html={course.name} className="font-medium text-gray-900" />
+                                            {course.description && (
+                                                <SafeRichContent html={course.description} className="mt-1 text-xs text-gray-500" />
+                                            )}
                                             <div className="text-xs text-gray-500">Curso #{course.courseId}</div>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-700">{course.ownerUserId || 'Sin definir'}</td>
