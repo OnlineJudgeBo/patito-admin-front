@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { problemSelectAtom, problemSelectAtomErrorMessage } from "../../../context/manager";
 import { apiService } from '../../../services/apiService';
@@ -10,7 +10,7 @@ const ProblemListComponent = () => {
     const [errorMessages, setErrorMessages] = useAtom(problemSelectAtomErrorMessage);
 
     useEffect(() => {
-        const validateUsers = async () => {
+        const validateProblems = async () => {
             const validProblems = [];
             setErrorMessages([]);
             for (const problem of problemList) {
@@ -38,7 +38,7 @@ const ProblemListComponent = () => {
             setSelectedProblems(validProblems);
         };
         if (problemList.length > 0) {
-            validateUsers();
+            validateProblems();
         }
     }, [problemList]);
 

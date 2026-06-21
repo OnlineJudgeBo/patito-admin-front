@@ -2,7 +2,6 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { useAtom } from "jotai";
-import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
@@ -26,18 +25,14 @@ const getCurrentTime = () => {
 };
 
 const CreateContestPage = () => {
-    const [userListAtom, setUserListAtom] = useAtom(userSelectAtom);
-    const [inputProblemTextAtom, setInputProblemTextAtom] = useAtom(problemSelectAtom);
-    const [userList, setUserList] = useState([]);
-    const [selectedProblems, setSelectedProblems] = useState([]);
-    const [selectedLanguages, setSelectedLanguages] = useState([]);
-    const [descriptionData, setDescriptionData] = useState("")
+    const [selectedUsers, setSelectedUsers] = useAtom(userSelectAtom);
+    const [selectedProblems, setSelectedProblems] = useAtom(problemSelectAtom);
     const { toast } = useToast()
     const navigate = useNavigate();
     const today = new Date();
     const currentDate = today.toISOString().substring(0, 10);
 
-    const [initialValues, setInitialValues] = useState({
+    const initialValues = {
         title: '',
         description: '',
         startDate: currentDate,
@@ -50,7 +45,7 @@ const CreateContestPage = () => {
         selectedProblem: [],
         selectedLanguages: [],
         manualUserList: ""
-    })
+    }
 
     const validationSchema = Yup.object().shape({
         title: Yup.string().required('Nombre del concurso requerido'),
@@ -62,45 +57,36 @@ const CreateContestPage = () => {
     });
 
     const Submit = async (values) => {
-        let sTime = values.startDate;
-        let eTime = values.endDate;
-        let selectedProblem = values.selectedProblem;
-        let selectedUser = values.selectedUser;
-        let selectedLanguage = values.selectedLanguages;
+        const payload = {
+            ...values,
+            startDate: values.startDate + " " + fixTimeFormat(values.startTime),
+            endDate: values.endDate + " " + fixTimeFormat(values.endTime),
+            selectedProblem: selectedProblems,
+            selectedUser: parseJSON(values.selectedUser),
+            selectedLanguages: parseJSON(values.selectedLanguages),
+            isPrivate: values.isPrivate == 1 ? true : false
+        };
 
-        values.startDate = values.startDate + " " + fixTimeFormat(values.startTime)
-        values.endDate = values.endDate + " " + fixTimeFormat(values.endTime)
-        values.selectedProblem = parseJSON(values.selectedProblem)
-        values.selectedUser = parseJSON(values.selectedUser)
-        values.selectedLanguages = parseJSON(values.selectedLanguages)
-        values.isPrivate = values.isPrivate == 1 ? true : false
-        if (values.isPrivate == 1) {
-            values.manualUserList = userListAtom.map(user => user.userId).join(",")
+        if (payload.isPrivate) {
+            payload.manualUserList = selectedUsers.map(user => user.userId).join(",")
         }
-        values.selectedProblem = inputProblemTextAtom//.map(user => user.problemId)
 
-        apiService.create('contests', values).then(data => {
+        apiService.create('contests', payload).then(() => {
             toast({
                 description: 'Contest agregado.',
             })
-            setUserListAtom("");
-            setInputProblemTextAtom("");
+            setSelectedUsers("");
+            setSelectedProblems("");
             setTimeout(() => {
                 navigate('/admin/contests');
             }, 2000);
-        }).catch((error) => {
+        }).catch(() => {
             toast({
                 variant: "destructive",
                 title: "Error al crear el contest",
                 description: "Error al crear el contest, revise todos los campos.",
             })
-            console.log(error);
         })
-        values.startDate = sTime;
-        values.endDate = eTime;
-        values.selectedProblem = selectedProblem;
-        values.selectedUser = selectedUser;
-        values.selectedLanguages = selectedLanguage;
     };
 
     return (
@@ -137,7 +123,7 @@ const CreateContestPage = () => {
                                     </label>
                                 </div>
 
-                                <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement={descriptionData} />
+                                <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement="" />
 
                                 <div className="flex mb-4 space-x-4">
                                     <div className="w-1/2">
@@ -185,7 +171,7 @@ const CreateContestPage = () => {
                                         <ErrorMessage name="endTime" component="div" className="text-red-500 text-sm mt-1" />
                                     </div>
                                 </div>
-                                <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={selectedLanguages} />
+                                <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={[]} />
                             </div>
 
                             <div className="w-3/5">
