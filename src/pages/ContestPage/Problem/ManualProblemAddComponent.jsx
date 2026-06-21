@@ -2,12 +2,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAtom } from "jotai";
 import { useEffect, useState } from 'react';
-import { problemSelectAtom, problemSelectAtomErrorMessage } from "../../../context/manager";
+import { problemSelectAtom } from "../../../context/manager";
 
 const ManualProblemAddComponent = () => {
     const [listTextAtom, setListTextAtom] = useAtom(problemSelectAtom);
     const [inputText, setInputText] = useState("");
-    const [errorMessagesProblem, setErrorMessagesProblem] = useAtom(problemSelectAtomErrorMessage);
 
     useEffect(() => {
         let value = []
@@ -20,7 +19,6 @@ const ManualProblemAddComponent = () => {
             let problemList = listTextAtom.map(problem => `${problem.problemId}`).join("\n");
             setInputText(problemList);
         }
-        setErrorMessagesProblem([]);
     }, [listTextAtom, setListTextAtom]);
 
     const onChangeHandler = (event) => {
