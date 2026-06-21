@@ -1,5 +1,5 @@
 import { useToast } from "@/components/ui/use-toast";
-import React, { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useParams } from "react-router-dom";
 import { apiService } from "../../services/apiService";
@@ -14,17 +14,16 @@ const FileManagerPage = () => {
     useEffect(() => {
         apiService.get(`FileManager/local-storage?problemId=` + problemId).then(data => {
             setFiles(data);
-        }).catch((error) => {
+        }).catch(() => {
             toast({
                 variant: "destructive",
                 title: "Error al obtener la lita de archivos",
                 description: "Error al obtener la lista de archivos.",
             })
-            console.log(error);
         })
     }, []);
 
-    const onDrop = useCallback(async (acceptedFiles) => {
+    const onDrop = async (acceptedFiles) => {
         try {
             acceptedFiles.forEach(element => {
                 let formData = new FormData();
@@ -39,19 +38,18 @@ const FileManagerPage = () => {
                         ...currentFiles,
                         { name: data.fileName, type: "file", path: '/' + data.fileName }
                     ]);
-                }).catch((error) => {
+                }).catch(() => {
                     toast({
                         variant: "destructive",
                         title: "Error al obtener la lita de archivos",
                         description: "Error al obtener la lista de archivos.",
                     })
-                    console.log(error);
                 })
             });
         } catch (error) {
             console.error("Error uploading file:", error);
         }
-    }, []);
+    };
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: true });
 

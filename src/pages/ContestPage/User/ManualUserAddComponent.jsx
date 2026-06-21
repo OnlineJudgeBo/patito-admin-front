@@ -2,12 +2,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAtom } from "jotai";
 import { useEffect, useState } from 'react';
-import { userSelectAtom, userSelectAtomErrorMessage } from "../../../context/manager";
+import { userSelectAtom } from "../../../context/manager";
 
 const ManualUserAddComponent = () => {
     const [listTextAtom, setListTextAtom] = useAtom(userSelectAtom);
     const [inputText, setInputText] = useState("");
-    const [errorMessagesUser, setErrorMessagesUser] = useAtom(userSelectAtomErrorMessage);
 
     useEffect(() => {
         let value = []
@@ -20,7 +19,6 @@ const ManualUserAddComponent = () => {
             let userList = listTextAtom.map(user => `${user.userId}`).join("\n");
             setInputText(userList);
         }
-        //setErrorMessagesUser([]);
     }, [listTextAtom, setListTextAtom]);
 
     const onChangeHandler = (event) => {

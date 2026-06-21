@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { userSelectAtom, userSelectAtomErrorMessage } from "../../../context/manager";
 import { apiService } from '../../../services/apiService';
@@ -15,8 +15,8 @@ const UserListComponent = () => {
             setErrorMessages([]);
             for (const user of userList) {
                 if (!user.userId || user.userId.includes(",")) continue;
+                const userId = user.userId.trim();
                 try {
-                    let userId = user.userId.trim();
                     const response = await apiService.fetchUserProfileList({ searchTerm: userId });
                     if (response.length > 0) {
                         validUsers.push({
