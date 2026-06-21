@@ -75,7 +75,7 @@ const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
             />
             {errorMessages.length > 0 && (
                 <div className="text-red-500 text-sm mt-1">
-                    {errorMessages[0]} {/* Display only the most recent error */}
+                    {errorMessages[0]}
                 </div>
             )}
         </div>
