@@ -2,7 +2,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { useAtom } from "jotai";
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
@@ -19,10 +19,9 @@ import ManualProblemAddComponent from "./Problem/ManualProblemAddComponent";
 import ProblemListComponent from "./Problem/ProblemListComponent";
 
 const EditContestPage = () => {
-    const [userListAtom, setUserListAtom] = useAtom(userSelectAtom);
-    const [inputProblemTextAtom, setInputProblemTextAtom] = useAtom(problemSelectAtom);
+    const [selectedUsers, setSelectedUsers] = useAtom(userSelectAtom);
+    const [selectedProblems, setSelectedProblems] = useAtom(problemSelectAtom);
 
-    const [selectedProblems, setSelectedProblems] = useState([]);
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [descriptionData, setDescriptionData] = useState("")
     const [isLoading, setIsLoading] = useState(false);
@@ -58,10 +57,8 @@ const EditContestPage = () => {
         apiService.get('contests/' + contestId).then(data => {
             let startDate = data.startTime.split(" ");
             let endDate = data.endTime.split(" ");
-            setUserListAtom(data.contestUsers)
+            setSelectedUsers(data.contestUsers)
             setSelectedProblems(data.contestProblems)
-            //setUserList(data.contestUsers)
-            setInputProblemTextAtom(data.contestProblems)
             setSelectedLanguages(data.programmingLanguages)
             setDescriptionData(data.description)
             setInitialValues({
@@ -78,55 +75,43 @@ const EditContestPage = () => {
                 manualUserList: ''
             })
             setIsLoading(false);
-        }).catch((error) => {
+        }).catch(() => {
             toast({
                 variant: "destructive",
                 title: "Error al crear el contest",
                 description: "Error al crear el contest, revise todos los campos.",
             })
-            console.log(error);
         })
     }, [contestId]);
 
     const Submit = async (values) => {
-        let sTime = values.startDate;
-        let eTime = values.endDate;
-        let selectedProblem = values.selectedProblem;
-        let selectedUser = values.selectedUser;
-        let selectedLanguage = values.selectedLanguages;
+        const payload = {
+            ...values,
+            startDate: values.startDate + " " + fixTimeFormat(values.startTime),
+            endDate: values.endDate + " " + fixTimeFormat(values.endTime),
+            selectedUser: parseJSON(values.selectedUser),
+            selectedLanguages: parseJSON(values.selectedLanguages),
+            isPrivate: values.isPrivate == 1 ? true : false,
+            manualUserList: selectedUsers.map(user => user.userId).join(","),
+            selectedProblem: selectedProblems
+        };
 
-        values.startDate = values.startDate + " " + fixTimeFormat(values.startTime)
-        values.endDate = values.endDate + " " + fixTimeFormat(values.endTime)
-        values.selectedUser = parseJSON(values.selectedUser)
-        values.selectedLanguages = parseJSON(values.selectedLanguages)
-        values.isPrivate = values.isPrivate == 1 ? true : false
-
-        values.manualUserList = userListAtom.map(user => user.userId).join(",")
-        values.selectedProblem = inputProblemTextAtom//.map(user => user.problemId)
-
-        apiService.update('contests', contestId, values).then(data => {
+        apiService.update('contests', contestId, payload).then(() => {
             toast({
                 description: 'Contest actualizado.',
             })
-            setUserListAtom("");
-            setInputProblemTextAtom("");
+            setSelectedUsers("");
+            setSelectedProblems("");
             setTimeout(() => {
                 navigate('/admin/contests');
             }, 2000);
-        }).catch((error) => {
+        }).catch(() => {
             toast({
                 variant: "destructive",
                 title: "Error al editar el contest",
                 description: "Error al editar el contest, revise todos los campos.",
             })
-            console.log(error);
         })
-
-        values.startDate = sTime;
-        values.endDate = eTime;
-        values.selectedProblem = selectedProblem;
-        values.selectedUser = selectedUser;
-        values.selectedLanguages = selectedLanguage;
     };
 
     return (

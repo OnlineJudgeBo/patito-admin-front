@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { PlusIcon } from "@radix-ui/react-icons";
 import { ErrorMessage, Field, FieldArray, Form, Formik } from 'formik';
-import React from 'react';
 import * as Yup from 'yup';
 import { apiService } from "../../services/apiService";
 
@@ -68,7 +67,7 @@ export function AddClassificationComponent({ topicId }) {
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
         >
-            {({ submitForm, isValid, validateForm, isSubmitting, values }) => (
+            {({ submitForm, isSubmitting, values }) => (
                 <Form>
                     <Dialog>
                         <DialogTrigger asChild>
@@ -83,7 +82,7 @@ export function AddClassificationComponent({ topicId }) {
                             </DialogHeader>
                             <div className="mt-4 grid gap-4">
                                 <FieldArray name="classifications">
-                                    {({ insert, remove, push }) => (
+                                    {({ remove, push }) => (
                                         <div className="mt-4">
                                             {values.classifications.length > 0 &&
                                                 values.classifications.map((classification, index) => (

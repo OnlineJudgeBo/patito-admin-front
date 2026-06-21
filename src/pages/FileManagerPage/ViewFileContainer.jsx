@@ -47,13 +47,12 @@ export function ViewFileContainer({ fileName, problemId }) {
     const fetchFileContent = () => {
         apiService.get(`FileManager/local-storage/content?problemId=${problemId}&fileName=${fileName}`).then(data => {
             setContentFile(data);
-        }).catch((error) => {
+        }).catch(() => {
             toast({
                 variant: "destructive",
                 title: "Error al obtener el contenido del archivo",
                 description: "No se pudo obtener el contenido del archivo. Por favor, intenta de nuevo más tarde.",
             });
-            console.log(error);
         });
     };
 

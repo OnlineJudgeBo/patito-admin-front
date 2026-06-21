@@ -1,5 +1,5 @@
 import { useToast } from "@/components/ui/use-toast";
-import React, { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useParams } from "react-router-dom";
 import { apiService } from "../../services/apiService";
@@ -10,24 +10,23 @@ const FileManagerAcPage = () => {
     const { problemId } = useParams();
     const [files, setFiles] = useState([]);
 
-    const loadFiles = useCallback(() => {
+    const loadFiles = () => {
         apiService.get(`FileManager/local-storage/ac?problemId=${problemId}`).then(data => {
             setFiles(data);
-        }).catch((error) => {
+        }).catch(() => {
             toast({
                 variant: "destructive",
                 title: "Error al obtener la lita de archivos",
                 description: "Error al obtener la lista de archivos.",
             })
-            console.log(error);
         })
-    }, [problemId, toast]);
+    };
 
     useEffect(() => {
         loadFiles();
-    }, [loadFiles]);
+    }, [problemId]);
 
-    const onDrop = useCallback(async (acceptedFiles) => {
+    const onDrop = async (acceptedFiles) => {
         try {
             acceptedFiles.forEach(element => {
                 let formData = new FormData();
@@ -44,19 +43,18 @@ const FileManagerAcPage = () => {
                         ...currentFiles,
                         { name: data.fileName, type: "file", path: `/ac/${data.fileName}` }
                     ]);
-                }).catch((error) => {
+                }).catch(() => {
                     toast({
                         variant: "destructive",
                         title: "Error al obtener la lita de archivos",
                         description: "Error al obtener la lista de archivos.",
                     })
-                    console.log(error);
                 })
             });
         } catch (error) {
             console.error("Error uploading file:", error);
         }
-    }, [problemId, toast]);
+    };
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: true });
 

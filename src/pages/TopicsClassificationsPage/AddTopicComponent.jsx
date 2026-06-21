@@ -10,28 +10,41 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PlusIcon } from "@radix-ui/react-icons";
-import { ErrorMessage, Field, Form, Formik } from 'formik';
-import React from 'react';
+import { useState } from 'react';
 import Swal from 'sweetalert2';
-import * as Yup from 'yup';
 import { apiService } from "../../services/apiService";
 
 export function AddTopicComponent() {
-    const initialValues = {
-        topicName: '',
-    };
+    const [topicName, setTopicName] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const validationSchema = Yup.object().shape({
-        topicName: Yup.string()
-            .required('El nombre del tema es requerido.')
-            .min(4, 'Cada nombre de tema debe tener al menos 4 caracteres.')
-            .max(50, 'Cada nombre de tema no debe tener más de 50 caracteres.')
-    });
+    const handleSubmit = async (event) => {
+        event.preventDefault();
 
-    const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+        const normalizedName = topicName.trim();
+
+        if (!normalizedName) {
+            setErrorMessage('El nombre del tema es requerido.');
+            return;
+        }
+
+        if (normalizedName.length < 4) {
+            setErrorMessage('Cada nombre de tema debe tener al menos 4 caracteres.');
+            return;
+        }
+
+        if (normalizedName.length > 50) {
+            setErrorMessage('Cada nombre de tema no debe tener más de 50 caracteres.');
+            return;
+        }
+
+        setIsSubmitting(true);
+        setErrorMessage('');
+
         try {
             await apiService.create("topics", {
-                name: values.topicName.trim(),
+                name: normalizedName,
             });
 
             Swal.fire({
@@ -40,7 +53,7 @@ export function AddTopicComponent() {
                 showConfirmButton: false,
                 timer: 1500
             });
-            resetForm();
+            setTopicName('');
             window.location.reload();
         } catch (error) {
             Swal.fire({
@@ -49,51 +62,48 @@ export function AddTopicComponent() {
                 text: error?.response?.data ?? error?.message ?? 'Error inesperado.',
             });
         } finally {
-            setSubmitting(false);
+            setIsSubmitting(false);
         }
     };
 
     return (
-        <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-        >
-            {({ isSubmitting }) => (
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button variant="outline" className="bg-gray-700 text-white">
-                            <PlusIcon className="h-5 w-5 mr-2" />
-                            Agregar Tema
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" className="bg-gray-700 text-white">
+                    <PlusIcon className="h-5 w-5 mr-2" />
+                    Agregar Tema
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-xl bg-white rounded-lg shadow p-6">
+                <form onSubmit={handleSubmit}>
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-semibold">Agregar Tema</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4 grid gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
+                            <Label htmlFor="topicName" className="md:text-right font-medium">
+                                Escriba el nombre del tema
+                            </Label>
+                            <Input
+                                id="topicName"
+                                value={topicName}
+                                onChange={(event) => setTopicName(event.target.value)}
+                                className="col-span-1 md:col-span-3"
+                            />
+                        </div>
+                        {errorMessage && <div className="text-red-500">{errorMessage}</div>}
+                    </div>
+                    <DialogFooter className="mt-4">
+                        <Button
+                            type="submit"
+                            className="ml-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Agregando...' : 'Agregar'}
                         </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-xl bg-white rounded-lg shadow p-6">
-                        <Form>
-                            <DialogHeader>
-                                <DialogTitle className="text-lg font-semibold">Agregar Tema</DialogTitle>
-                            </DialogHeader>
-                            <div className="mt-4 grid gap-4">
-                                <div className="grid grid-cols-1 md:grid-cols-4 items-center gap-4">
-                                    <Label htmlFor="topicName" className="md:text-right font-medium">
-                                        Escriba el nombre del tema
-                                    </Label>
-                                    <Field name="topicName" as={Input} className="col-span-1 md:col-span-3" />
-                                </div>
-                                <ErrorMessage name="topicName" component="div" className="text-red-500" />
-                            </div>
-                            <DialogFooter className="mt-4">
-                                <Button
-                                    type="submit"
-                                    className="ml-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? 'Agregando...' : 'Agregar'}
-                                </Button>
-                            </DialogFooter>
-                        </Form>
-                    </DialogContent>
-                </Dialog>
-            )}
-        </Formik>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 }
