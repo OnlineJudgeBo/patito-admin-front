@@ -2,36 +2,31 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useFormik } from 'formik';
-import React from 'react';
-import * as Yup from 'yup';
+import { useState } from 'react';
 import { apiService } from '../../services/apiService';
 
-const createValidationSchema = () => Yup.object().shape({
-    password: Yup.string().required('La clave es requerida')
-});
-
 export function ChangePasswordComponent({ userId }) {
+    const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handleClick = () => {
-        formik.handleSubmit();
-    };
+    const handleSubmit = (event) => {
+        event.preventDefault();
 
-    const formik = useFormik({
-        initialValues: {
-            password: "",
-        },
-        validationSchema: createValidationSchema(),
-        onSubmit: (values, { setSubmitting }) => {
-            apiService.update("Users/changePassword", userId, values).then(data => {
-                window.location.reload();
-            })
+        if (!password.trim()) {
+            setErrorMessage('La clave es requerida');
+            return;
         }
-    });
+
+        setErrorMessage('');
+
+        apiService.update("Users/changePassword", userId, { password }).then(() => {
+            window.location.reload();
+        })
+    };
 
     return (
         <Dialog>
-            <form onSubmit={formik.handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 <DialogTrigger asChild>
                     <Button variant="outline" type="button">Cambiar clave</Button>
                 </DialogTrigger>
@@ -45,11 +40,12 @@ export function ChangePasswordComponent({ userId }) {
                             <Input
                                 id="password"
                                 type="password"
-                                {...formik.getFieldProps('password')}
+                                value={password}
+                                onChange={(event) => setPassword(event.target.value)}
                                 className="col-span-3 border p-2 rounded-md"
                             />
-                            {formik.touched.password && formik.errors.password && (
-                                <p className="col-span-4 text-red-500 text-xs mt-1">{formik.errors.password}</p>
+                            {errorMessage && (
+                                <p className="col-span-4 text-red-500 text-xs mt-1">{errorMessage}</p>
                             )}
                         </div>
                     </div>
@@ -58,7 +54,6 @@ export function ChangePasswordComponent({ userId }) {
                             type="submit"
                             variant="secondary"
                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                            onClick={handleClick}
                         >Guardar cambios</Button>
                     </DialogFooter>
                 </DialogContent>

@@ -1,17 +1,23 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import {
     Select,
     SelectContent,
+    SelectGroup,
     SelectItem,
+    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { apiService } from "../../services/apiService";
-import { InputPopoverComponent } from "../components/InputPopoverComponent";
-import { SelectComponent } from "../components/SelectComponent";
 import { ScheduleTable } from "./ScheduleTable";
 
 export function AddSubjectPage() {
@@ -20,6 +26,10 @@ export function AddSubjectPage() {
 
     const [selectedSubject, setSelectedSubject] = useState("");
     const [selectedTeacher, setSelectedTeacher] = useState("");
+    const [subjectName, setSubjectName] = useState("");
+    const [teacherName, setTeacherName] = useState("");
+    const [subjectPopoverOpen, setSubjectPopoverOpen] = useState(false);
+    const [teacherPopoverOpen, setTeacherPopoverOpen] = useState(false);
 
     const [newScheduleTime, setNewScheduleTime] = useState("");
     const [newScheduleDays, setNewScheduleDays] = useState([]);
@@ -76,6 +86,30 @@ export function AddSubjectPage() {
             });
     };
 
+    const handleAddSubjectClick = () => {
+        const normalizedName = subjectName.trim();
+
+        if (!normalizedName) {
+            return;
+        }
+
+        handleCreateSubject(normalizedName);
+        setSubjectName("");
+        setSubjectPopoverOpen(false);
+    };
+
+    const handleAddTeacherClick = () => {
+        const normalizedName = teacherName.trim();
+
+        if (!normalizedName) {
+            return;
+        }
+
+        handleCreateTeacher(normalizedName);
+        setTeacherName("");
+        setTeacherPopoverOpen(false);
+    };
+
     const handleSelectSubject = (value) => {
         setSelectedSubject(value);
     };
@@ -83,14 +117,6 @@ export function AddSubjectPage() {
     const handleSelectTeacher = (value) => {
         setSelectedTeacher(value);
     };
-
-    useEffect(() => {
-        console.log("Updated subjectList:", subjectList);
-    }, [subjectList]);
-
-    useEffect(() => {
-        console.log("Updated subjectList:", selectedSubject);
-    }, [selectedSubject])
 
     const toggleNewScheduleDay = (day) => {
         if (newScheduleDays.includes(day)) {
@@ -113,8 +139,7 @@ export function AddSubjectPage() {
         };
 
         apiService.create("schedule-management/schedules", newSubject)
-            .then((data) => {
-                console.log(data);
+            .then(() => {
                 setReload(prev => prev + 1);
             })
             .catch((error) => {
@@ -134,53 +159,118 @@ export function AddSubjectPage() {
                             <Label className="block text-gray-700 mb-2">Materia</Label>
                             <div className="mb-2 text-sm text-gray-600">
                                 Materia no encontrada?{" "}
-                                <span className="text-blue-500 cursor-pointer" onClick={() => { }}>
-                                    <InputPopoverComponent
-                                        onAddSubject={handleCreateSubject}
-                                        triggerText="Agregar Materia"
-                                        popoverTitle="Agregar Materia"
-                                        popoverDescription="Ingresa el nombre de la materia para agregarlo a la lista."
-                                        inputLabel="Nombre de la materia"
-                                        inputPlaceholder="Escribe el nombre de la materia"
-                                        buttonText="Agregar"
-                                    ></InputPopoverComponent>
+                                <span className="text-blue-500 cursor-pointer">
+                                    <Popover open={subjectPopoverOpen} onOpenChange={setSubjectPopoverOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="link" className="text-blue-500 underline">
+                                                Agregar Materia
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-96 p-6 bg-white shadow-lg rounded-lg">
+                                            <div className="space-y-4">
+                                                <div className="text-center">
+                                                    <h4 className="text-lg font-semibold text-gray-800">Agregar Materia</h4>
+                                                    <p className="text-sm text-gray-500">Ingresa el nombre de la materia para agregarlo a la lista.</p>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="subjectName" className="text-gray-700">
+                                                        Nombre de la materia
+                                                    </Label>
+                                                    <Input
+                                                        id="subjectName"
+                                                        value={subjectName}
+                                                        onChange={(event) => setSubjectName(event.target.value)}
+                                                        className="w-full"
+                                                        placeholder="Escribe el nombre de la materia"
+                                                        autoComplete="off"
+                                                    />
+                                                </div>
+                                                <Button
+                                                    onClick={handleAddSubjectClick}
+                                                    className="w-full bg-blue-500 text-white hover:bg-blue-600"
+                                                >
+                                                    Agregar
+                                                </Button>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
                                 </span>
                             </div>
                             <div className="mb-4">
-                                <SelectComponent
-                                    subjectList={subjectList}
-                                    selectedSubject={selectedSubject}
-                                    setSelectedSubject={handleSelectSubject}
-                                    defaultLabel="Materia"
-                                    placeholder="Escribe el nombre de la materia..."
-                                />
+                                <Select value={selectedSubject} onValueChange={handleSelectSubject}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Escribe el nombre de la materia..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Materia</SelectLabel>
+                                            {subjectList.map((subject) => (
+                                                <SelectItem key={subject.id} value={String(subject.id)}>
+                                                    {subject.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         <div>
                             <Label className="block text-gray-700 mb-2">Docente</Label>
                             <div className="mb-2 text-sm text-gray-600">
                                 ¿Docente no encontrado?{" "}
-                                <span className="text-blue-500 cursor-pointer" onClick={() => { }}>
-                                    <InputPopoverComponent
-                                        onAddSubject={handleCreateTeacher}
-                                        triggerText="Agregar Docente"
-                                        popoverTitle="Agregar Docente"
-                                        popoverDescription="Ingresa el nombre del docente para agregarlo a la lista."
-                                        inputLabel="Nombre del docente"
-                                        inputPlaceholder="Escribe el nombre del docente"
-                                        buttonText="Agregar"
-
-                                    ></InputPopoverComponent>
+                                <span className="text-blue-500 cursor-pointer">
+                                    <Popover open={teacherPopoverOpen} onOpenChange={setTeacherPopoverOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="link" className="text-blue-500 underline">
+                                                Agregar Docente
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-96 p-6 bg-white shadow-lg rounded-lg">
+                                            <div className="space-y-4">
+                                                <div className="text-center">
+                                                    <h4 className="text-lg font-semibold text-gray-800">Agregar Docente</h4>
+                                                    <p className="text-sm text-gray-500">Ingresa el nombre del docente para agregarlo a la lista.</p>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="teacherName" className="text-gray-700">
+                                                        Nombre del docente
+                                                    </Label>
+                                                    <Input
+                                                        id="teacherName"
+                                                        value={teacherName}
+                                                        onChange={(event) => setTeacherName(event.target.value)}
+                                                        className="w-full"
+                                                        placeholder="Escribe el nombre del docente"
+                                                        autoComplete="off"
+                                                    />
+                                                </div>
+                                                <Button
+                                                    onClick={handleAddTeacherClick}
+                                                    className="w-full bg-blue-500 text-white hover:bg-blue-600"
+                                                >
+                                                    Agregar
+                                                </Button>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
                                 </span>
                             </div>
                             <div className="mb-4">
-                                <SelectComponent
-                                    subjectList={teacherList}
-                                    selectedSubject={selectedTeacher}
-                                    setSelectedSubject={handleSelectTeacher}
-                                    defaultLabel="Docente"
-                                    placeholder="Escribe el nombre del docente..."
-                                />
+                                <Select value={selectedTeacher} onValueChange={handleSelectTeacher}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Escribe el nombre del docente..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Docente</SelectLabel>
+                                            {teacherList.map((teacher) => (
+                                                <SelectItem key={teacher.id} value={String(teacher.id)}>
+                                                    {teacher.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                     </div>
