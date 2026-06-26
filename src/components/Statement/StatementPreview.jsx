@@ -76,8 +76,17 @@ function sanitizeHtml(value) {
     return document.body.innerHTML;
 }
 
-function normalizeLatex(value) {
+function fixLatextText(value) {
     return value
+        .replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '$1 / $2')
+        .replace(/\\binom\{([^{}]+)\}\{([^{}]+)\}/g, '($1 sobre $2)')
+        .replace(/\\sqrt\{([^{}]+)\}/g, '√$1')
+        .replace(/\\gcd\s*\(/g, 'gcd(')
+        .replace(/\\pmod\s*\{([^{}]+)\}/g, '(mod $1)')
+        .replace(/\\bmod/g, 'mod')
+        .replace(/\\mathcal\{O\}/g, 'O')
+        .replace(/\\sum/g, '∑')
+        .replace(/\\prod/g, '∏')
         .replace(/\\;/g, ' ')
         .replace(/\\,/g, ' ')
         .replace(/\\\{/g, '{')
@@ -86,6 +95,9 @@ function normalizeLatex(value) {
         .replace(/\\leq?/g, '≤')
         .replace(/\\geq?/g, '≥')
         .replace(/\\neq?/g, '≠')
+        .replace(/<=/g, '≤')
+        .replace(/>=/g, '≥')
+        .replace(/!=/g, '≠')
         .replace(/\\times/g, '×')
         .replace(/\\cdot/g, '·')
         .replace(/\\to/g, '→')
@@ -93,6 +105,28 @@ function normalizeLatex(value) {
         .replace(/\\ldots/g, '…')
         .replace(/\s+/g, ' ')
         .trim();
+}
+
+function splitBareLatexSegments(value) {
+    const segments = [];
+    const pattern = /(\\(?:sqrt\{[^{}]+\}|frac\{[^{}]+\}\{[^{}]+\}|binom\{[^{}]+\}\{[^{}]+\}|gcd\s*\([^)]*\)|bmod\b|pmod\s*\{[^{}]+\}|mathcal\{O\}|sum(?:_\{[^{}]+\})?(?:\^\{[^{}]+\})?(?:\s+[a-zA-Z][a-zA-Z0-9_]*(?:_\{[^{}]+\}|_[a-zA-Z0-9]+)?)?|prod(?:_\{[^{}]+\})?(?:\^\{[^{}]+\})?(?:\s+[a-zA-Z][a-zA-Z0-9_]*(?:_\{[^{}]+\}|_[a-zA-Z0-9]+)?)?)|\b[a-zA-Z0-9_]+\s*(?:<=|>=|!=)\s*[a-zA-Z0-9_]+\b)/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = pattern.exec(value)) !== null) {
+        if (match.index > lastIndex) {
+            segments.push({ type: 'text', value: value.slice(lastIndex, match.index) });
+        }
+
+        segments.push({ type: 'inlineMath', value: match[0] });
+        lastIndex = pattern.lastIndex;
+    }
+
+    if (lastIndex < value.length) {
+        segments.push({ type: 'text', value: value.slice(lastIndex) });
+    }
+
+    return segments;
 }
 
 function splitMathSegments(value) {
@@ -130,7 +164,7 @@ function splitMathSegments(value) {
 function enhanceLatex(container) {
     const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
         acceptNode(node) {
-            if (!node.nodeValue || !/(\$|\\\(|\\\[)/.test(node.nodeValue)) {
+            if (!node.nodeValue || !/(\$|\\\(|\\\[|\\(?:sqrt|frac|binom|gcd|bmod|pmod|mathcal|sum|prod)\b|<=|>=|!=)/.test(node.nodeValue)) {
                 return NodeFilter.FILTER_REJECT;
             }
 
@@ -152,11 +186,14 @@ function enhanceLatex(container) {
     }
 
     nodes.forEach((node) => {
-        const segments = splitMathSegments(node.nodeValue || '');
+        const segments = splitMathSegments(node.nodeValue || '').flatMap((segment) => (
+            segment.type === 'text' ? splitBareLatexSegments(segment.value) : [segment]
+        ));
         if (segments.length <= 1 && segments[0]?.type === 'text') {
             return;
         }
 
+        const hasTextAroundMath = segments.some((segment) => segment.type === 'text' && segment.value.trim());
         const fragment = document.createDocumentFragment();
         segments.forEach((segment) => {
             if (segment.type === 'text') {
@@ -164,10 +201,11 @@ function enhanceLatex(container) {
                 return;
             }
 
-            const element = document.createElement(segment.type === 'displayMath' ? 'div' : 'span');
-            element.className = segment.type === 'displayMath' ? 'rich-math rich-math-display' : 'rich-math rich-math-inline';
+            const shouldRenderInline = segment.type === 'inlineMath' || hasTextAroundMath;
+            const element = document.createElement(shouldRenderInline ? 'span' : 'div');
+            element.className = shouldRenderInline ? 'rich-math rich-math-inline' : 'rich-math rich-math-display';
             element.title = segment.value;
-            element.textContent = normalizeLatex(segment.value);
+            element.textContent = fixLatextText(segment.value);
             fragment.append(element);
         });
 
@@ -175,7 +213,7 @@ function enhanceLatex(container) {
     });
 }
 
-export function SafeRichContent({ html, className = '', as: Element = 'div' }) {
+export function StatementPreview({ html, className = '', as: Element = 'div' }) {
     const containerRef = useRef(null);
 
     useEffect(() => {
