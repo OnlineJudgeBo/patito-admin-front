@@ -4,7 +4,7 @@ import AsyncSelect from 'react-select/async';
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { SafeRichContent } from '../../components/SafeRichContent';
+import { StatementPreview } from '../../components/Statement/StatementPreview';
 import { apiService } from '../../services/apiService';
 import { fixTimeFormat } from '../../utils/Utils';
 
@@ -581,8 +581,8 @@ function CourseAdminDetailPage() {
                     <section className="bg-white border rounded-lg p-4 shadow-sm">
                         <div className="flex flex-wrap items-start justify-between gap-4">
                             <div>
-                                <SafeRichContent html={course.name} className="text-xl font-semibold text-gray-900" />
-                                <SafeRichContent html={course.description || 'Este curso no tiene descripción.'} className="mt-1 text-sm text-gray-600" />
+                                <StatementPreview html={course.name} className="text-xl font-semibold text-gray-900" />
+                                <StatementPreview html={course.description || 'Este curso no tiene descripción.'} className="mt-1 text-sm text-gray-600" />
                             </div>
 
                             <div className="text-sm text-gray-600">
@@ -670,9 +670,9 @@ function CourseAdminDetailPage() {
                                             {(course.assignments || []).map((assignment) => (
                                                 <tr key={assignment.assignmentId} className={editingAssignmentId === assignment.assignmentId ? 'bg-blue-50' : 'hover:bg-gray-50'}>
                                                     <td className="px-3 py-2 text-sm text-gray-700">
-                                                        <SafeRichContent html={assignment.title} className="font-medium text-gray-900" />
+                                                        <StatementPreview html={assignment.title} className="font-medium text-gray-900" />
                                                         {assignment.description && (
-                                                            <SafeRichContent html={assignment.description} className="mt-1 text-xs text-gray-500" />
+                                                            <StatementPreview html={assignment.description} className="mt-1 text-xs text-gray-500" />
                                                         )}
                                                         <div className="text-xs text-gray-500">{assignment.statusLabel}</div>
                                                         {(assignment.problems || []).length > 0 && (
@@ -926,7 +926,7 @@ function CourseAdminDetailPage() {
                                                     )}
                                                     value={currentAssignmentProblemOptions}
                                                     formatOptionLabel={(problem) => (
-                                                        <SafeRichContent html={problem.label} className="text-sm text-gray-900" />
+                                                        <StatementPreview html={problem.label} className="text-sm text-gray-900" />
                                                     )}
                                                     placeholder="Busca por id o título"
                                                     className="text-base w-full"
@@ -974,7 +974,7 @@ function CourseAdminDetailPage() {
                                                     <div className="flex flex-wrap gap-2">
                                                         {currentAssignmentProblemOptions.map((problem) => (
                                                             <span key={problem.value} className="rounded-full border bg-gray-50 px-3 py-1 text-xs text-gray-700">
-                                                                <SafeRichContent html={problem.label} />
+                                                                <StatementPreview html={problem.label} />
                                                             </span>
                                                         ))}
                                                     </div>
@@ -1027,7 +1027,7 @@ function CourseAdminDetailPage() {
                                                 <th className="px-4 py-3 text-right text-sm font-semibold">AC</th>
                                                 {(report.assignments || []).map((assignment) => (
                                                     <th key={assignment.assignmentId} className="px-4 py-3 text-right text-sm font-semibold">
-                                                        <SafeRichContent html={assignment.title} />
+                                                        <StatementPreview html={assignment.title} />
                                                     </th>
                                                 ))}
                                             </tr>

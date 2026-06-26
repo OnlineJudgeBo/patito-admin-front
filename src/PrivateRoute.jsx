@@ -1,16 +1,15 @@
-import React from 'react';
+/* eslint-disable react/prop-types */
 import UseAuth from './hooks/UseAuth';
+import { resolveLogoutUrl } from './utils/authRedirect';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, isLoading } = UseAuth();
-    const authRedirectUrl = import.meta.env.VITE_REACT_APP_AUTH_REDIRECT_URL;
-
     if (isLoading) {
         return <div>Cargando...</div>;
     }
 
     if (!isAuthenticated) {
-        window.location.href = authRedirectUrl + "/logout.php";
+        window.location.href = resolveLogoutUrl();
         return null;
     }
 
