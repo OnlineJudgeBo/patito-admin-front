@@ -60,10 +60,11 @@ export function ScheduleTable({ reload }) {
                                     return (
                                         <td key={day} className="px-4 py-2 border">
                                             {schedulesForCell.length > 0 ? (
-                                                schedulesForCell.map((schedule, index) => (
-                                                    <div key={index} className="mb-2 border-b pb-2">
+                                                schedulesForCell.map((schedule) => (
+                                                    <div key={schedule.id} className="mb-2 border-b pb-2">
                                                         <strong>{schedule.subject.name}</strong><br />
                                                         <strong>{schedule.teacher.name}</strong>
+                                                        {schedule.assistant && <><br /><span>Auxiliar: {schedule.assistant.name}</span></>}
                                                         <br />
                                                         <div>
                                                             <ConfirmationDialogComponent
