@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { getRuntimeNumber, getRuntimeValue } from '../utils/runtimeConfig';
 
-const BASE_URL = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/+$/, '');
-const DEFAULT_SITE_ID = Number(import.meta.env.VITE_SITE_ID ?? 1);
+const BASE_URL = String(getRuntimeValue('API_URL', import.meta.env.VITE_API_URL ?? '/api')).replace(/\/+$/, '');
+const DEFAULT_SITE_ID = getRuntimeNumber('SITE_ID', import.meta.env.VITE_SITE_ID ?? 1);
 
 function getCookie(name) {
     const nameEQ = name + "=";

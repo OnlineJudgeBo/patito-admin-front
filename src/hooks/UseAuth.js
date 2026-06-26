@@ -1,21 +1,7 @@
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
-
-const redirectLogoutURL = () => {
-    const hostname = window.location.hostname;
-    let url = "";
-    if (hostname === "juezvirtual.local") {
-        url = "https://juezvirtual.local/oj/logout.php";
-    } else if (hostname === "juezvirtual.local") {
-        url = "https://juezvirtual.local/logout.php";
-    } else if (hostname === "jv.umsa.bo") {
-        url = "http://jv.umsa.bo/logout.php";
-    } else {
-        url = "/logout.php";
-    }
-    return url;
-};
+import { resolveLogoutUrl } from '../utils/authRedirect';
 
 const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -27,7 +13,7 @@ const useAuth = () => {
         try {
             const decoded = jwtDecode(token);
             return decoded.exp < Date.now() / 1000;
-        } catch (error) {
+        } catch {
             return true;
         }
     };
@@ -37,7 +23,7 @@ const useAuth = () => {
         const tokenIsValid = Boolean(token) && !isTokenExpired(token);
 
         if (!tokenIsValid) {
-            window.location.href = redirectLogoutURL();
+            window.location.href = resolveLogoutUrl();
         }
 
         setIsAuthenticated(tokenIsValid);
