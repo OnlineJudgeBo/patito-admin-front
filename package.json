@@ -25,6 +25,7 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.2",
     "@vitejs/plugin-react": "^4.3.3",
+    "@wiris/mathtype-ckeditor5": "^8.15.2",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",
     "ckeditor5-build-classic-mathtype": "^1.0.0",
