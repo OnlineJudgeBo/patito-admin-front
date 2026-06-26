@@ -1,14 +1,24 @@
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { useFormik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from 'yup';
+import { MathStatementEditor } from '../../components/Statement/MathStatementEditor';
 import './CKEditorStyle.css';
 
 import '../../components/CKEditor/ckeditor.css';
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
+import { StatementPreview } from '../../components/Statement/StatementPreview';
 import TopicClassificationComponent from '../../components/TopicClassification/TopicClassification.jsx';
 import { apiService } from '../../services/apiService';
 
@@ -20,7 +30,7 @@ const EditForm = () => {
     const Submit = async (values) => {
         console.log(values);
         try {
-            const data = await apiService.update('problems', problemId, values);
+            await apiService.update('problems', problemId, values);
             toast({
                 variant: "success",
                 description: 'Problema actualizado correctamente.',
@@ -39,7 +49,7 @@ const EditForm = () => {
     };
 
     const [topicClassificationList, setTopicClassificationList] = useState();
-    const [topicClassificationSelected, setTopicClassificationSelected] = useState();
+    const [previewOpen, setPreviewOpen] = useState(false);
 
     const [initialValues, setInitialValues] = useState({
         Title: '',
@@ -62,8 +72,6 @@ const EditForm = () => {
                 const data = await apiService.fetchProblemById(problemId);
                 let topicClassificationList = await apiService.fetchTopicList();
                 setTopicClassificationList(topicClassificationList);
-                setTopicClassificationSelected(data.classifications);
-
                 setInitialValues({
                     Title: data.title || '',
                     Description: data.description || '',
@@ -174,7 +182,7 @@ const EditForm = () => {
 
             <div className="mb-6">
                 <label htmlFor="problem-description" className="block text-xl font-semibold mb-2">Descripción del Problema</label>
-                <CKEditor
+                <MathStatementEditor
                     editor={ClassicEditor}
                     config={{
                         toolbar: {
@@ -188,8 +196,7 @@ const EditForm = () => {
                                 'insertTable', '|',
                                 'blockQuote', '|',
                                 'imageUpload', '|',
-                                'MathType', 'ChemType',
-                                'SourceEditing'
+                                'MathType', 'ChemType'
                             ]
                         },
                         extraPlugins: [UploadAdapterPlugin],
@@ -207,7 +214,7 @@ const EditForm = () => {
 
             <div className="mb-6">
                 <label htmlFor="problem-description" className="block text-xl font-semibold mb-2">Descripción de la entrada del Problema</label>
-                <CKEditor
+                <MathStatementEditor
                     editor={ClassicEditor}
                     config={{
                         toolbar: {
@@ -221,8 +228,7 @@ const EditForm = () => {
                                 'insertTable', '|',
                                 'blockQuote', '|',
                                 'imageUpload', '|',
-                                'MathType', 'ChemType',
-                                'SourceEditing'
+                                'MathType', 'ChemType'
                             ]
                         },
                         extraPlugins: [UploadAdapterPlugin],
@@ -240,7 +246,7 @@ const EditForm = () => {
 
             <div className="mb-6">
                 <label htmlFor="problem-description" className="block text-xl font-semibold mb-2">Descripción de la salida del Problema</label>
-                <CKEditor
+                <MathStatementEditor
                     editor={ClassicEditor}
                     config={{
                         toolbar: {
@@ -254,8 +260,7 @@ const EditForm = () => {
                                 'insertTable', '|',
                                 'blockQuote', '|',
                                 'imageUpload', '|',
-                                'MathType', 'ChemType',
-                                'SourceEditing'
+                                'MathType', 'ChemType'
                             ]
                         },
                         extraPlugins: [UploadAdapterPlugin],
@@ -296,7 +301,7 @@ const EditForm = () => {
             {/* Hits */}
             <div className="mb-6">
                 <label htmlFor="problem-notes" className="block text-xl font-semibold mb-2">Notas/Consejos</label>
-                <CKEditor
+                <MathStatementEditor
                     editor={ClassicEditor}
                     config={{
                         toolbar: {
@@ -310,8 +315,7 @@ const EditForm = () => {
                                 'insertTable', '|',
                                 'blockQuote', '|',
                                 'imageUpload', '|',
-                                'MathType', 'ChemType',
-                                'SourceEditing'
+                                'MathType', 'ChemType'
                             ]
                         },
                         extraPlugins: [UploadAdapterPlugin],
@@ -338,11 +342,70 @@ const EditForm = () => {
             </div>
 
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setPreviewOpen(true)}>
+                    Vista previa
+                </Button>
                 <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
                     Guardar
                 </button>
             </div>
+
+            <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto bg-white">
+                    <DialogHeader>
+                        <DialogTitle>Vista previa del problema</DialogTitle>
+                        <DialogDescription>
+                            Así se verá el enunciado con el contenido actual del formulario.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <article className="space-y-7 text-slate-900">
+                        <header className="border-b border-slate-200 pb-5">
+                            <h1 className="text-3xl font-bold">{formik.values.Title}</h1>
+                            <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
+                                <div><dt className="inline font-semibold text-slate-800">Tiempo límite: </dt><dd className="inline">{formik.values.TimeLimit} s</dd></div>
+                                <div><dt className="inline font-semibold text-slate-800">Memoria: </dt><dd className="inline">{formik.values.MemoryLimit} MB</dd></div>
+                            </dl>
+                        </header>
+                        <section>
+                            <h2 className="mb-2 text-xl font-semibold">Descripción</h2>
+                            <StatementPreview html={formik.values.Description || 'Aún no se ha escrito la descripción.'} className="leading-7" />
+                        </section>
+                        <section>
+                            <h2 className="mb-2 text-xl font-semibold">Entrada</h2>
+                            <StatementPreview html={formik.values.Input || 'Aún no se ha escrito la especificación de entrada.'} className="leading-7" />
+                        </section>
+                        <section>
+                            <h2 className="mb-2 text-xl font-semibold">Salida</h2>
+                            <StatementPreview html={formik.values.Output || 'Aún no se ha escrito la especificación de salida.'} className="leading-7" />
+                        </section>
+                        {(formik.values.SampleInput || formik.values.SampleOutput) ? (
+                            <section>
+                                <h2 className="mb-3 text-xl font-semibold">Ejemplo</h2>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div>
+                                        <h3 className="mb-2 font-medium">Entrada</h3>
+                                        <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-100">{formik.values.SampleInput || '—'}</pre>
+                                    </div>
+                                    <div>
+                                        <h3 className="mb-2 font-medium">Salida</h3>
+                                        <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-100">{formik.values.SampleOutput || '—'}</pre>
+                                    </div>
+                                </div>
+                            </section>
+                        ) : null}
+                        {formik.values.Hint ? (
+                            <section className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                                <h2 className="mb-2 text-xl font-semibold">Notas</h2>
+                                <StatementPreview html={formik.values.Hint} className="leading-7" />
+                            </section>
+                        ) : null}
+                    </article>
+                    <DialogFooter>
+                        <Button type="button" onClick={() => setPreviewOpen(false)}>Cerrar vista previa</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </form>
     );
 };
