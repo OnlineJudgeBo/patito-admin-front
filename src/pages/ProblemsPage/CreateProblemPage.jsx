@@ -1,15 +1,77 @@
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CKEditor } from '@ckeditor/ckeditor5-react';
 import { useFormik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
+import { MathStatementEditor } from '../../components/Statement/MathStatementEditor';
+import { StatementPreview } from '../../components/Statement/StatementPreview';
 import TopicClassificationComponent from '../../components/TopicClassification/TopicClassification.jsx';
 import { apiService } from '../../services/apiService';
 import './CKEditorStyle.css';
+
+const problemEditorToolbar = [
+    'undo', 'redo', '|',
+    'heading', 'style', 'showBlocks', '|',
+    'fontFamily', 'fontSize', 'fontColor', 'fontBackgroundColor', 'highlight', 'removeFormat', '|',
+    'bold', 'italic', 'underline', 'strikethrough', 'subscript', 'superscript', '|',
+    'link', '|',
+    'bulletedList', 'numberedList', 'todoList', 'alignment', '|',
+    'code', 'codeBlock', '|',
+    'insertTable', 'horizontalLine', '|',
+    'blockQuote', 'mediaEmbed', '|',
+    'imageUpload', 'specialCharacters', '|',
+    'findAndReplace', 'selectAll', 'accessibilityHelp', '|',
+    'MathType', 'ChemType'
+];
+
+const createProblemEditorConfig = (extraPlugins) => ({
+    toolbar: {
+        shouldNotGroupWhenFull: true,
+        items: problemEditorToolbar
+    },
+    blockToolbar: [
+        'heading', '|',
+        'bulletedList', 'numberedList', 'todoList', '|',
+        'blockQuote', 'codeBlock', 'insertTable', 'imageUpload', 'mediaEmbed'
+    ],
+    codeBlock: {
+        languages: [
+            { language: 'plaintext', label: 'Texto plano' },
+            { language: 'c', label: 'C' },
+            { language: 'cpp', label: 'C++' },
+            { language: 'java', label: 'Java' },
+            { language: 'python', label: 'Python' },
+            { language: 'javascript', label: 'JavaScript' },
+            { language: 'pascal', label: 'Pascal' }
+        ]
+    },
+    image: {
+        toolbar: [
+            'toggleImageCaption', 'imageTextAlternative', '|',
+            'imageStyle:inline', 'imageStyle:block', 'imageStyle:side'
+        ]
+    },
+    table: {
+        contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+    },
+    link: {
+        addTargetToExternalLinks: true,
+        defaultProtocol: 'https://'
+    },
+    extraPlugins,
+    upload: {}
+});
 
 const CreateProblemPage = () => {
 
@@ -17,7 +79,7 @@ const CreateProblemPage = () => {
     const navigate = useNavigate();
 
     const Submit = (values) => {
-        apiService.create('problems', values).then(data => {
+        apiService.create('problems', values).then(() => {
             toast({
                 description: 'Problema creado correctamente.',
             })
@@ -35,6 +97,7 @@ const CreateProblemPage = () => {
     };
 
     const [topicClassificationList, setTopicClassificationList] = useState();
+    const [previewOpen, setPreviewOpen] = useState(false);
 
     const [initialValues, setInitialValues] = useState({
         Title: '',
@@ -76,8 +139,6 @@ const CreateProblemPage = () => {
         };
         fetchData();
     }, []);
-
-
 
     const validationSchema = Yup.object().shape({
         Title: Yup.string().required('El título es obligatorio'),
@@ -168,28 +229,9 @@ const CreateProblemPage = () => {
 
             <div className="mb-6">
                 <label htmlFor="problem-description" className="block text-xl font-semibold mb-2">Descripción del Problema</label>
-                <CKEditor
+                <MathStatementEditor
                     editor={ClassicEditor}
-                    config={{
-                        toolbar: {
-                            shouldNotGroupWhenFull: true,
-                            items: [
-                                'fontColor', 'fontBackgroundColor', '|',
-                                'link', '|',
-                                'bold', 'italic', '|',
-                                'bulletedList', 'numberedList', '|',
-                                'code', 'codeBlock', '|',
-                                'insertTable', '|',
-                                'blockQuote', '|',
-                                'imageUpload', '|',
-                                'MathType', 'ChemType',
-                                'SourceEditing'
-                            ]
-                        },
-                        extraPlugins: [UploadAdapterPlugin],
-                        upload: {
-                        }
-                    }}
+                    config={createProblemEditorConfig([UploadAdapterPlugin])}
                     data={formik.values.Description}
                     onChange={(event, editor) => formik.setFieldValue('Description', editor.getData())}
                 />
@@ -201,28 +243,9 @@ const CreateProblemPage = () => {
 
             <div className="mb-6">
                 <label htmlFor="problem-description" className="block text-xl font-semibold mb-2">Descripción de la entrada del Problema</label>
-                <CKEditor
+                <MathStatementEditor
                     editor={ClassicEditor}
-                    config={{
-                        toolbar: {
-                            shouldNotGroupWhenFull: true,
-                            items: [
-                                'fontColor', 'fontBackgroundColor', '|',
-                                'link', '|',
-                                'bold', 'italic', '|',
-                                'bulletedList', 'numberedList', '|',
-                                'code', 'codeBlock', '|',
-                                'insertTable', '|',
-                                'blockQuote', '|',
-                                'imageUpload', '|',
-                                'MathType', 'ChemType',
-                                'SourceEditing'
-                            ]
-                        },
-                        extraPlugins: [UploadAdapterPlugin],
-                        upload: {
-                        }
-                    }}
+                    config={createProblemEditorConfig([UploadAdapterPlugin])}
                     data={formik.values.Input}
                     onChange={(event, editor) => formik.setFieldValue('Input', editor.getData())}
                 />
@@ -234,28 +257,9 @@ const CreateProblemPage = () => {
 
             <div className="mb-6">
                 <label htmlFor="problem-description" className="block text-xl font-semibold mb-2">Descripción de la salida del Problema</label>
-                <CKEditor
+                <MathStatementEditor
                     editor={ClassicEditor}
-                    config={{
-                        toolbar: {
-                            shouldNotGroupWhenFull: true,
-                            items: [
-                                'fontColor', 'fontBackgroundColor', '|',
-                                'link', '|',
-                                'bold', 'italic', '|',
-                                'bulletedList', 'numberedList', '|',
-                                'code', 'codeBlock', '|',
-                                'insertTable', '|',
-                                'blockQuote', '|',
-                                'imageUpload', '|',
-                                'MathType', 'ChemType',
-                                'SourceEditing'
-                            ]
-                        },
-                        extraPlugins: [UploadAdapterPlugin],
-                        upload: {
-                        }
-                    }}
+                    config={createProblemEditorConfig([UploadAdapterPlugin])}
                     data={formik.values.Output}
                     onChange={(event, editor) => formik.setFieldValue('Output', editor.getData())}
                 />
@@ -290,28 +294,9 @@ const CreateProblemPage = () => {
             {/* Hits */}
             <div className="mb-6">
                 <label htmlFor="problem-notes" className="block text-xl font-semibold mb-2">Notas/Consejos</label>
-                <CKEditor
+                <MathStatementEditor
                     editor={ClassicEditor}
-                    config={{
-                        toolbar: {
-                            shouldNotGroupWhenFull: true,
-                            items: [
-                                'fontColor', 'fontBackgroundColor', '|',
-                                'link', '|',
-                                'bold', 'italic', '|',
-                                'bulletedList', 'numberedList', '|',
-                                'code', 'codeBlock', '|',
-                                'insertTable', '|',
-                                'blockQuote', '|',
-                                'imageUpload', '|',
-                                'MathType', 'ChemType',
-                                'SourceEditing'
-                            ]
-                        },
-                        extraPlugins: [UploadAdapterPlugin],
-                        upload: {
-                        }
-                    }}
+                    config={createProblemEditorConfig([UploadAdapterPlugin])}
                     data={formik.values.Hint}
                     onChange={(event, editor) => formik.setFieldValue('Hint', editor.getData())}
                 />
@@ -328,12 +313,68 @@ const CreateProblemPage = () => {
                 ) : null}
             </div>
 
-
-            <div className="flex justify-end">
+            {/* Preview */}
+            <div className="flex justify-end gap-3">
+                <Button type="button" variant="outline" onClick={() => setPreviewOpen(true)}>
+                    Vista previa
+                </Button>
                 <button type="submit" className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
                     Guardar
                 </button>
             </div>
+
+            <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto bg-white">
+                    <DialogHeader>
+                        <DialogTitle>Vista previa del problema</DialogTitle>
+                    </DialogHeader>
+                    <article className="space-y-7 text-slate-900">
+                        <header className="border-b border-slate-200 pb-5">
+                            <h1 className="text-3xl font-bold">{formik.values.Title || 'Título del problema'}</h1>
+                            <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
+                                <div><dt className="inline font-semibold text-slate-800">Tiempo límite: </dt><dd className="inline">{formik.values.TimeLimit || '—'} s</dd></div>
+                                <div><dt className="inline font-semibold text-slate-800">Memoria: </dt><dd className="inline">{formik.values.MemoryLimit || '—'} MB</dd></div>
+                            </dl>
+                        </header>
+                        <section>
+                            <h2 className="mb-2 text-xl font-semibold">Descripción</h2>
+                            <StatementPreview html={formik.values.Description} className="leading-7" />
+                        </section>
+                        <section>
+                            <h2 className="mb-2 text-xl font-semibold">Entrada</h2>
+                            <StatementPreview html={formik.values.Input} className="leading-7" />
+                        </section>
+                        <section>
+                            <h2 className="mb-2 text-xl font-semibold">Salida</h2>
+                            <StatementPreview html={formik.values.Output} className="leading-7" />
+                        </section>
+                        {(formik.values.SampleInput || formik.values.SampleOutput) ? (
+                            <section>
+                                <h2 className="mb-3 text-xl font-semibold">Ejemplo</h2>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div>
+                                        <h3 className="mb-2 font-medium">Entrada</h3>
+                                        <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-100">{formik.values.SampleInput}</pre>
+                                    </div>
+                                    <div>
+                                        <h3 className="mb-2 font-medium">Salida</h3>
+                                        <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-100">{formik.values.SampleOutput}</pre>
+                                    </div>
+                                </div>
+                            </section>
+                        ) : null}
+                        {formik.values.Hint ? (
+                            <section className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+                                <h2 className="mb-2 text-xl font-semibold">Notas</h2>
+                                <StatementPreview html={formik.values.Hint} className="leading-7" />
+                            </section>
+                        ) : null}
+                    </article>
+                    <DialogFooter>
+                        <Button type="button" onClick={() => setPreviewOpen(false)}>Cerrar vista previa</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </form>
     );
 };

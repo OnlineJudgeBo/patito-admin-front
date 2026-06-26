@@ -1,6 +1,7 @@
+/* eslint-disable react/prop-types */
 
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { MathStatementEditor } from '../../components/Statement/MathStatementEditor';
 import { ErrorMessage } from 'formik';
 import { useAtom } from "jotai";
 import { useEffect } from 'react';
@@ -13,7 +14,7 @@ const CkeditorComponent = ({ setFieldValue, valueElement }) => {
 
     useEffect(() => {
         setCkeditorValue(valueElement)
-    }, [valueElement]);
+    }, [setCkeditorValue, valueElement]);
 
     const handleEditorChange = (event, editor) => {
         const data = editor.getData();
@@ -30,7 +31,7 @@ const CkeditorComponent = ({ setFieldValue, valueElement }) => {
     return (
         <div className="mb-4">
             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Descripción</label>
-            <CKEditor
+            <MathStatementEditor
                 editor={ClassicEditor}
                 data={ckEditorValue}
                 config={{
@@ -45,8 +46,7 @@ const CkeditorComponent = ({ setFieldValue, valueElement }) => {
                             'insertTable', '|',
                             'blockQuote', '|',
                             'imageUpload', '|',
-                            'MathType', 'ChemType',
-                            'SourceEditing'
+                            'MathType', 'ChemType'
                         ]
                     },
                     extraPlugins: [UploadAdapterPlugin],
