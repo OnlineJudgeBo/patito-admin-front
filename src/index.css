@@ -108,7 +108,7 @@
   display: block;
   margin: 0.5rem 0;
   overflow-x: auto;
-  text-align: center;
+  text-align: left;
   font-style: italic;
   white-space: nowrap;
 }
