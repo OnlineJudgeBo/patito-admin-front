@@ -22,7 +22,6 @@ Thumbs.db
 *.sublime-project
 *.sublime-workspace
 
-package-lock.json
 yarn.lock
 
 *.tmp

@@ -1,10 +1,10 @@
-FROM node:20 as builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json package-lock.json ./
 
-RUN npm install
+RUN npm ci
 
 COPY . .
 
