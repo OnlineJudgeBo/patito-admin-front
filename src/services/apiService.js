@@ -100,6 +100,7 @@ async function postApiFile(endpoint, { method = 'GET', body = null, params = {} 
 }
 
 export const apiService = {
+    login: (userId, password, siteId = DEFAULT_SITE_ID) => fetchAPI('public/auth/login', { method: 'POST', body: { userId, password, siteId } }),
     fetchContestsList: () => fetchAPI('contests', {}),
     fetchProblems: () => fetchAPI('problems', {}),
     fetchProblemById: (id) => fetchAPI(`problems/${id}`, { method: 'GET' }),

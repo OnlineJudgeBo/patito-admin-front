@@ -1,37 +1,31 @@
 import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
-import { jwtDecode } from 'jwt-decode';
+import { getAdminAuthState } from '../utils/auth';
 
-const ACCESS_TOKEN_COOKIE = 'accessToken';
-
-const isTokenExpired = (token) => {
-    try {
-        const decoded = jwtDecode(token);
-
-        if (!decoded?.exp) {
-            return false;
-        }
-
-        return decoded.exp * 1000 <= Date.now();
-    } catch {
-        return true;
-    }
-};
+const readAuthState = () => ({
+    ...getAdminAuthState(),
+    isLoading: false,
+});
 
 const UseAuth = () => {
     const [authState, setAuthState] = useState({
         isAuthenticated: false,
+        hasValidToken: false,
+        hasAdminAccess: false,
+        roles: [],
         isLoading: true,
     });
 
     useEffect(() => {
-        const token = Cookies.get(ACCESS_TOKEN_COOKIE);
-        const isAuthenticated = Boolean(token) && !isTokenExpired(token);
+        const refreshAuthState = () => setAuthState(readAuthState());
 
-        setAuthState({
-            isAuthenticated,
-            isLoading: false,
-        });
+        refreshAuthState();
+        window.addEventListener('auth-changed', refreshAuthState);
+        window.addEventListener('focus', refreshAuthState);
+
+        return () => {
+            window.removeEventListener('auth-changed', refreshAuthState);
+            window.removeEventListener('focus', refreshAuthState);
+        };
     }, []);
 
     return authState;
