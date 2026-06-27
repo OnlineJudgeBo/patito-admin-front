@@ -217,3 +217,17 @@ Validación funcional mínima:
 4. Verificar listado de problemas y usuarios.
 5. Crear o editar un registro de prueba en un ambiente no productivo.
 6. Validar que una recarga del navegador en una ruta interna mantiene la SPA funcionando.
+
+## 14. Capturas de pantalla
+
+### Inicio de sesión
+
+![Pantalla de inicio de sesión](docs/screenshots/login.png)
+
+### Dashboard administrativo
+
+![Dashboard administrativo](docs/screenshots/dashboard.png)
+
+### Creación de concurso
+
+![Formulario de creación de concurso](docs/screenshots/contest-form.png)
