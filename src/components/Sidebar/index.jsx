@@ -5,13 +5,19 @@ const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
 
     return (
-        <div className={`min-h-screen ${isOpen ? 'w-64' : 'w-0'} flex flex-col flex-auto flex-shrink-0 antialiased bg-gray-50 text-gray-800 transition-all duration-300 ease-in-out`}>
+        <aside className={`min-h-screen ${isOpen ? 'w-64' : 'w-14'} flex shrink-0 flex-col antialiased bg-gray-50 text-gray-800 transition-all duration-300 ease-in-out`}>
             <div className="flex-none">
-                <button onClick={() => setIsOpen(!isOpen)} className="p-4 focus:outline-none focus:bg-gray-200 hover:bg-gray-100">
+                <button
+                    type="button"
+                    aria-label={isOpen ? 'Ocultar menú' : 'Mostrar menú'}
+                    aria-expanded={isOpen}
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="p-4 focus:outline-none focus:bg-gray-200 hover:bg-gray-100"
+                >
                     <svg className={`transition-transform transform ${isOpen ? '-rotate-180' : 'rotate-0'} h-6 w-6`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                 </button>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className={`${isOpen ? 'block' : 'hidden'} flex-1 overflow-y-auto`}>
                 <div className="flex items-center justify-center h-14 border-b">
                     <div className="text-lg font-semibold">Panel de Control</div>
                 </div>
@@ -116,7 +122,7 @@ const Sidebar = () => {
                     </li>
                 </ul>
             </div>
-        </div>
+        </aside>
     );
 }
 

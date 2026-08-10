@@ -32,11 +32,9 @@ const App = () => {
         <BrowserRouter>
             <div className='flex'>
                 {isAuthenticated && (
-                    <div className="w-64">
-                        <Sidebar />
-                    </div>
+                    <Sidebar />
                 )}
-                <div className='flex-1 p-4 ml-5 mt-1'>
+                <main className='min-w-0 flex-1 p-4 ml-5 mt-1 transition-[width] duration-300 ease-in-out'>
                     <Routes>
                         <Route path="/admin" element={<PrivateRoute><IndexPage /></PrivateRoute>} />
                         <Route path="/admin/users" element={<PrivateRoute><ListUserProfilePage /></PrivateRoute>} />
@@ -66,7 +64,7 @@ const App = () => {
                         <Route path="/admin/logout" element={<LogoutPage />} />
                         <Route path="/admin/login" element={<LoginPage />} />
                     </Routes>
-                </div>
+                </main>
             </div>
         </BrowserRouter>
     );
