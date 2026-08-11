@@ -37,14 +37,14 @@ En `.env` se define la conexión con la API:
 ```env
 VITE_API_URL=http://localhost:8088/api
 VITE_LOGOUT_URL=http://localhost:8082/oj/logout.php
-VITE_SITE_ID=1
+VITE_SITE_ID=3
 ```
 
 | Variable | Para qué sirve | Obligatoria |
 | --- | --- | --- |
 | `VITE_API_URL` | URL base de la API. Debe incluir `/api`. | Sí |
 | `VITE_LOGOUT_URL` | Ruta de logout de la web PHP. | Sí |
-| `VITE_SITE_ID` | Sitio usado cuando el token no trae `site_id`. | No, usa `1` |
+| `VITE_SITE_ID` | Sitio usado para autenticar y cuando el token no trae `site_id`. | No, usa `3` (`juezvirtual.com.bo`) |
 
 Las variables `VITE_*` se guardan dentro del build. Para una imagen ya construida usa `public/config.js`, que tiene prioridad sobre `.env`.
 
@@ -55,7 +55,7 @@ Las variables `VITE_*` se guardan dentro del build. Para una imagen ya construid
 ```js
 window.__APP_CONFIG__ = {
   API_URL: 'https://mi-dominio.com/api',
-  SITE_ID: 1,
+  SITE_ID: 3,
   LOGOUT_URL: 'https://mi-dominio.com/oj/logout.php'
 };
 ```

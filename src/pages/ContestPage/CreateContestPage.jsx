@@ -98,10 +98,10 @@ const CreateContestPage = () => {
                 onSubmit={Submit}
             >
                 {formik => (
-                    <Form>
-                        <div className="flex divide-x divide-gray-200 w-full">
-                            <div className="w-full p-4">
-                                <h1 className="text-3xl font-bold mb-10">Crear Concurso</h1>
+                    <Form className="mx-10 my-10">
+                        <h1 className="text-dark mb-6 text-2xl font-semibold dark:text-white">Crear Concurso</h1>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
                                 <div className="mb-4">
                                     <label htmlFor="title" className="block text-sm font-medium text-gray-700">Nombre del Concurso</label>
                                     <Field type="text" id="title" name="title" placeholder="Ingrese el nombre del concurso" className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
@@ -172,41 +172,33 @@ const CreateContestPage = () => {
                                     </div>
                                 </div>
                                 <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={[]} />
+
+                                <button
+                                    type="submit"
+                                    className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar</button>
                             </div>
 
-                            <div className="w-3/5">
-                                <div className="flex divide-x divide-gray-200 w-full">
-                                    <div className="w-full p-4">
-                                        <h1 className="text-3xl font-bold mb-10">Agregar problemas</h1>
-                                        <div className="mb-2">
-                                            <ManualProblemAddComponent />
-                                            <Separator />
-                                            <ProblemListComponent />
-                                        </div>
+                            <div className="flex flex-col gap-6">
+                                <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
+                                    <h2 className="text-dark mb-2 text-xl font-semibold dark:text-white">Agregar problemas</h2>
+                                    <div className="mb-2">
+                                        <ManualProblemAddComponent />
+                                        <Separator />
+                                        <ProblemListComponent />
                                     </div>
                                 </div>
-                            </div>
-                            <div className="w-3/5">
                                 {formik.values.isPrivate === true && (
-                                    <>
-                                        <div className="flex divide-x divide-gray-200 w-full">
-                                            <div className="w-full p-4">
-                                                <h1 className="text-3xl font-bold mb-10">Agregar usuarios</h1>
-                                                <div className="mb-2">
-                                                    <ManualUserAddComponent />
-                                                    <Separator />
-                                                    <UserListComponent />
-                                                </div>
-                                            </div>
+                                    <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
+                                        <h2 className="text-dark mb-2 text-xl font-semibold dark:text-white">Agregar usuarios</h2>
+                                        <div className="mb-2">
+                                            <ManualUserAddComponent />
+                                            <Separator />
+                                            <UserListComponent />
                                         </div>
-                                    </>
+                                    </div>
                                 )}
                             </div>
-
                         </div>
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar</button>
                     </Form>
                 )}
             </Formik>

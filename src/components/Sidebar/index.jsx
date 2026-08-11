@@ -1,23 +1,15 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const Sidebar = () => {
-    const [isOpen, setIsOpen] = useState(true);
-
+// eslint-disable-next-line react/prop-types
+const Sidebar = ({ isOpen, onToggle }) => {
     return (
-        <aside className={`min-h-screen ${isOpen ? 'w-64' : 'w-14'} flex shrink-0 flex-col antialiased bg-gray-50 text-gray-800 transition-all duration-300 ease-in-out`}>
+        <aside className={`${isOpen ? 'w-64' : 'w-16'} sticky top-0 h-screen flex flex-col flex-shrink-0 overflow-hidden border-r bg-white text-gray-800 transition-[width] duration-300 ease-in-out`}>
             <div className="flex-none">
-                <button
-                    type="button"
-                    aria-label={isOpen ? 'Ocultar menú' : 'Mostrar menú'}
-                    aria-expanded={isOpen}
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="p-4 focus:outline-none focus:bg-gray-200 hover:bg-gray-100"
-                >
+                <button type="button" aria-label={isOpen ? 'Ocultar menú' : 'Mostrar menú'} title={isOpen ? 'Ocultar menú' : 'Mostrar menú'} aria-expanded={isOpen} onClick={onToggle} className="m-2 rounded p-3 focus:outline-none focus:bg-gray-200 hover:bg-gray-100">
                     <svg className={`transition-transform transform ${isOpen ? '-rotate-180' : 'rotate-0'} h-6 w-6`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                 </button>
             </div>
-            <div className={`${isOpen ? 'block' : 'hidden'} flex-1 overflow-y-auto`}>
+            <div className={`${isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'} flex-1 overflow-y-auto transition-opacity duration-150`}>
                 <div className="flex items-center justify-center h-14 border-b">
                     <div className="text-lg font-semibold">Panel de Control</div>
                 </div>
@@ -32,24 +24,34 @@ const Sidebar = () => {
                             <span className="ml-2 text-sm font-medium">Dashboard</span>
                         </Link>
                     </li>
+
+                    <div className="px-6 text-xs text-gray-600 mt-4">Académico</div>
+                    <li>
+                        <Link to="/admin/academic/courses" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/mortarboard-fill.svg" className="w-5 h-5" alt="Cursos académicos Icon" />
+                            </span>
+                            <span className="ml-2 text-sm font-medium">Cursos Académicos</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/admin/topicsClassifications" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/file-text.svg" className="w-5 h-5" alt="Algoritmos Icon" />
+                            </span>
+                            <span className="ml-2 text-sm font-medium">Temas y Clasificación</span>
+                        </Link>
+                    </li>
                     <li>
                         <Link to="/admin/schedules" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
-                                <img src="https://www.svgrepo.com/show/256603/calendar-schedule.svg" className="w-5 h-5" alt="Dashboard Icon" />
+                                <img src="https://www.svgrepo.com/show/256603/calendar-schedule.svg" className="w-5 h-5" alt="Horarios Icon" />
                             </span>
                             <span className="ml-2 text-sm font-medium">Horarios</span>
                         </Link>
                     </li>
-                    <li>
-                        <Link to="/admin/users" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
-                            <span className="inline-flex justify-center items-center ml-4">
-                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/person-lines-fill.svg" className="w-5 h-5" alt="Gestión de Usuarios Icon" />
-                            </span>
-                            <span className="ml-2 text-sm font-medium">Gestión de Usuarios</span>
-                        </Link>
-                    </li>
 
-                    <div className="px-6 text-xs text-gray-600 mt-4">Problemas</div>
+                    <div className="px-6 text-xs text-gray-600 mt-4">Banco de Problemas</div>
                     <li>
                         <Link to="/admin/problems" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
@@ -66,25 +68,12 @@ const Sidebar = () => {
                             <span className="ml-2 text-sm font-medium">Agregar Problema</span>
                         </Link>
                     </li>
-
-                    <div className="px-6 text-xs text-gray-600 mt-4">Temas y Clasificación</div>
-
                     <li>
-                        <Link to="/admin/topicsClassifications" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin/problems/rejudge" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
-                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/file-text.svg" className="w-5 h-5" alt="Algoritmos Icon" />
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/arrow-repeat.svg" className="w-5 h-5" alt="Rejudge Icon" />
                             </span>
-                            <span className="ml-2 text-sm font-medium">Temas y Clasificación</span>
-                        </Link>
-                    </li>
-
-                    <div className="px-6 text-xs text-gray-600 mt-4">Académico</div>
-                    <li>
-                        <Link to="/admin/academic/courses" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
-                            <span className="inline-flex justify-center items-center ml-4">
-                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/mortarboard-fill.svg" className="w-5 h-5" alt="Cursos académicos Icon" />
-                            </span>
-                            <span className="ml-2 text-sm font-medium">Cursos Académicos</span>
+                            <span className="ml-2 text-sm font-medium">Centro de Rejudge</span>
                         </Link>
                     </li>
 
@@ -104,16 +93,34 @@ const Sidebar = () => {
                             <span className="ml-2 text-sm font-medium">Crear Concurso</span>
                         </Link>
                     </li>
-                    <div className="px-6 text-xs text-gray-600 mt-4">Gestión</div>
+
+                    <div className="px-6 text-xs text-gray-600 mt-4">Administración</div>
                     <li>
-                        <Link to="/admin/management/users" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                        <Link to="/admin/users" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/person-lines-fill.svg" className="w-5 h-5" alt="Gestión de Usuarios Icon" />
                             </span>
-                            <span className="ml-2 text-sm font-medium">Permisos de Usuario</span>
+                            <span className="ml-2 text-sm font-medium">Gestión de Usuarios</span>
                         </Link>
                     </li>
                     <li>
+                        <Link to="/admin/management/roles" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/person-lines-fill.svg" className="w-5 h-5" alt="Roles y Permisos Icon" />
+                            </span>
+                            <span className="ml-2 text-sm font-medium">Roles y Permisos</span>
+                        </Link>
+                    </li>
+
+                    <div className="px-6 text-xs text-gray-600 mt-4">Otros</div>
+                    <li>
+                        <Link to="/admin/academic/learning-paths" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4 text-lg">🧭</span>
+                            <span className="ml-2 text-sm font-medium">Rutas de aprendizaje</span>
+                        </Link>
+                    </li>
+
+                    <li className="mt-4 border-t pt-2">
                         <Link to="/admin/logout" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/box-arrow-right.svg" className="w-5 h-5" alt="Cerrar Sesión Icon" />                            </span>
