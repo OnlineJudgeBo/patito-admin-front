@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from 'react';
 import { apiService } from '../../services/apiService';
 
 export function ChangePasswordComponent({ userId }) {
+    const [isOpen, setIsOpen] = useState(false);
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
 
         if (!password.trim()) {
@@ -18,19 +20,40 @@ export function ChangePasswordComponent({ userId }) {
         }
 
         setErrorMessage('');
+        setIsSubmitting(true);
 
-        apiService.update("Users/changePassword", userId, { password }).then(() => {
+        try {
+            await apiService.update("users/changePassword", userId, { password });
             window.location.reload();
-        })
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message ?? 'No se pudo cambiar la clave. Intente nuevamente.');
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleOpenChange = (open) => {
+        setIsOpen(open);
+
+        if (!open) {
+            setPassword('');
+            setErrorMessage('');
+            setIsSubmitting(false);
+        }
     };
 
     return (
-        <Dialog>
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <DialogTrigger asChild>
-                    <Button variant="outline" type="button">Cambiar clave</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-lg p-8">
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+            <Button
+                variant="outline"
+                type="button"
+                onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setIsOpen(true);
+                }}
+            >Cambiar clave</Button>
+            <DialogContent className="sm:max-w-lg p-8">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <DialogHeader>
                         <DialogTitle className="text-lg font-semibold">Cambiar clave de usuario</DialogTitle>
                     </DialogHeader>
@@ -52,12 +75,13 @@ export function ChangePasswordComponent({ userId }) {
                     <DialogFooter className="mt-4">
                         <Button
                             type="submit"
+                            disabled={isSubmitting}
                             variant="secondary"
                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                        >Guardar cambios</Button>
+                        >{isSubmitting ? 'Guardando...' : 'Guardar cambios'}</Button>
                     </DialogFooter>
-                </DialogContent>
-            </form>
+                </form>
+            </DialogContent>
         </Dialog>
     );
 

@@ -22,7 +22,7 @@ export function DisableAdminUserComponent({ userId, roleId }) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant="outline">Desactivar Cuenta</Button>
+                <Button variant="outline">Quitar Rol</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
@@ -33,7 +33,7 @@ export function DisableAdminUserComponent({ userId, roleId }) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={(e) => disableAdmin()}>Desactivar Cuenta</AlertDialogAction>
+                    <AlertDialogAction onClick={(e) => disableAdmin()}>Quitar Rol</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
