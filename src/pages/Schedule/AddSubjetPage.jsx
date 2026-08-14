@@ -97,7 +97,7 @@ export function AddSubjectPage() {
     }, [selectedSubject, reload]);
 
     useEffect(() => {
-        apiService.get("schedule-management/teachers/teachers")
+        apiService.get("schedule-management/teachers")
             .then((data) => {
                 setTeacherList(data);
             })
@@ -136,7 +136,7 @@ export function AddSubjectPage() {
 
         if (!normalizedName) return;
 
-        apiService.create("schedule-management/teachers/teacher", { "teacherName": normalizedName })
+        apiService.create("schedule-management/teachers", { "teacherName": normalizedName })
             .then((newTeacher) => {
                 setTeacherList((prevTeacher) => [...prevTeacher, newTeacher]);
                 setSelectedTeacher(String(newTeacher.id));
