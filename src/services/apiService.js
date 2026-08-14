@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { getRuntimeNumber, getRuntimeValue } from '../utils/runtimeConfig';
 
@@ -30,6 +31,19 @@ function getTokenSiteId() {
         return Number.isInteger(siteId) && siteId > 0 ? siteId : null;
     } catch {
         return null;
+    }
+}
+
+function handleUnauthorized(error) {
+    if (error?.response?.status !== 401) {
+        return;
+    }
+
+    Cookies.remove('accessToken', { path: '/' });
+    window.dispatchEvent(new Event('auth-changed'));
+
+    if (!window.location.pathname.endsWith('/admin/login')) {
+        window.location.href = '/admin/login';
     }
 }
 
@@ -67,6 +81,7 @@ async function fetchAPI(endpoint, { method = 'GET', body = null, params = {} } =
         return response.data;
     } catch (error) {
         console.error("Error en la llamada a la API:", error);
+        handleUnauthorized(error);
         throw error;
     }
 }
@@ -95,6 +110,7 @@ async function postApiFile(endpoint, { method = 'GET', body = null, params = {} 
         return response.data;
     } catch (error) {
         console.error("Error en la llamada a la API:", error);
+        handleUnauthorized(error);
         throw error;
     }
 }
@@ -110,6 +126,29 @@ export const apiService = {
     checkUsernameAvailability: (userId) => fetchAPI(`users/UsernameIsAvailable`, { method: 'POST', body: userId }),
     checkUserEmailAvailability: (email) => fetchAPI(`users/UserEmailIsAvailable`, { method: 'POST', body: email }),
     fetchRoles: () => fetchAPI(`Roles`),
+    fetchAvailableRoles: () => fetchAPI('Roles/rolesAvailable'),
+    addRoleToUser: (userId, roleId) => fetchAPI(`Roles/${encodeURIComponent(userId)}/${roleId}`, { method: 'POST' }),
+    removeRoleFromUser: (userId, roleId) => fetchAPI(`Roles/${encodeURIComponent(userId)}/${roleId}`, { method: 'DELETE' }),
+    fetchProgrammingLanguages: () => fetchAPI('ProgrammingLanguages'),
+    rejudgeSolution: (solutionId) => fetchAPI(`Judge/rejudge/solution/${solutionId}`),
+    rejudgeProblem: (problemId) => fetchAPI(`Judge/rejudge/problem/${problemId}`),
+    rejudgeContest: (contestId) => fetchAPI(`Judge/rejudge/contest/${contestId}`),
+    rejudgeRange: (fromSolutionId, toSolutionId) => fetchAPI('Judge/rejudge/range', {
+        params: { fromSolutionId, toSolutionId }
+    }),
+    rejudgeLanguage: (languageId) => fetchAPI(`Judge/rejudge/language/${languageId}`),
+    fetchRejudgeHistory: (limit = 50) => fetchAPI('Judge/rejudge/history', { params: { limit } }),
+    fetchAcademicLearningPaths: (siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/learning-paths`),
+    fetchAcademicLearningPath: (key, siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/learning-paths/${encodeURIComponent(key)}`),
+    createAcademicLearningPath: (body) => fetchAPI('academic/learning-paths', { method: 'POST', body }),
+    updateAcademicLearningPath: (key, body) => fetchAPI(`academic/learning-paths/${encodeURIComponent(key)}`, { method: 'PUT', body }),
+    deleteAcademicLearningPath: (key) => fetchAPI(`academic/learning-paths/${encodeURIComponent(key)}`, { method: 'DELETE' }),
+    createAcademicLearningPathStage: (key, body) => fetchAPI(`academic/learning-paths/${encodeURIComponent(key)}/stages`, { method: 'POST', body }),
+    updateAcademicLearningPathStage: (key, stageId, body) => fetchAPI(`academic/learning-paths/${encodeURIComponent(key)}/stages/${stageId}`, { method: 'PUT', body }),
+    deleteAcademicLearningPathStage: (key, stageId) => fetchAPI(`academic/learning-paths/${encodeURIComponent(key)}/stages/${stageId}`, { method: 'DELETE' }),
+    createAcademicLearningPathTopic: (key, stageId, body) => fetchAPI(`academic/learning-paths/${encodeURIComponent(key)}/stages/${stageId}/topics`, { method: 'POST', body }),
+    updateAcademicLearningPathTopic: (key, stageId, topicId, body) => fetchAPI(`academic/learning-paths/${encodeURIComponent(key)}/stages/${stageId}/topics/${topicId}`, { method: 'PUT', body }),
+    deleteAcademicLearningPathTopic: (key, stageId, topicId) => fetchAPI(`academic/learning-paths/${encodeURIComponent(key)}/stages/${stageId}/topics/${topicId}`, { method: 'DELETE' }),
     fetchManageableAcademicCourses: (siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/manageable`, { method: 'GET' }),
     fetchAcademicCourse: (courseId, siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses/${courseId}`, { method: 'GET' }),
     createAcademicCourse: (body, siteId) => fetchAPI(`academic/sites/${getAcademicSiteId(siteId)}/courses`, { method: 'POST', body }),
@@ -125,22 +164,25 @@ export const apiService = {
     downloadAcademicCourseReportCsv: async (courseId, siteId) => {
         const token = getCookie('accessToken');
         const academicSiteId = getAcademicSiteId(siteId);
-        const response = await axios({
-            method: 'GET',
-            url: `${BASE_URL}/academic/sites/${academicSiteId}/courses/${courseId}/report.csv`,
-            headers: token
-                ? {
-                    'Accept': 'text/csv',
-                    'Authorization': `Bearer ${token}`
-                }
-                : {
-                    'Accept': 'text/csv'
-                },
-            responseType: 'blob'
-        });
+        try {
+            const response = await axios({
+                method: 'GET',
+                url: `${BASE_URL}/academic/sites/${academicSiteId}/courses/${courseId}/report.csv`,
+                headers: token
+                    ? { 'Accept': 'text/csv', 'Authorization': `Bearer ${token}` }
+                    : { 'Accept': 'text/csv' },
+                responseType: 'blob'
+            });
 
-        return response.data;
+            return response.data;
+        } catch (error) {
+            handleUnauthorized(error);
+            throw error;
+        }
     },
+
+    fetchSubjectAssistant: (subjectId) => fetchAPI(`schedule-management/subjects/${subjectId}/assistant`, { method: 'GET' }),
+    updateSubjectAssistant: (subjectId, body) => fetchAPI(`schedule-management/subjects/${subjectId}/assistant`, { method: 'PUT', body }),
 
     create: (endpoint, body) => fetchAPI(endpoint, { method: 'POST', body: body }),
     update: (endpoint, id, body) => fetchAPI(`${endpoint}/${id}`, { method: 'PUT', body: body ? body : "" }),

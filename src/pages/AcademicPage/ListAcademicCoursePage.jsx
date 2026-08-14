@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { StatementPreview } from '../../components/Statement/StatementPreview';
 import { apiService } from '../../services/apiService';
+import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 function ListAcademicCoursePage() {
     const [courses, setCourses] = useState([]);
@@ -22,7 +23,7 @@ function ListAcademicCoursePage() {
             const response = await apiService.fetchManageableAcademicCourses();
             setCourses(Array.isArray(response) ? response : []);
         } catch (apiError) {
-            setError(apiError?.response?.data?.message || apiError?.message || 'No se pudieron cargar los cursos.');
+            setError(getApiErrorMessage(apiError, 'No se pudieron cargar los cursos.'));
         } finally {
             setLoading(false);
         }
@@ -66,7 +67,7 @@ function ListAcademicCoursePage() {
             setActionMessage(`Curso creado correctamente. Código de invitación: ${createdCourse.inviteCode}`);
             await loadCourses();
         } catch (apiError) {
-            setActionMessage(apiError?.response?.data?.message || apiError?.message || 'No se pudo crear el curso.');
+            setActionMessage(getApiErrorMessage(apiError, 'No se pudo crear el curso.'));
         } finally {
             setCreating(false);
         }
