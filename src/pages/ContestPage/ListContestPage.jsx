@@ -99,6 +99,7 @@ function ListContestPage2() {
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.nick')}>Fecha de Inicio▲▼</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.lastname')}>Fecha de Fin▲▼</th>
                                 <th className="px-4 py-2">Publico/Privado</th>
+                                <th className="px-4 py-2">Estado</th>
                                 <th className="px-4 py-2">Promover a Practica</th>
                                 <th className="px-4 py-2">Editar</th>
                             </tr>
@@ -116,8 +117,15 @@ function ListContestPage2() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.startTime}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.endTime}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.private == false ? "Publico" : "Privado"}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        {problem.defunct === 'O'
+                                            ? <span className="inline-block rounded bg-green-100 px-2 py-1 text-green-800">Promovido a práctica</span>
+                                            : <span className="text-gray-500">Normal</span>}
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <PromoteComponent contestId={problem.contestId} />
+                                        {problem.defunct === 'O'
+                                            ? <span className="text-gray-400">—</span>
+                                            : <PromoteComponent contestId={problem.contestId} />}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900"
