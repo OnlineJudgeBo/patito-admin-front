@@ -31,7 +31,7 @@ const ManualProblemAddComponent = () => {
 
     return (
         <div className="mb-4">
-            <Label htmlFor="manualProblemList" className="block text-sm font-medium text-gray-700">Adicionar Problemas</Label>
+            <Label htmlFor="manualProblemList" className="block text-sm font-medium text-gray-700">Adicionar Problemas por ID, uno por linea</Label>
             <Textarea
                 id="manualProblemList"
                 onChange={onChangeHandler}

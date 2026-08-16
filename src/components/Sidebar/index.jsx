@@ -49,6 +49,23 @@ const Sidebar = () => {
                         </Link>
                     </li>
 
+                    <div className="px-6 text-xs text-gray-600 mt-4">Contest</div>
+                    <li>
+                        <Link to="/admin/contests" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/trophy-fill.svg" className="w-5 h-5" alt="Concursos Icon" />
+                            </span>
+                            <span className="ml-2 text-sm font-medium">Contest</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/admin/contests/add" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/plus-circle-fill.svg" className="w-5 h-5" alt="Crear Concurso Icon" />                            </span>
+                            <span className="ml-2 text-sm font-medium">Crear Contest</span>
+                        </Link>-
+                    </li>
+
                     <div className="px-6 text-xs text-gray-600 mt-4">Problemas</div>
                     <li>
                         <Link to="/admin/problems" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
@@ -64,6 +81,14 @@ const Sidebar = () => {
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/plus-circle-fill.svg" className="w-5 h-5" alt="Agregar Problema Icon" />
                             </span>
                             <span className="ml-2 text-sm font-medium">Agregar Problema</span>
+                        </Link>
+                    </li>
+                    <li>
+                        <Link to="/admin/problems/import-boca" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/file-earmark-zip-fill.svg" className="w-5 h-5" alt="Importar de BOCA Icon" />
+                            </span>
+                            <span className="ml-2 text-sm font-medium">Importar de BOCA</span>
                         </Link>
                     </li>
 
@@ -82,28 +107,12 @@ const Sidebar = () => {
                     <li>
                         <Link to="/admin/academic/courses" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
-                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/mortarboard-fill.svg" className="w-5 h-5" alt="Cursos académicos Icon" />
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/mortarboard-fill.svg" className="w-5 h-5" alt="Cursos Icon" />
                             </span>
                             <span className="ml-2 text-sm font-medium">Cursos Académicos</span>
                         </Link>
                     </li>
 
-                    <div className="px-6 text-xs text-gray-600 mt-4">Concursos</div>
-                    <li>
-                        <Link to="/admin/contests" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
-                            <span className="inline-flex justify-center items-center ml-4">
-                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/trophy-fill.svg" className="w-5 h-5" alt="Concursos Icon" />
-                            </span>
-                            <span className="ml-2 text-sm font-medium">Concursos</span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link to="/admin/contests/add" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
-                            <span className="inline-flex justify-center items-center ml-4">
-                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/plus-circle-fill.svg" className="w-5 h-5" alt="Crear Concurso Icon" />                            </span>
-                            <span className="ml-2 text-sm font-medium">Crear Concurso</span>
-                        </Link>
-                    </li>
                     <div className="px-6 text-xs text-gray-600 mt-4">Gestión</div>
                     <li>
                         <Link to="/admin/management/users" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">

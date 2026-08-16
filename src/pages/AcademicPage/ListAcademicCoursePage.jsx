@@ -88,8 +88,7 @@ function ListAcademicCoursePage() {
             <section className="bg-white border rounded-lg p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                        <h1 className="text-xl font-semibold text-gray-900">Cursos académicos</h1>
-                        <p className="text-sm text-gray-600">Docentes y auxiliares ven aquí los cursos creados por su usuario. Administrador ve todos los cursos.</p>
+                        <h1 className="text-xl font-semibold text-gray-900">Cursos</h1>
                     </div>
                     <button
                         type="button"
@@ -119,7 +118,6 @@ function ListAcademicCoursePage() {
             <section className="bg-white border rounded-lg p-4 shadow-sm">
                 <div className="mb-3">
                     <h2 className="text-lg font-semibold text-gray-900">Crear curso</h2>
-                    <p className="text-sm text-gray-600">La inscripción de estudiantes por username se administra luego desde el detalle del curso. Esta acción está pensada para docentes y administrador.</p>
                 </div>
 
                 <form onSubmit={handleCreateCourse} className="grid gap-3 md:grid-cols-3">
@@ -169,7 +167,7 @@ function ListAcademicCoursePage() {
                 {loading ? (
                     <div className="p-4 text-sm text-gray-600">Cargando cursos...</div>
                 ) : courses.length === 0 ? (
-                    <div className="p-4 text-sm text-gray-600">No hay cursos disponibles para gestionar.</div>
+                    <div className="p-4 text-sm text-gray-600">No hay cursos disponibles.</div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="table-auto w-full border-collapse">

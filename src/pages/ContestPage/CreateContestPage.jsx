@@ -17,11 +17,19 @@ import { problemSelectAtom, userSelectAtom } from "../../context/manager";
 import ManualProblemAddComponent from "./Problem/ManualProblemAddComponent";
 import ProblemListComponent from "./Problem/ProblemListComponent";
 
+const OPEN_WINDOW_YEARS = 50;
+
 const getCurrentTime = () => {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
+};
+
+const getDatePlusYears = (years) => {
+    const future = new Date();
+    future.setFullYear(future.getFullYear() + years);
+    return future.toISOString().substring(0, 10);
 };
 
 const CreateContestPage = () => {
@@ -35,9 +43,10 @@ const CreateContestPage = () => {
     const initialValues = {
         title: '',
         description: '',
+        isOfficial: false,
         startDate: currentDate,
         startTime: getCurrentTime(),
-        endDate: currentDate,
+        endDate: getDatePlusYears(OPEN_WINDOW_YEARS),
         endTime: getCurrentTime(),
         isPrivate: '',
         users: '',
@@ -123,8 +132,39 @@ const CreateContestPage = () => {
                                     </label>
                                 </div>
 
-                                <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement="" />
+                                <div className="mb-4">
+                                    <label htmlFor="isOfficial" className="inline-flex relative items-center cursor-pointer">
+                                        <Field
+                                            type="checkbox"
+                                            id="isOfficial"
+                                            name="isOfficial"
+                                            className="sr-only peer"
+                                            checked={formik.values.isOfficial}
+                                            onChange={() => {
+                                                const nextIsOfficial = !formik.values.isOfficial;
+                                                formik.setFieldValue('isOfficial', nextIsOfficial);
+                                                if (nextIsOfficial) {
+                                                    formik.setFieldValue('startDate', currentDate);
+                                                    formik.setFieldValue('startTime', getCurrentTime());
+                                                    formik.setFieldValue('endDate', currentDate);
+                                                    formik.setFieldValue('endTime', getCurrentTime());
+                                                } else {
+                                                    formik.setFieldValue('startDate', currentDate);
+                                                    formik.setFieldValue('startTime', getCurrentTime());
+                                                    formik.setFieldValue('endDate', getDatePlusYears(OPEN_WINDOW_YEARS));
+                                                    formik.setFieldValue('endTime', getCurrentTime());
+                                                }
+                                            }}
+                                        />
+                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                        <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Oficial Ej Div1, Div2?</span>
+                                    </label>
+                                </div>
 
+                                <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement="" />
+                                
+                                {!formik.values.isOfficial && (
+                                <>
                                 <div className="flex mb-4 space-x-4">
                                     <div className="w-1/2">
                                         <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
@@ -133,18 +173,28 @@ const CreateContestPage = () => {
                                             id="startDate"
                                             name="startDate"
                                             placeholder="Ingrese la fecha de inicio"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full disabled:bg-gray-100 disabled:text-gray-500" />
                                         <ErrorMessage name="startDate" component="div" className="text-red-500 text-sm mt-1" />
                                     </div>
 
                                     <div className="w-1/2">
-                                        <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Hora de Inicio</label>
+                                        <div className="flex items-center justify-between">
+                                            <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">Hora de Inicio</label>
+                                            <button
+                                                type="button"
+                                                onClick={() => formik.setFieldValue('startTime', getCurrentTime())}
+                                                className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                                            >
+                                                Usar hora actual
+                                            </button>
+                                        </div>
                                         <Field
                                             type="time"
                                             id="startTime"
                                             name="startTime"
-                                            placeholder="Ingrese la hora de inicio"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                            aria-describedby="startTimeHint"
+                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full disabled:bg-gray-100 disabled:text-gray-500" />
+                                        <p id="startTimeHint" className="mt-1 text-xs text-gray-500">Formato de 24 horas.</p>
                                         <ErrorMessage name="startTime" component="div" className="text-red-500 text-sm mt-1" />
                                     </div>
                                 </div>
@@ -157,7 +207,7 @@ const CreateContestPage = () => {
                                             id="endDate"
                                             name="endDate"
                                             placeholder="Ingrese la fecha de fin"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full disabled:bg-gray-100 disabled:text-gray-500" />
                                         <ErrorMessage name="endDate" component="div" className="text-red-500 text-sm mt-1" />
                                     </div>
                                     <div className="w-1/2">
@@ -167,10 +217,12 @@ const CreateContestPage = () => {
                                             id="endTime"
                                             name="endTime"
                                             placeholder="Ingrese la hora de fin"
-                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full" />
+                                            className="mt-1 p-2 border border-gray-300 rounded-md w-full disabled:bg-gray-100 disabled:text-gray-500" />
                                         <ErrorMessage name="endTime" component="div" className="text-red-500 text-sm mt-1" />
                                     </div>
                                 </div>
+                                </>
+                                )}
                                 <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={[]} />
                             </div>
 

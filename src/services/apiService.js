@@ -189,4 +189,7 @@ export const apiService = {
     get: (endpoint) => fetchAPI(`${endpoint}`, { method: 'GET' }),
     delete: (endpoint) => fetchAPI(`${endpoint}`, { method: 'DELETE' }),
     postFile: (endpoint, formData) => postApiFile(`${endpoint}`, { method: 'POST', body: formData }),
+
+    bocaImportPreview: (formData) => postApiFile('boca-import/preview', { method: 'POST', body: formData }),
+    bocaImportConfirm: (stagingIds) => fetchAPI('boca-import/confirm', { method: 'POST', body: { stagingIds } }),
 };
