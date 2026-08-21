@@ -10,6 +10,7 @@ import ListContestPage from './pages/ContestPage/ListContestPage';
 import FileManagerAcPage from './pages/FileManagerPage/FileManagerAcPage';
 import FileManagerPage from './pages/FileManagerPage/FileManagerPage';
 import IndexPage from './pages/IndexPage/IndexPage';
+import RejudgePage from './pages/JudgePage/RejudgePage';
 import LoginPage from './pages/LoginPage/LoginPage';
 import LogoutPage from './pages/LogoutPage';
 import UserAdminPage from './pages/Managment/Users/UserAdminPage';
@@ -46,7 +47,7 @@ const App = () => {
                         <Route path="/admin/problems/add" element={<PrivateRoute><CreateProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/import-boca" element={<PrivateRoute><BocaImportPage /></PrivateRoute>} />
                         <Route path="/admin/problems/edit/:problemId" element={<PrivateRoute><EditProblemPage /></PrivateRoute>} />
-                        <Route path="/admin/problems/rejudge" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+                        <Route path="/admin/problems/rejudge" element={<PrivateRoute><RejudgePage /></PrivateRoute>} />
 
                         <Route path="/admin/topicsClassifications" element={<PrivateRoute><TopicsClassificationsPage /></PrivateRoute>} />
 
