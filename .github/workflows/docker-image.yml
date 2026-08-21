@@ -8,6 +8,25 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      run_selenium:
+        description: 'Ejecutar pruebas Selenium antes de publicar la imagen'
+        required: false
+        type: boolean
+        default: false
+      tags:
+        description: 'Tags de Cucumber'
+        required: false
+        default: '@admin'
+      env:
+        description: 'Archivo application.properties'
+        required: false
+        default: 'dev'
+      reset_db:
+        description: 'Restablecer la base de datos antes de las pruebas'
+        required: false
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -21,8 +40,45 @@ env:
   IMAGE_NAME: ghcr.io/onlinejudgebo/patito-admin-ui
 
 jobs:
+  selenium-tests:
+    name: Run Selenium BDD tests
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_selenium == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Trigger and wait for automation tests
+        env:
+          GH_TOKEN: ${{ secrets.PATITO_AUTOMATION_TOKEN }}
+          REPO: OnlineJudgeBo/patito-automation-test
+          WORKFLOW: selenium-tests.yml
+          TAGS: ${{ inputs.tags || '@admin' }}
+          ENV_NAME: ${{ inputs.env || 'dev' }}
+          RESET_DB: ${{ inputs.reset_db }}
+        run: |
+          set -euo pipefail
+          BEFORE_IDS=$(gh run list --repo "$REPO" --workflow "$WORKFLOW" --limit 20 --json databaseId --jq '.[].databaseId')
+          gh workflow run "$WORKFLOW" --repo "$REPO" --ref main \
+            -f env="$ENV_NAME" -f tags="$TAGS" -f reset_db="$RESET_DB"
+
+          RUN_ID=""
+          for attempt in $(seq 1 20); do
+            sleep 10
+            CURRENT_IDS=$(gh run list --repo "$REPO" --workflow "$WORKFLOW" --limit 20 --json databaseId --jq '.[].databaseId')
+            for id in $CURRENT_IDS; do
+              if ! grep -qx "$id" <<< "$BEFORE_IDS"; then
+                RUN_ID="$id"
+                break 2
+              fi
+            done
+          done
+
+          test -n "$RUN_ID" || { echo '::error::No se pudo identificar la ejecución de Selenium.'; exit 1; }
+          gh run watch "$RUN_ID" --repo "$REPO" --exit-status
+
   docker-image:
     name: Build Docker image
+    needs: selenium-tests
+    if: ${{ always() && (needs.selenium-tests.result == 'success' || needs.selenium-tests.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
