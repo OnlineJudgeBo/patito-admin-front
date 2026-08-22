@@ -92,7 +92,7 @@ const EditContestPage = () => {
                 description: "Error al crear el contest, revise todos los campos.",
             })
         })
-    }, [contestId]);
+    }, [contestId, setSelectedProblems, setSelectedUsers, toast]);
 
     const Submit = async (values) => {
         const endDate = values.isOfficial ? getDatePlusYears(OPEN_WINDOW_YEARS) : values.endDate;
