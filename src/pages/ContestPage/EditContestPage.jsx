@@ -18,6 +18,14 @@ import UserListComponent from "./User/UserListComponent.jsx";
 import ManualProblemAddComponent from "./Problem/ManualProblemAddComponent";
 import ProblemListComponent from "./Problem/ProblemListComponent";
 
+const OPEN_WINDOW_YEARS = 50;
+
+const getDatePlusYears = (years) => {
+    const future = new Date();
+    future.setFullYear(future.getFullYear() + years);
+    return future.toISOString().substring(0, 10);
+};
+
 const EditContestPage = () => {
     const [selectedUsers, setSelectedUsers] = useAtom(userSelectAtom);
     const [selectedProblems, setSelectedProblems] = useAtom(problemSelectAtom);
@@ -36,6 +44,7 @@ const EditContestPage = () => {
         endDate: '',
         endTime: '',
         isPrivate: '',
+        isOfficial: false,
         users: '',
         selectedUser: [],
         selectedProblem: [],
@@ -69,6 +78,7 @@ const EditContestPage = () => {
                 endDate: endDate[0] || '',
                 endTime: endDate[1] || '',
                 isPrivate: data.private == 1 ? true : false,
+                isOfficial: data.defunct === 'O',
                 selectedUser: data.selectedUser || '',
                 selectedProblem: data.selectedProblem || '',
                 selectedLanguage: data.language || '',
@@ -82,13 +92,15 @@ const EditContestPage = () => {
                 description: "Error al crear el contest, revise todos los campos.",
             })
         })
-    }, [contestId]);
+    }, [contestId, setSelectedProblems, setSelectedUsers, toast]);
 
     const Submit = async (values) => {
+        const endDate = values.isOfficial ? getDatePlusYears(OPEN_WINDOW_YEARS) : values.endDate;
+        const endTime = values.isOfficial ? '23:59' : values.endTime;
         const payload = {
             ...values,
             startDate: values.startDate + " " + fixTimeFormat(values.startTime),
-            endDate: values.endDate + " " + fixTimeFormat(values.endTime),
+            endDate: endDate + " " + fixTimeFormat(endTime),
             selectedUser: parseJSON(values.selectedUser),
             selectedLanguages: parseJSON(values.selectedLanguages),
             isPrivate: values.isPrivate == 1 ? true : false,
@@ -154,6 +166,21 @@ const EditContestPage = () => {
                                             </label>
                                         </div>
 
+                                        <div className="mb-4">
+                                            <label htmlFor="isOfficial" className="inline-flex relative items-center cursor-pointer">
+                                                <Field
+                                                    type="checkbox"
+                                                    id="isOfficial"
+                                                    name="isOfficial"
+                                                    className="sr-only peer"
+                                                    checked={formik.values.isOfficial}
+                                                    onChange={() => formik.setFieldValue('isOfficial', !formik.values.isOfficial)}
+                                                />
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                                <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Oficial Ej Div1, Div2?</span>
+                                            </label>
+                                        </div>
+
                                         <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement={descriptionData} />
 
                                         <div className="flex mb-4 space-x-4">
@@ -180,6 +207,7 @@ const EditContestPage = () => {
                                             </div>
                                         </div>
 
+                                        {!formik.values.isOfficial && (
                                         <div className="flex mb-4 space-x-4">
                                             <div className="w-1/2">
                                                 <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">Fecha de Fin</label>
@@ -202,6 +230,10 @@ const EditContestPage = () => {
                                                 <ErrorMessage name="endTime" component="div" className="text-red-500 text-sm mt-1" />
                                             </div>
                                         </div>
+                                        )}
+                                        {formik.values.isOfficial && (
+                                            <p className="mb-4 text-xs text-gray-500">Concurso oficial: queda abierto para práctica sin fecha de cierre.</p>
+                                        )}
                                         <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={selectedLanguages} />
                                     </div>
 

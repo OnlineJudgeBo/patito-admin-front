@@ -66,10 +66,12 @@ const CreateContestPage = () => {
     });
 
     const Submit = async (values) => {
+        const endDate = values.isOfficial ? getDatePlusYears(OPEN_WINDOW_YEARS) : values.endDate;
+        const endTime = values.isOfficial ? '23:59' : values.endTime;
         const payload = {
             ...values,
             startDate: values.startDate + " " + fixTimeFormat(values.startTime),
-            endDate: values.endDate + " " + fixTimeFormat(values.endTime),
+            endDate: endDate + " " + fixTimeFormat(endTime),
             selectedProblem: selectedProblems,
             selectedUser: parseJSON(values.selectedUser),
             selectedLanguages: parseJSON(values.selectedLanguages),
@@ -140,21 +142,7 @@ const CreateContestPage = () => {
                                             name="isOfficial"
                                             className="sr-only peer"
                                             checked={formik.values.isOfficial}
-                                            onChange={() => {
-                                                const nextIsOfficial = !formik.values.isOfficial;
-                                                formik.setFieldValue('isOfficial', nextIsOfficial);
-                                                if (nextIsOfficial) {
-                                                    formik.setFieldValue('startDate', currentDate);
-                                                    formik.setFieldValue('startTime', getCurrentTime());
-                                                    formik.setFieldValue('endDate', currentDate);
-                                                    formik.setFieldValue('endTime', getCurrentTime());
-                                                } else {
-                                                    formik.setFieldValue('startDate', currentDate);
-                                                    formik.setFieldValue('startTime', getCurrentTime());
-                                                    formik.setFieldValue('endDate', getDatePlusYears(OPEN_WINDOW_YEARS));
-                                                    formik.setFieldValue('endTime', getCurrentTime());
-                                                }
-                                            }}
+                                            onChange={() => formik.setFieldValue('isOfficial', !formik.values.isOfficial)}
                                         />
                                         <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                         <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Oficial Ej Div1, Div2?</span>
@@ -162,9 +150,7 @@ const CreateContestPage = () => {
                                 </div>
 
                                 <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement="" />
-                                
-                                {!formik.values.isOfficial && (
-                                <>
+
                                 <div className="flex mb-4 space-x-4">
                                     <div className="w-1/2">
                                         <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Fecha de Inicio</label>
@@ -199,6 +185,7 @@ const CreateContestPage = () => {
                                     </div>
                                 </div>
 
+                                {!formik.values.isOfficial && (
                                 <div className="flex mb-4 space-x-4">
                                     <div className="w-1/2">
                                         <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">Fecha de Fin</label>
@@ -221,7 +208,9 @@ const CreateContestPage = () => {
                                         <ErrorMessage name="endTime" component="div" className="text-red-500 text-sm mt-1" />
                                     </div>
                                 </div>
-                                </>
+                                )}
+                                {formik.values.isOfficial && (
+                                    <p className="mb-4 text-xs text-gray-500">Concurso oficial: queda abierto para práctica sin fecha de cierre.</p>
                                 )}
                                 <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={[]} />
                             </div>
