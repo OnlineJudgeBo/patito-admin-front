@@ -125,8 +125,8 @@ function ListProblemsPage() {
                                 <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('title')}>Nombre▲▼</th>
                                 <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('inDate')}>Creación▲▼</th>
                                 <th className="px-3 py-2">En uso? ▲▼</th>
-                                <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('submit')}>Intentos▲▼</th>
-                                <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('accepted')}>Resuelto▲▼</th>
+                                <th className="px-3 py-2 cursor-pointer" title="Intentos" onClick={() => requestSort('submit')}>I▲▼</th>
+                                <th className="px-3 py-2 cursor-pointer" title="Resuelto" onClick={() => requestSort('accepted')}>R▲▼</th>
                                 <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('topic')}>Tema▲▼</th>
                                 <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('classification')}>Clasificación▲▼</th>
                                 <th className="px-3 py-2">Soluciones</th>
