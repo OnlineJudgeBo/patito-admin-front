@@ -82,7 +82,7 @@ const CreateContestPage = () => {
             payload.manualUserList = selectedUsers.map(user => user.userId).join(",")
         }
 
-        apiService.create('contests', payload).then(() => {
+        return apiService.create('contests', payload).then(() => {
             toast({
                 description: 'Contest agregado.',
             })
@@ -247,7 +247,10 @@ const CreateContestPage = () => {
                         </div>
                         <button
                             type="submit"
-                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar</button>
+                            disabled={formik.isSubmitting}
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                            {formik.isSubmitting ? 'Guardando...' : 'Guardar'}
+                        </button>
                     </Form>
                 )}
             </Formik>

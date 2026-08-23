@@ -100,7 +100,7 @@ const EditContestPage = () => {
             selectedProblem: selectedProblems
         };
 
-        apiService.update('contests', contestId, payload).then(() => {
+        return apiService.update('contests', contestId, payload).then(() => {
             toast({
                 description: 'Contest actualizado.',
             })
@@ -260,7 +260,10 @@ const EditContestPage = () => {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Guardar</button>
+                                    disabled={formik.isSubmitting}
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    {formik.isSubmitting ? 'Guardando...' : 'Guardar'}
+                                </button>
                             </Form>
                         )}
                     </Formik>
