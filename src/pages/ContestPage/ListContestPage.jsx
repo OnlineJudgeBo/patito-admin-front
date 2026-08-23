@@ -6,6 +6,7 @@ import { PromoteComponent } from './PromoteComponent';
 function ListContestPage2() {
     const [problems, setProblems] = useState([]);
     const [filter, setFilter] = useState('');
+    const [onlyOfficial, setOnlyOfficial] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -44,6 +45,10 @@ function ListContestPage2() {
             });
         }
 
+        if (onlyOfficial) {
+            sortableItems = sortableItems.filter(problem => problem.defunct === 'O');
+        }
+
         return filter ? sortableItems.filter(problem =>
             (problem.contestId && problem.contestId.toString().includes(filter)) ||
             (problem.title && problem.title.toLowerCase().includes(filter.toLowerCase())) ||
@@ -52,7 +57,7 @@ function ListContestPage2() {
         ) : sortableItems;
 
 
-    }, [problems, sortConfig, filter]);
+    }, [problems, sortConfig, filter, onlyOfficial]);
 
     const indexOfLastProblem = currentPage * problemsPerPage;
     const indexOfFirstProblem = indexOfLastProblem - problemsPerPage;
@@ -76,13 +81,20 @@ function ListContestPage2() {
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
-            <div className="mb-4">
+            <div className="mb-4 flex gap-2">
                 <input
                     type="text"
                     placeholder="Buscar por nombre o nombre de usuario..."
                     onChange={(e) => setFilter(e.target.value)}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
+                <button
+                    type="button"
+                    onClick={() => { setOnlyOfficial(prev => !prev); setCurrentPage(1); }}
+                    className={`whitespace-nowrap rounded px-4 py-2 text-sm font-medium ${onlyOfficial ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                >
+                    {onlyOfficial ? 'Viendo solo oficiales' : 'Ver concursos oficiales'}
+                </button>
             </div>
 
             {isLoading ? (
