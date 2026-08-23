@@ -58,8 +58,7 @@ const EditForm = () => {
         TimeLimit: '',
         Input: '',
         Output: '',
-        SampleInput: '',
-        SampleOutput: '',
+        SampleCases: [{ Input: '', Output: '' }],
         Source: '',
         Hint: '',
         Classifications: [],
@@ -80,8 +79,9 @@ const EditForm = () => {
                     Classifications: data.classifications || [],
                     Input: data.input || '',
                     Output: data.output || '',
-                    SampleInput: data.sampleInput || '',
-                    SampleOutput: data.sampleOutput || '',
+                    SampleCases: data.sampleCases && data.sampleCases.length > 0
+                        ? data.sampleCases.map((sample) => ({ Input: sample.input || '', Output: sample.output || '' }))
+                        : [{ Input: data.sampleInput || '', Output: data.sampleOutput || '' }],
                     Source: data.source || '',
                     Hint: data.hint || '',
                 });
@@ -103,8 +103,6 @@ const EditForm = () => {
         TimeLimit: Yup.number().required('El límite de tiempo es obligatorio').positive('Debe ser positivo'),
         Input: Yup.string().required('La descripción de la entrada es obligatoria'),
         Output: Yup.string().required('La descripción de la salida es obligatoria'),
-        //SampleInput: Yup.string().required('La entrada de ejemplo es obligatoria'),
-        //SampleOutput: Yup.string().required('La salida de ejemplo es obligatoria'),
     });
 
     const formik = useFormik({
@@ -113,6 +111,21 @@ const EditForm = () => {
         validationSchema: validationSchema,
         onSubmit: Submit,
     });
+
+    const updateSampleCase = (index, field, value) => {
+        const cases = formik.values.SampleCases.map((sample, i) =>
+            i === index ? { ...sample, [field]: value } : sample
+        );
+        formik.setFieldValue('SampleCases', cases);
+    };
+
+    const addSampleCase = () => {
+        formik.setFieldValue('SampleCases', [...formik.values.SampleCases, { Input: '', Output: '' }]);
+    };
+
+    const removeSampleCase = (index) => {
+        formik.setFieldValue('SampleCases', formik.values.SampleCases.filter((_, i) => i !== index));
+    };
 
     const onSelectionChange = (selectedClassifications) => {
         let classifications = []
@@ -276,26 +289,36 @@ const EditForm = () => {
                 ) : null}
             </div>
 
-            {/* Sample Input */}
-            <div className="mb-6">
-                <label htmlFor="sample-input" className="block text-xl font-semibold mb-2">Ejemplo de Entrada del Problema</label>
-                <textarea id="sample-input" name="SampleInput" rows="10"
-                    className="form-textarea mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    value={formik.values.SampleInput} onChange={formik.handleChange} onBlur={formik.handleBlur} />
-                {formik.touched.SampleInput && formik.errors.SampleInput ? (
-                    <div className="text-red-500">{formik.errors.SampleInput}</div>
-                ) : null}
-            </div>
-
-            {/* Sample Output */}
-            <div className="mb-6">
-                <label htmlFor="sample-output" className="block text-xl font-semibold mb-2">Ejemplo de Salida del Problema</label>
-                <textarea id="sample-output" name="SampleOutput" rows="10"
-                    className="form-textarea mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    value={formik.values.SampleOutput} onChange={formik.handleChange} onBlur={formik.handleBlur} />
-                {formik.touched.SampleOutput && formik.errors.SampleOutput ? (
-                    <div className="text-red-500">{formik.errors.SampleOutput}</div>
-                ) : null}
+            {/* Casos de ejemplo */}
+            <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
+                <label className="block text-xl font-semibold mb-4">Casos de ejemplo</label>
+                {formik.values.SampleCases.map((sample, index) => (
+                    <div key={index} className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-4">
+                        <div>
+                            <label htmlFor={`sample-input-${index}`} className="block text-sm font-medium mb-1">Entrada #{index + 1}</label>
+                            <textarea id={`sample-input-${index}`} rows="4"
+                                className="form-textarea mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                value={sample.Input} onChange={(e) => updateSampleCase(index, 'Input', e.target.value)} />
+                        </div>
+                        <div>
+                            <label htmlFor={`sample-output-${index}`} className="block text-sm font-medium mb-1">Salida #{index + 1}</label>
+                            <textarea id={`sample-output-${index}`} rows="4"
+                                className="form-textarea mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                value={sample.Output} onChange={(e) => updateSampleCase(index, 'Output', e.target.value)} />
+                        </div>
+                        {formik.values.SampleCases.length > 1 && (
+                            <button type="button" className="text-red-600 text-sm md:col-span-2 text-left"
+                                onClick={() => removeSampleCase(index)}>
+                                Quitar caso
+                            </button>
+                        )}
+                    </div>
+                ))}
+                <button type="button"
+                    className="bg-gray-200 hover:bg-gray-300 text-sm font-medium py-2 px-4 rounded"
+                    onClick={addSampleCase}>
+                    + Agregar caso
+                </button>
             </div>
 
             {/* Hits */}
@@ -379,19 +402,26 @@ const EditForm = () => {
                             <h2 className="mb-2 text-xl font-semibold">Salida</h2>
                             <StatementPreview html={formik.values.Output || 'Aún no se ha escrito la especificación de salida.'} className="leading-7" />
                         </section>
-                        {(formik.values.SampleInput || formik.values.SampleOutput) ? (
-                            <section>
-                                <h2 className="mb-3 text-xl font-semibold">Ejemplo</h2>
-                                <div className="grid gap-4 md:grid-cols-2">
-                                    <div>
-                                        <h3 className="mb-2 font-medium">Entrada</h3>
-                                        <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-100">{formik.values.SampleInput || '—'}</pre>
-                                    </div>
-                                    <div>
-                                        <h3 className="mb-2 font-medium">Salida</h3>
-                                        <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-100">{formik.values.SampleOutput || '—'}</pre>
-                                    </div>
-                                </div>
+                        {formik.values.SampleCases.some((sample) => sample.Input || sample.Output) ? (
+                            <section className="space-y-4">
+                                <h2 className="mb-1 text-xl font-semibold">Ejemplos</h2>
+                                {formik.values.SampleCases.map((sample, index) => (
+                                    (sample.Input || sample.Output) && (
+                                        <div key={index}>
+                                            <h3 className="mb-2 font-medium">Ejemplo #{index + 1}</h3>
+                                            <div className="grid gap-4 md:grid-cols-2">
+                                                <div>
+                                                    <h4 className="mb-1 text-sm font-medium text-slate-600">Entrada</h4>
+                                                    <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-100">{sample.Input || '—'}</pre>
+                                                </div>
+                                                <div>
+                                                    <h4 className="mb-1 text-sm font-medium text-slate-600">Salida</h4>
+                                                    <pre className="overflow-x-auto rounded-lg bg-slate-950 p-4 font-mono text-sm text-slate-100">{sample.Output || '—'}</pre>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                ))}
                             </section>
                         ) : null}
                         {formik.values.Hint ? (
