@@ -92,6 +92,16 @@ function ListProblemsPage() {
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
+            {isAdmin && (
+                <div className="mb-4 flex justify-end">
+                    <a
+                        href="/admin/problems/import"
+                        className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded"
+                    >
+                        Importar problema (ICPC)
+                    </a>
+                </div>
+            )}
             <div className="mb-4">
                 <input
                     type="text"
