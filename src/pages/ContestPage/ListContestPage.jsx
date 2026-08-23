@@ -45,9 +45,9 @@ function ListContestPage2() {
             });
         }
 
-        if (onlyOfficial) {
-            sortableItems = sortableItems.filter(problem => problem.defunct === 'O');
-        }
+        sortableItems = onlyOfficial
+            ? sortableItems.filter(problem => problem.defunct === 'O')
+            : sortableItems.filter(problem => problem.defunct !== 'O');
 
         return filter ? sortableItems.filter(problem =>
             (problem.contestId && problem.contestId.toString().includes(filter)) ||
@@ -93,7 +93,7 @@ function ListContestPage2() {
                     onClick={() => { setOnlyOfficial(prev => !prev); setCurrentPage(1); }}
                     className={`whitespace-nowrap rounded px-4 py-2 text-sm font-medium ${onlyOfficial ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}
                 >
-                    {onlyOfficial ? 'Viendo solo oficiales' : 'Ver concursos oficiales'}
+                    {onlyOfficial ? 'Viendo solo oficiales de práctica' : 'Ver concursos oficiales de práctica'}
                 </button>
             </div>
 
