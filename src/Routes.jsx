@@ -17,6 +17,7 @@ import UserAdminPage from './pages/Managment/Users/UserAdminPage';
 import BocaImportPage from './pages/ProblemsPage/BocaImportPage';
 import CreateProblemPage from './pages/ProblemsPage/CreateProblemPage';
 import EditProblemPage from './pages/ProblemsPage/EditProblemPage';
+import ImportProblemPage from './pages/ProblemsPage/ImportProblemPage';
 import ListProblemPage from './pages/ProblemsPage/ListProblemPage';
 import SchedulePage from './pages/Schedule/SchedulePage';
 import TopicsClassificationsPage from './pages/TopicsClassificationsPage/TopicsClassificationsPage';
@@ -46,6 +47,7 @@ const App = () => {
 
                         <Route path="/admin/problems/add" element={<PrivateRoute><CreateProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/import-boca" element={<PrivateRoute><BocaImportPage /></PrivateRoute>} />
+                        <Route path="/admin/problems/import" element={<PrivateRoute><ImportProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/edit/:problemId" element={<PrivateRoute><EditProblemPage /></PrivateRoute>} />
                         <Route path="/admin/problems/rejudge" element={<PrivateRoute><RejudgePage /></PrivateRoute>} />
 

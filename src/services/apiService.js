@@ -192,4 +192,24 @@ export const apiService = {
 
     bocaImportPreview: (formData) => postApiFile('boca-import/preview', { method: 'POST', body: formData }),
     bocaImportConfirm: (stagingIds) => fetchAPI('boca-import/confirm', { method: 'POST', body: { stagingIds } }),
+
+    exportProblem: async (problemId) => {
+        const token = getCookie('accessToken');
+        try {
+            const response = await axios({
+                method: 'GET',
+                url: `${BASE_URL}/problems/${problemId}/export`,
+                headers: token
+                    ? { 'Accept': 'application/zip', 'Authorization': `Bearer ${token}` }
+                    : { 'Accept': 'application/zip' },
+                responseType: 'blob'
+            });
+
+            return response.data;
+        } catch (error) {
+            handleUnauthorized(error);
+            throw error;
+        }
+    },
+    importProblem: (formData) => postApiFile('problems/import', { method: 'POST', body: formData }),
 };

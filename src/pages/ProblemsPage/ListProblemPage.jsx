@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import UseAuth from '../../hooks/UseAuth';
 import { apiService } from '../../services/apiService';
 import { ChangeStatusComponent } from './ChangeStatusComponent';
 
 function ListProblemsPage() {
+    const { roles } = UseAuth();
+    const isAdmin = roles.some((role) => String(role).trim().toLowerCase() === 'administrador');
     const [problems, setProblems] = useState([]);
     const [filter, setFilter] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -10,6 +13,26 @@ function ListProblemsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [problemsPerPage] = useState(100);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+    const [exportingId, setExportingId] = useState(null);
+
+    const handleExport = async (problemId) => {
+        setExportingId(problemId);
+        try {
+            const blob = await apiService.exportProblem(problemId);
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = downloadUrl;
+            anchor.download = `problem-${problemId}.zip`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (apiError) {
+            alert(apiError?.response?.data?.message || apiError?.message || 'No se pudo exportar el problema.');
+        } finally {
+            setExportingId(null);
+        }
+    };
 
     useEffect(() => {
         apiService.fetchProblems()
@@ -147,6 +170,12 @@ function ListProblemsPage() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-4">
                                         <a className="text-blue-600 hover:text-blue-900" href={`/admin/problems/edit/${problem.problemId}`}>Editar</a>
+                                        {isAdmin && (
+                                            <a className="text-blue-600 hover:text-blue-900" href="#" onClick={(e) => {
+                                                e.preventDefault();
+                                                handleExport(problem.problemId);
+                                            }}>{exportingId === problem.problemId ? 'Exportando...' : 'Exportar'}</a>
+                                        )}
                                         <a className="text-blue-600 hover:text-blue-900" href="#" onClick={(e) => {
                                             e.preventDefault();
                                             if (confirm("¿Está seguro de volver a juzgar todos los envíos?")) {
