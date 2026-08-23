@@ -42,7 +42,7 @@ function ImportProblemPage() {
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
-            <h1 className="text-xl font-semibold mb-4">Importar problema (paquete ICPC)</h1>
+            <h1 className="text-xl font-semibold mb-4">Importar problema</h1>
 
             <div
                 {...getRootProps()}
