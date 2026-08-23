@@ -18,14 +18,6 @@ import UserListComponent from "./User/UserListComponent.jsx";
 import ManualProblemAddComponent from "./Problem/ManualProblemAddComponent";
 import ProblemListComponent from "./Problem/ProblemListComponent";
 
-const OPEN_WINDOW_YEARS = 50;
-
-const getDatePlusYears = (years) => {
-    const future = new Date();
-    future.setFullYear(future.getFullYear() + years);
-    return future.toISOString().substring(0, 10);
-};
-
 const EditContestPage = () => {
     const [selectedUsers, setSelectedUsers] = useAtom(userSelectAtom);
     const [selectedProblems, setSelectedProblems] = useAtom(problemSelectAtom);
@@ -95,8 +87,8 @@ const EditContestPage = () => {
     }, [contestId, setSelectedProblems, setSelectedUsers, toast]);
 
     const Submit = async (values) => {
-        const endDate = values.isOfficial ? getDatePlusYears(OPEN_WINDOW_YEARS) : values.endDate;
-        const endTime = values.isOfficial ? '23:59' : values.endTime;
+        const endDate = values.isOfficial ? values.startDate : values.endDate;
+        const endTime = values.isOfficial ? values.startTime : values.endTime;
         const payload = {
             ...values,
             startDate: values.startDate + " " + fixTimeFormat(values.startTime),

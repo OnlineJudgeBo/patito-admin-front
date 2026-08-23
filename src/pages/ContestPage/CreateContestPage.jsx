@@ -66,8 +66,8 @@ const CreateContestPage = () => {
     });
 
     const Submit = async (values) => {
-        const endDate = values.isOfficial ? getDatePlusYears(OPEN_WINDOW_YEARS) : values.endDate;
-        const endTime = values.isOfficial ? '23:59' : values.endTime;
+        const endDate = values.isOfficial ? values.startDate : values.endDate;
+        const endTime = values.isOfficial ? values.startTime : values.endTime;
         const payload = {
             ...values,
             startDate: values.startDate + " " + fixTimeFormat(values.startTime),
