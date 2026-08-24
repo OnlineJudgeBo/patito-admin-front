@@ -19,3 +19,8 @@
 .ck-editor__editable_inline {
     padding: 0 30px !important;
 }
+
+.ck.ck-content a {
+    color: #2563eb;
+    text-decoration: underline;
+}
