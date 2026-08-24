@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import UseAuth from '../../hooks/UseAuth';
 import { apiService } from '../../services/apiService';
 import { ChangeStatusComponent } from './ChangeStatusComponent';
 
 function ListProblemsPage() {
+    const { roles } = UseAuth();
+    const isAdmin = roles.some((role) => String(role).trim().toLowerCase() === 'administrador');
     const [problems, setProblems] = useState([]);
     const [filter, setFilter] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -10,6 +13,26 @@ function ListProblemsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [problemsPerPage] = useState(100);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+    const [exportingId, setExportingId] = useState(null);
+
+    const handleExport = async (problemId) => {
+        setExportingId(problemId);
+        try {
+            const blob = await apiService.exportProblem(problemId);
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = downloadUrl;
+            anchor.download = `problem-${problemId}.zip`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (apiError) {
+            alert(apiError?.response?.data?.message || apiError?.message || 'No se pudo exportar el problema.');
+        } finally {
+            setExportingId(null);
+        }
+    };
 
     useEffect(() => {
         apiService.fetchProblems()
@@ -69,6 +92,16 @@ function ListProblemsPage() {
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
+            {isAdmin && (
+                <div className="mb-4 flex justify-end">
+                    <a
+                        href="/admin/problems/import"
+                        className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded"
+                    >
+                        Importar problema
+                    </a>
+                </div>
+            )}
             <div className="mb-4">
                 <input
                     type="text"
@@ -84,39 +117,40 @@ function ListProblemsPage() {
                 <div className="text-red-500 text-center">Error al cargar los datos: {error}</div>
             ) : (
                 <>
+                    <div className="overflow-x-auto border rounded">
                     <table className="table-auto w-full border-collapse">
                         <thead className="bg-gray-700 text-white">
                             <tr>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('problemId')}>Id</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('title')}>Nombre▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('inDate')}>Creación▲▼</th>
-                                <th className="px-4 py-2">En uso? ▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('submit')}>Intentos▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('accepted')}>Resuelto▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('topic')}>Tema▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('classification')}>Clasificación▲▼</th>
-                                <th className="px-4 py-2">Soluciones</th>
-                                <th className="px-4 py-2">TestData</th>
-                                <th className="px-4 py-2">Acciones</th>
+                                <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('problemId')}>Id</th>
+                                <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('title')}>Nombre▲▼</th>
+                                <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('inDate')}>Creación▲▼</th>
+                                <th className="px-3 py-2">En uso? ▲▼</th>
+                                <th className="px-3 py-2 cursor-pointer" title="Intentos" onClick={() => requestSort('submit')}>I▲▼</th>
+                                <th className="px-3 py-2 cursor-pointer" title="Resuelto" onClick={() => requestSort('accepted')}>R▲▼</th>
+                                <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('topic')}>Tema▲▼</th>
+                                <th className="px-3 py-2 cursor-pointer" onClick={() => requestSort('classification')}>Clasificación▲▼</th>
+                                <th className="px-3 py-2">Soluciones</th>
+                                <th className="px-3 py-2">TestData</th>
+                                <th className="px-3 py-2">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                             {currentProblems.map((problem) => (
                                 <tr key={problem.problemId}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.problemId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{problem.problemId}</td>
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900"
                                             href={`/admin/problems/edit/${problem.problemId}`}>
                                             {problem.title}
                                         </a>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(problem.inDate).toLocaleDateString()}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{new Date(problem.inDate).toLocaleDateString()}</td>
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                                         <ChangeStatusComponent problemId={problem.problemId} initialDefunct={problem.defunct}></ChangeStatusComponent>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.submit}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.accepted}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{problem.submit}</td>
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{problem.accepted}</td>
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                                         {
                                             problem.classifications ?
                                                 Array.from(new Set(problem.classifications.map(classification => classification.topic.name)))
@@ -128,7 +162,7 @@ function ListProblemsPage() {
                                         }
                                     </td>
 
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                                         {
                                             problem.classifications ?
                                                 Array.from(new Set(problem.classifications.map(classification => classification.name)))
@@ -139,14 +173,20 @@ function ListProblemsPage() {
                                                     )) : ""
                                         }
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900" href={`/admin/fileManager/${problem.problemId}/ac`}>Soluciones</a>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                                         <a className="text-blue-600 hover:text-blue-900" href={`/admin/fileManager/${problem.problemId}`}>Tes Data</a>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-4">
+                                    <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 flex gap-4">
                                         <a className="text-blue-600 hover:text-blue-900" href={`/admin/problems/edit/${problem.problemId}`}>Editar</a>
+                                        {isAdmin && (
+                                            <a className="text-blue-600 hover:text-blue-900" href="#" onClick={(e) => {
+                                                e.preventDefault();
+                                                handleExport(problem.problemId);
+                                            }}>{exportingId === problem.problemId ? 'Exportando...' : 'Exportar'}</a>
+                                        )}
                                         <a className="text-blue-600 hover:text-blue-900" href="#" onClick={(e) => {
                                             e.preventDefault();
                                             if (confirm("¿Está seguro de volver a juzgar todos los envíos?")) {
@@ -166,6 +206,7 @@ function ListProblemsPage() {
                             ))}
                         </tbody>
                     </table>
+                    </div>
                     {sortedAndFilteredProblems.length === 0 && <div className="text-center my-4">No se encontraron problemas con esos criterios de búsqueda.</div>}
                     <nav className="flex justify-center mt-4">
                         {pageNumbers.map(number => (
