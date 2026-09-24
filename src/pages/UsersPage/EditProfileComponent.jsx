@@ -3,6 +3,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 import React from 'react';
 import * as Yup from 'yup';
 import { apiService } from '../../services/apiService';
@@ -16,7 +18,8 @@ const createValidationSchema = ({ originalEmail, originalUsername }) => Yup.obje
             return await apiService.checkUserEmailAvailability({ "email": email, "userId": "" });
         }
     ),
-    username: Yup.string().required('Nombre de usuario requerido').test(
+    username: Yup.string().required('Nombre de usuario requerido')
+        .matches(/^[A-Za-z0-9_]{3,20}$/, '3 a 20 caracteres: letras, números o guion bajo').test(
         'username-available',
         'El nombre de usuario ya esta en uso',
         async (username, context) => {
@@ -43,10 +46,17 @@ export function EditProfileComponent({ email, username, name, lastname }) {
             lastname: lastname,
         },
         validationSchema: createValidationSchema({ originalEmail: email, originalUsername: username }),
-        onSubmit: (values) => {
-            apiService.update("users", username, values).then(data => {
-                window.location.reload();
-            })
+        onSubmit: (values, { setStatus }) => {
+            setStatus(null);
+            apiService.update("users", encodeURIComponent(username), values).then(() => {
+                const token = Cookies.get('accessToken');
+                const renamedSelf = values.username !== username && token && jwtDecode(token).sub === username;
+                // The session token still carries the old user id: log in again with the new one.
+                if (renamedSelf) window.location.href = '/admin/logout';
+                else window.location.reload();
+            }).catch(error => {
+                setStatus(error?.response?.data?.message ?? 'No se pudo guardar los cambios.');
+            });
         }
     });
 
@@ -116,6 +126,9 @@ export function EditProfileComponent({ email, username, name, lastname }) {
                             )}
                         </div>
                     </div>
+                    {formik.status && (
+                        <p className="text-red-500 text-sm">{formik.status}</p>
+                    )}
                     <DialogFooter className="mt-4">
                         <Button
                             type="submit"
