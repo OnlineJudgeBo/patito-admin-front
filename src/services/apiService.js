@@ -187,6 +187,23 @@ export const apiService = {
     create: (endpoint, body) => fetchAPI(endpoint, { method: 'POST', body: body }),
     update: (endpoint, id, body) => fetchAPI(`${endpoint}/${id}`, { method: 'PUT', body: body ? body : "" }),
     get: (endpoint) => fetchAPI(`${endpoint}`, { method: 'GET' }),
+    post: (endpoint, body) => fetchAPI(`${endpoint}`, { method: 'POST', body }),
+    put: (endpoint, body) => fetchAPI(`${endpoint}`, { method: 'PUT', body }),
+    getBlob: async (endpoint) => {
+        const token = getCookie('accessToken');
+        try {
+            const response = await axios({
+                method: 'GET',
+                url: `${BASE_URL}/${String(endpoint).replace(/^\/+/, '')}`,
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                responseType: 'blob'
+            });
+            return response.data;
+        } catch (error) {
+            handleUnauthorized(error);
+            throw error;
+        }
+    },
     delete: (endpoint) => fetchAPI(`${endpoint}`, { method: 'DELETE' }),
     postFile: (endpoint, formData) => postApiFile(`${endpoint}`, { method: 'POST', body: formData }),
 

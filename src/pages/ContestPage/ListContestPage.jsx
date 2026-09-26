@@ -131,6 +131,12 @@ function ListContestPage2() {
                                                 Examen · Monitoreo
                                             </a>
                                         )}
+                                        {problem.isExam && (
+                                            <a className="ml-2 inline-block rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800 hover:bg-blue-200"
+                                                href={`/admin/contests/${problem.contestId}/machines`}>
+                                                Máquinas
+                                            </a>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.startTime}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.endTime}</td>
