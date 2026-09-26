@@ -213,6 +213,8 @@ export const apiService = {
 
     getProblemClassificationSuggestions: (problemId) =>
         fetchAPI(`problems/${problemId}/classification-suggestions`, { method: 'GET' }),
+    addProblemClassifications: (problemId, classificationIds) =>
+        fetchAPI(`problems/${problemId}/classifications`, { method: 'POST', body: { classificationIds } }),
 
     exportProblem: async (problemId) => {
         const token = getCookie('accessToken');
