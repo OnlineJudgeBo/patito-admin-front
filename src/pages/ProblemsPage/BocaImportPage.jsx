@@ -197,12 +197,16 @@ function BocaImportPage() {
                                         {item.success && item.suggestedClassifications?.length > 0 ? (
                                             <ul className="space-y-1">
                                                 {item.suggestedClassifications.map((c) => (
-                                                    <li key={c.classificationId} className="flex items-center gap-2 text-xs">
+                                                    <li key={c.classificationId} className="flex items-start gap-2 text-xs">
                                                         <Checkbox
+                                                            className="mt-0.5"
                                                             checked={selectedClassificationIds.get(item.stagingId)?.has(c.classificationId) ?? false}
                                                             onCheckedChange={() => toggleClassification(item.stagingId, c.classificationId)}
                                                         />
-                                                        <span>{c.label}</span>
+                                                        <span>
+                                                            {c.label}
+                                                            {c.reason && <span className="block text-muted-foreground">{c.reason}</span>}
+                                                        </span>
                                                     </li>
                                                 ))}
                                             </ul>

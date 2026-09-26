@@ -66,6 +66,8 @@ const EditForm = () => {
     });
 
     const [dataLoaded, setDataLoaded] = useState(false);
+    // What the Tema/Clasificación picker shows; it takes {classificationId, topic: {topicId}} items.
+    const [pickerSelected, setPickerSelected] = useState([]);
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -86,6 +88,7 @@ const EditForm = () => {
                     Source: data.source || '',
                     Hint: data.hint || '',
                 });
+                setPickerSelected(data.classifications || []);
                 setDataLoaded(true);
             } catch (error) {
                 console.error("Error al cargar los datos del problema:", error);
@@ -136,13 +139,8 @@ const EditForm = () => {
         formik.setFieldValue('Classifications', classifications);
     };
 
-    // Suggestion state lives apart from the Tema/Clasificación picker above -- that
-    // picker's `selected` is bound to `initialValues.Classifications`, and formik's
-    // `enableReinitialize: true` means changing `initialValues` resets the WHOLE form
-    // (title, description, everything), not just the classifications. Merging straight
-    // into `formik.values.Classifications` instead avoids wiping unsaved edits; the only
-    // cost is the two-column picker's own highlighting won't reflect an AI-added item
-    // until the page is reloaded, which is cosmetic, not a data problem.
+    // The picker reads `pickerSelected`, not `initialValues`: changing `initialValues` would reset
+    // the whole form (enableReinitialize), wiping unsaved edits.
     const [classificationSuggestion, setClassificationSuggestion] = useState(null);
     const [suggestedSelection, setSuggestedSelection] = useState(new Set());
     const [isSuggestingClassifications, setIsSuggestingClassifications] = useState(false);
@@ -184,15 +182,25 @@ const EditForm = () => {
         });
     };
 
-    const applySuggestedClassifications = () => {
-        const existingIds = new Set(formik.values.Classifications.map((c) => c.ClassificationId));
-        const toAdd = classificationSuggestion.classifications
-            .filter((c) => suggestedSelection.has(c.classificationId) && !existingIds.has(c.classificationId))
-            .map((c) => ({ ClassificationId: c.classificationId }));
-
-        formik.setFieldValue('Classifications', [...formik.values.Classifications, ...toAdd]);
-        toast({ variant: "success", description: `${toAdd.length} clasificación(es) agregada(s). Revisalas y guardá el problema.` });
-        setClassificationSuggestion(null);
+    // Accepting a suggestion saves it right away, and the picker then shows it with the rest.
+    const applySuggestedClassifications = async () => {
+        const pickerItem = (classificationId) => {
+            const topic = topicClassificationList.find((t) => t.classifications.some((c) => c.classificationId === classificationId));
+            return { classificationId, topic: { topicId: topic?.topicId } };
+        };
+        try {
+            const saved = await apiService.addProblemClassifications(problemId, [...suggestedSelection]);
+            const savedIds = new Set(saved.map((c) => c.classificationId));
+            // Keep what was picked by hand but not saved yet.
+            const unsaved = formik.values.Classifications
+                .map((c) => c.ClassificationId)
+                .filter((id) => !savedIds.has(id));
+            setPickerSelected([...saved.map((c) => pickerItem(c.classificationId)), ...unsaved.map(pickerItem)]);
+            toast({ variant: "success", description: "Clasificaciones guardadas." });
+            setClassificationSuggestion(null);
+        } catch (error) {
+            toast({ variant: "destructive", description: error?.response?.data?.message || "No se pudieron guardar las clasificaciones." });
+        }
     };
 
     if (!dataLoaded) {
@@ -244,7 +252,7 @@ const EditForm = () => {
                         <div className="rounded-lg mt-5">
                             <TopicClassificationComponent
                                 topics={topicClassificationList}
-                                selected={initialValues.Classifications}
+                                selected={pickerSelected}
                                 onSelectionChange={onSelectionChange}
                             />
                         </div>
@@ -262,12 +270,18 @@ const EditForm = () => {
                                         </p>
                                         <ul className="space-y-1 mb-3">
                                             {classificationSuggestion.classifications.map((c) => (
-                                                <li key={c.classificationId} className="flex items-center gap-2 text-sm">
+                                                <li key={c.classificationId} className="flex items-start gap-2 text-sm">
                                                     <Checkbox
+                                                        className="mt-0.5"
                                                         checked={suggestedSelection.has(c.classificationId)}
                                                         onCheckedChange={() => toggleSuggested(c.classificationId)}
                                                     />
-                                                    <span>{c.topic ? `${c.topic.name} > ${c.name}` : c.name}</span>
+                                                    <span>
+                                                        {c.topic ? `${c.topic.name} > ${c.name}` : c.name}
+                                                        {classificationSuggestion.reasons?.[c.classificationId] && (
+                                                            <span className="block text-xs text-muted-foreground">{classificationSuggestion.reasons[c.classificationId]}</span>
+                                                        )}
+                                                    </span>
                                                 </li>
                                             ))}
                                         </ul>
