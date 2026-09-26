@@ -191,7 +191,11 @@ export const apiService = {
     postFile: (endpoint, formData) => postApiFile(`${endpoint}`, { method: 'POST', body: formData }),
 
     bocaImportPreview: (formData) => postApiFile('boca-import/preview', { method: 'POST', body: formData }),
-    bocaImportConfirm: (stagingIds) => fetchAPI('boca-import/confirm', { method: 'POST', body: { stagingIds } }),
+    bocaImportConfirm: (stagingIds, selectedClassificationIdsByStagingId) =>
+        fetchAPI('boca-import/confirm', { method: 'POST', body: { stagingIds, selectedClassificationIdsByStagingId } }),
+
+    getProblemClassificationSuggestions: (problemId) =>
+        fetchAPI(`problems/${problemId}/classification-suggestions`, { method: 'GET' }),
 
     exportProblem: async (problemId) => {
         const token = getCookie('accessToken');

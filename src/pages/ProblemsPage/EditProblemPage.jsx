@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Dialog,
     DialogContent,
@@ -135,6 +136,65 @@ const EditForm = () => {
         formik.setFieldValue('Classifications', classifications);
     };
 
+    // Suggestion state lives apart from the Tema/Clasificación picker above -- that
+    // picker's `selected` is bound to `initialValues.Classifications`, and formik's
+    // `enableReinitialize: true` means changing `initialValues` resets the WHOLE form
+    // (title, description, everything), not just the classifications. Merging straight
+    // into `formik.values.Classifications` instead avoids wiping unsaved edits; the only
+    // cost is the two-column picker's own highlighting won't reflect an AI-added item
+    // until the page is reloaded, which is cosmetic, not a data problem.
+    const [classificationSuggestion, setClassificationSuggestion] = useState(null);
+    const [suggestedSelection, setSuggestedSelection] = useState(new Set());
+    const [isSuggestingClassifications, setIsSuggestingClassifications] = useState(false);
+
+    const handleSuggestClassifications = async () => {
+        setIsSuggestingClassifications(true);
+        try {
+            const suggestion = await apiService.getProblemClassificationSuggestions(problemId);
+            if (!suggestion.available) {
+                toast({
+                    variant: "destructive",
+                    title: "Sugerencia no disponible",
+                    description: suggestion.unavailableReason || "No se pudo generar una sugerencia.",
+                });
+                return;
+            }
+            setClassificationSuggestion(suggestion);
+            setSuggestedSelection(new Set(suggestion.classifications.map((c) => c.classificationId)));
+        } catch {
+            toast({
+                variant: "destructive",
+                title: "Error al pedir sugerencia",
+                description: "No se pudo contactar el servicio de clasificación automática.",
+            });
+        } finally {
+            setIsSuggestingClassifications(false);
+        }
+    };
+
+    const toggleSuggested = (classificationId) => {
+        setSuggestedSelection((current) => {
+            const next = new Set(current);
+            if (next.has(classificationId)) {
+                next.delete(classificationId);
+            } else {
+                next.add(classificationId);
+            }
+            return next;
+        });
+    };
+
+    const applySuggestedClassifications = () => {
+        const existingIds = new Set(formik.values.Classifications.map((c) => c.ClassificationId));
+        const toAdd = classificationSuggestion.classifications
+            .filter((c) => suggestedSelection.has(c.classificationId) && !existingIds.has(c.classificationId))
+            .map((c) => ({ ClassificationId: c.classificationId }));
+
+        formik.setFieldValue('Classifications', [...formik.values.Classifications, ...toAdd]);
+        toast({ variant: "success", description: `${toAdd.length} clasificación(es) agregada(s). Revisalas y guardá el problema.` });
+        setClassificationSuggestion(null);
+    };
+
     if (!dataLoaded) {
         return <div>Cargando datos...</div>;
     }
@@ -187,6 +247,43 @@ const EditForm = () => {
                                 selected={initialValues.Classifications}
                                 onSelectionChange={onSelectionChange}
                             />
+                        </div>
+
+                        <div className="rounded-lg mt-5">
+                            <Button type="button" variant="outline" onClick={handleSuggestClassifications} disabled={isSuggestingClassifications}>
+                                {isSuggestingClassifications ? 'Calculando sugerencia...' : 'Clasificación automática'}
+                            </Button>
+
+                            {classificationSuggestion && (
+                                classificationSuggestion.classifications.length > 0 ? (
+                                    <div className="mt-3 p-4 border border-gray-300 rounded-md shadow-sm">
+                                        <p className="text-sm text-muted-foreground mb-2">
+                                            Clasificación sugerida automáticamente -- desmarcá lo que no aplique antes de agregar:
+                                        </p>
+                                        <ul className="space-y-1 mb-3">
+                                            {classificationSuggestion.classifications.map((c) => (
+                                                <li key={c.classificationId} className="flex items-center gap-2 text-sm">
+                                                    <Checkbox
+                                                        checked={suggestedSelection.has(c.classificationId)}
+                                                        onCheckedChange={() => toggleSuggested(c.classificationId)}
+                                                    />
+                                                    <span>{c.topic ? `${c.topic.name} > ${c.name}` : c.name}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <div className="flex gap-2">
+                                            <Button type="button" onClick={applySuggestedClassifications} disabled={suggestedSelection.size === 0}>
+                                                Agregar seleccionadas
+                                            </Button>
+                                            <Button type="button" variant="outline" onClick={() => setClassificationSuggestion(null)}>
+                                                Descartar
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground mt-2">No se encontraron clasificaciones aplicables.</p>
+                                )
+                            )}
                         </div>
 
                     </div>
