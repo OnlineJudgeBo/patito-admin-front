@@ -270,12 +270,18 @@ const EditForm = () => {
                                         </p>
                                         <ul className="space-y-1 mb-3">
                                             {classificationSuggestion.classifications.map((c) => (
-                                                <li key={c.classificationId} className="flex items-center gap-2 text-sm">
+                                                <li key={c.classificationId} className="flex items-start gap-2 text-sm">
                                                     <Checkbox
+                                                        className="mt-0.5"
                                                         checked={suggestedSelection.has(c.classificationId)}
                                                         onCheckedChange={() => toggleSuggested(c.classificationId)}
                                                     />
-                                                    <span>{c.topic ? `${c.topic.name} > ${c.name}` : c.name}</span>
+                                                    <span>
+                                                        {c.topic ? `${c.topic.name} > ${c.name}` : c.name}
+                                                        {classificationSuggestion.reasons?.[c.classificationId] && (
+                                                            <span className="block text-xs text-muted-foreground">{classificationSuggestion.reasons[c.classificationId]}</span>
+                                                        )}
+                                                    </span>
                                                 </li>
                                             ))}
                                         </ul>
