@@ -258,7 +258,7 @@ const EditForm = () => {
                                 classificationSuggestion.classifications.length > 0 ? (
                                     <div className="mt-3 p-4 border border-gray-300 rounded-md shadow-sm">
                                         <p className="text-sm text-muted-foreground mb-2">
-                                            Clasificación sugerida automáticamente -- desmarcá lo que no aplique antes de agregar:
+                                            Clasificación sugerida automáticamente: desmarca lo que no aplique antes de agregar.
                                         </p>
                                         <ul className="space-y-1 mb-3">
                                             {classificationSuggestion.classifications.map((c) => (
