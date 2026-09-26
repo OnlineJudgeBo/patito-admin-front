@@ -8,6 +8,7 @@ import '../../components/CKEditor/ckeditor.css';
 import { apiService } from '../../services/apiService.js';
 import { fixTimeFormat, parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
+import ExamFields from "./ExamFields";
 import LanguageListComponent from "./LanguageListComponent";
 
 import ManualUserAddComponent from "./User/ManualUserAddComponent.jsx";
@@ -44,6 +45,8 @@ const CreateContestPage = () => {
         title: '',
         description: '',
         isOfficial: false,
+        isExam: false,
+        examLabIps: '',
         startDate: currentDate,
         startTime: getCurrentTime(),
         endDate: getDatePlusYears(OPEN_WINDOW_YEARS),
@@ -91,11 +94,11 @@ const CreateContestPage = () => {
             setTimeout(() => {
                 navigate('/admin/contests');
             }, 2000);
-        }).catch(() => {
+        }).catch((error) => {
             toast({
                 variant: "destructive",
                 title: "Error al crear el contest",
-                description: "Error al crear el contest, revise todos los campos.",
+                description: error?.response?.data?.message ?? "Error al crear el contest, revise todos los campos.",
             })
         })
     };
@@ -148,6 +151,9 @@ const CreateContestPage = () => {
                                         <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Oficial Ej Div1, Div2?</span>
                                     </label>
                                 </div>
+
+
+                                <ExamFields formik={formik} />
 
                                 <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement="" />
 
