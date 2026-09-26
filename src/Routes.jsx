@@ -6,6 +6,7 @@ import CourseAdminDetailPage from './pages/AcademicPage/CourseAdminDetailPage';
 import ListAcademicCoursePage from './pages/AcademicPage/ListAcademicCoursePage';
 import CreateContestPage from './pages/ContestPage/CreateContestPage';
 import EditContestPage from './pages/ContestPage/EditContestPage';
+import ExamMonitorPage from './pages/ContestPage/ExamMonitorPage';
 import ListContestPage from './pages/ContestPage/ListContestPage';
 import FileManagerAcPage from './pages/FileManagerPage/FileManagerAcPage';
 import FileManagerPage from './pages/FileManagerPage/FileManagerPage';
@@ -59,6 +60,7 @@ const App = () => {
                         <Route path="/admin/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/edit/:contestId" element={<PrivateRoute><EditContestPage /></PrivateRoute>} />
+                        <Route path="/admin/contests/:contestId/monitor" element={<PrivateRoute><ExamMonitorPage /></PrivateRoute>} />
 
                         <Route path="/admin/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
                         <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />

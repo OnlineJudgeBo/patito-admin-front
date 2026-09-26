@@ -10,6 +10,7 @@ import { problemSelectAtom, userSelectAtom } from "../../context/manager";
 import { apiService } from '../../services/apiService.js';
 import { fixTimeFormat, parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
+import ExamFields from "./ExamFields";
 import LanguageListComponent from "./LanguageListComponent";
 
 import ManualUserAddComponent from "./User/ManualUserAddComponent.jsx";
@@ -37,6 +38,8 @@ const EditContestPage = () => {
         endTime: '',
         isPrivate: '',
         isOfficial: false,
+        isExam: false,
+        examLabIps: '',
         users: '',
         selectedUser: [],
         selectedProblem: [],
@@ -71,17 +74,19 @@ const EditContestPage = () => {
                 endTime: endDate[1] || '',
                 isPrivate: data.private == 1 ? true : false,
                 isOfficial: data.defunct === 'O',
+                isExam: Boolean(data.isExam),
+                examLabIps: data.examLabIps || '',
                 selectedUser: data.selectedUser || '',
                 selectedProblem: data.selectedProblem || '',
                 selectedLanguage: data.language || '',
                 manualUserList: ''
             })
             setIsLoading(false);
-        }).catch(() => {
+        }).catch((error) => {
             toast({
                 variant: "destructive",
                 title: "Error al crear el contest",
-                description: "Error al crear el contest, revise todos los campos.",
+                description: error?.response?.data?.message ?? "Error al crear el contest, revise todos los campos.",
             })
         })
     }, [contestId, setSelectedProblems, setSelectedUsers, toast]);
@@ -109,11 +114,11 @@ const EditContestPage = () => {
             setTimeout(() => {
                 navigate('/admin/contests');
             }, 2000);
-        }).catch(() => {
+        }).catch((error) => {
             toast({
                 variant: "destructive",
                 title: "Error al editar el contest",
-                description: "Error al editar el contest, revise todos los campos.",
+                description: error?.response?.data?.message ?? "Error al editar el contest, revise todos los campos.",
             })
         })
     };
@@ -172,6 +177,9 @@ const EditContestPage = () => {
                                                 <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Oficial Ej Div1, Div2?</span>
                                             </label>
                                         </div>
+
+
+                                        <ExamFields formik={formik} />
 
                                         <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement={descriptionData} />
 
