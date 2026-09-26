@@ -59,7 +59,10 @@ export default function ExamMonitorPage() {
                         {monitor.labIps.length > 0 && <> · Laboratorio: <span className="font-mono">{monitor.labIps.join(', ')}</span></>}
                     </p>
                 </div>
-                <button type="button" onClick={load} className="rounded bg-gray-200 px-3 py-1 text-sm hover:bg-gray-300">Actualizar ahora</button>
+                <div className="flex items-center gap-3">
+                    <a href={`/admin/contests/${contestId}/machines`} className="text-sm font-semibold text-blue-600">Máquinas</a>
+                    <button type="button" onClick={load} className="rounded bg-gray-200 px-3 py-1 text-sm hover:bg-gray-300">Actualizar ahora</button>
+                </div>
             </div>
 
             {error && <div className="mb-2 text-sm text-red-600">{error}</div>}
