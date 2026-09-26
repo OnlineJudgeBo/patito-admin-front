@@ -13,6 +13,10 @@ function BocaImportPage() {
     const [files, setFiles] = useState([]);
     const [results, setResults] = useState([]);
     const [selectedIds, setSelectedIds] = useState(new Set());
+    // stagingId -> Set<classificationId>. Suggestions come pre-checked (same spirit as
+    // selectedIds defaulting to every successfully-parsed package): the admin unchecks
+    // whatever doesn't fit rather than having to hunt for and check each one.
+    const [selectedClassificationIds, setSelectedClassificationIds] = useState(new Map());
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [isConfirming, setIsConfirming] = useState(false);
 
@@ -20,6 +24,7 @@ function BocaImportPage() {
         setFiles(acceptedFiles);
         setResults([]);
         setSelectedIds(new Set());
+        setSelectedClassificationIds(new Map());
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -41,6 +46,14 @@ function BocaImportPage() {
             const data = await apiService.bocaImportPreview(formData);
             setResults(data.results);
             setSelectedIds(new Set(data.results.filter((item) => item.success).map((item) => item.stagingId)));
+            setSelectedClassificationIds(new Map(
+                data.results
+                    .filter((item) => item.success)
+                    .map((item) => [
+                        item.stagingId,
+                        new Set((item.suggestedClassifications || []).map((c) => c.classificationId)),
+                    ])
+            ));
         } catch {
             toast({
                 variant: "destructive",
@@ -64,6 +77,20 @@ function BocaImportPage() {
         });
     };
 
+    const toggleClassification = (stagingId, classificationId) => {
+        setSelectedClassificationIds((current) => {
+            const next = new Map(current);
+            const forStaging = new Set(next.get(stagingId));
+            if (forStaging.has(classificationId)) {
+                forStaging.delete(classificationId);
+            } else {
+                forStaging.add(classificationId);
+            }
+            next.set(stagingId, forStaging);
+            return next;
+        });
+    };
+
     const handleConfirm = async () => {
         if (selectedIds.size === 0) {
             return;
@@ -71,7 +98,13 @@ function BocaImportPage() {
 
         setIsConfirming(true);
         try {
-            const data = await apiService.bocaImportConfirm(Array.from(selectedIds));
+            const selectedClassificationIdsByStagingId = Object.fromEntries(
+                Array.from(selectedIds).map((stagingId) => [
+                    stagingId,
+                    Array.from(selectedClassificationIds.get(stagingId) || []),
+                ])
+            );
+            const data = await apiService.bocaImportConfirm(Array.from(selectedIds), selectedClassificationIdsByStagingId);
             const outcomeByStagingId = new Map(data.results.map((item) => [item.stagingId, item]));
 
             setResults((current) =>
@@ -133,6 +166,7 @@ function BocaImportPage() {
                                 <TableHead>Límites</TableHead>
                                 <TableHead>Casos</TableHead>
                                 <TableHead>Muestra</TableHead>
+                                <TableHead>Clasificación sugerida</TableHead>
                                 <TableHead>Revisión</TableHead>
                                 <TableHead>Estado</TableHead>
                             </TableRow>
@@ -158,6 +192,21 @@ function BocaImportPage() {
                                         {item.success ? (
                                             <pre className="text-xs whitespace-pre-wrap break-all">{item.sampleInputPreview}</pre>
                                         ) : '—'}
+                                    </TableCell>
+                                    <TableCell className="max-w-xs">
+                                        {item.success && item.suggestedClassifications?.length > 0 ? (
+                                            <ul className="space-y-1">
+                                                {item.suggestedClassifications.map((c) => (
+                                                    <li key={c.classificationId} className="flex items-center gap-2 text-xs">
+                                                        <Checkbox
+                                                            checked={selectedClassificationIds.get(item.stagingId)?.has(c.classificationId) ?? false}
+                                                            onCheckedChange={() => toggleClassification(item.stagingId, c.classificationId)}
+                                                        />
+                                                        <span>{c.label}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (item.success ? <span className="text-muted-foreground text-xs">Sin sugerencias</span> : '—')}
                                     </TableCell>
                                     <TableCell>
                                         {item.success && item.needsReview && (
