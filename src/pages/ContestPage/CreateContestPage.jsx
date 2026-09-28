@@ -106,7 +106,6 @@ const CreateContestPage = () => {
     return (
         <>
             <Formik
-                enableReinitialize="true"
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 onSubmit={Submit}

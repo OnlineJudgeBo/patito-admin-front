@@ -1,9 +1,12 @@
 import parse from 'html-react-parser';
 import React, { useEffect, useState } from 'react';
+import UseAuth from '../../hooks/UseAuth';
 import { apiService } from '../../services/apiService';
 import { PromoteComponent } from './PromoteComponent';
 
 function ListContestPage2() {
+    const { roles } = UseAuth();
+    const isAdmin = roles.some((role) => String(role).trim().toLowerCase() === 'administrador');
     const [problems, setProblems] = useState([]);
     const [filter, setFilter] = useState('');
     const [onlyOfficial, setOnlyOfficial] = useState(false);
@@ -12,6 +15,24 @@ function ListContestPage2() {
     const [currentPage, setCurrentPage] = useState(1);
     const [problemsPerPage] = useState(100);
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
+    const [exportingId, setExportingId] = useState(null);
+
+    const exportContest = async (contestId) => {
+        setExportingId(contestId);
+        try {
+            const blob = await apiService.exportContest(contestId);
+            const url = window.URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = `contest-${contestId}.zip`;
+            anchor.click();
+            window.URL.revokeObjectURL(url);
+        } catch (apiError) {
+            alert(apiError?.response?.data?.message || apiError?.message || 'No se pudo exportar el concurso.');
+        } finally {
+            setExportingId(null);
+        }
+    };
 
     useEffect(() => {
         apiService.fetchContestsList()
@@ -81,6 +102,13 @@ function ListContestPage2() {
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
+            {isAdmin && (
+                <div className="mb-4 flex justify-end">
+                    <a href="/admin/contests/import" className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                        Importar concurso
+                    </a>
+                </div>
+            )}
             <div className="mb-4 flex gap-2">
                 <input
                     type="text"
@@ -114,6 +142,7 @@ function ListContestPage2() {
                                 <th className="px-4 py-2">Estado</th>
                                 <th className="px-4 py-2">Promover a Practica</th>
                                 <th className="px-4 py-2">Editar</th>
+                                {isAdmin && <th className="px-4 py-2">Exportar</th>}
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -158,6 +187,15 @@ function ListContestPage2() {
                                             Editar
                                         </a>
                                     </td>
+                                    {isAdmin && (
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <button type="button" disabled={exportingId !== null}
+                                                className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
+                                                onClick={() => exportContest(problem.contestId)}>
+                                                {exportingId === problem.contestId ? 'Exportando…' : 'Exportar ZIP'}
+                                            </button>
+                                        </td>
+                                    )}
 
                                 </tr>
                             ))}
