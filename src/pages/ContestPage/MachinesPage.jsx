@@ -424,6 +424,8 @@ export default function MachinesPage() {
     const [byIp, setByIp] = useState(true);
     const [collapsed, setCollapsed] = useState(new Set());
     const [open, setOpen] = useState(null);
+    const [sending, setSending] = useState(false);
+    const sendingRef = useRef(false);
 
     const refresh = useCallback(async () => {
         try {
@@ -481,6 +483,7 @@ export default function MachinesPage() {
 
     // Returns true when every command was accepted.
     const sendCommand = async (action, targets, count) => {
+        if (sendingRef.current) return false;
         const args = {};
         if (action === 'message') { const text = prompt('Mensaje:'); if (!text) return false; args.text = text; }
         if (action === 'set-wallpaper') { const url = prompt('URL de la imagen (su host debe estar en la allowlist):'); if (!url) return false; args.url = url.trim(); }
@@ -499,6 +502,8 @@ export default function MachinesPage() {
         } else if (DANGEROUS.has(action) || action === 'lock-root' || targets.some(target => target.group_id)) {
             if (!confirm(`¿Enviar "${action}" a ${count} máquina(s)?`)) return false;
         }
+        sendingRef.current = true;
+        setSending(true);
         try {
             for (const target of targets) {
                 await apiService.post(`${base}/cmd`, { target, action, args });
@@ -508,6 +513,9 @@ export default function MachinesPage() {
         } catch (err) {
             alert(`error: ${apiError(err)}`);
             return false;
+        } finally {
+            sendingRef.current = false;
+            setSending(false);
         }
     };
 
@@ -516,6 +524,10 @@ export default function MachinesPage() {
         if (picked.length) {
             sendCommand(action, picked.map(machineId => ({ machine_id: machineId })), picked.length);
         } else {
+            if (machines.length === 0) {
+                alert('No hay máquinas en este examen.');
+                return;
+            }
             sendCommand(action, [{ group_id: group.groupId, machine_id: '*' }], machines.length);
         }
     };
@@ -590,11 +602,12 @@ export default function MachinesPage() {
                 <div className={label}>Acciones · a las máquinas marcadas o a todo el examen</div>
                 <div className="flex flex-wrap gap-1">
                     {ACTIONS.map(([action, text]) => (
-                        <button key={action} type="button" onClick={() => sendToSelection(action)}
-                            className={`rounded border px-2 py-1 text-sm hover:bg-gray-100 ${DANGEROUS.has(action) ? 'border-red-300 text-red-700' : ''}`}>
+                        <button key={action} type="button" disabled={sending} onClick={() => sendToSelection(action)}
+                            className={`rounded border px-2 py-1 text-sm hover:bg-gray-100 disabled:cursor-wait disabled:opacity-50 ${DANGEROUS.has(action) ? 'border-red-300 text-red-700' : ''}`}>
                             {text}
                         </button>
                     ))}
+                    {sending && <span className="self-center text-xs text-gray-500">enviando…</span>}
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
                     <button type="button" onClick={downloadHomes} className="text-blue-600 underline">descargar código del examen (zip)</button>
