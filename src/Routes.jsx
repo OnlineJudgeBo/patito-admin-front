@@ -10,6 +10,7 @@ import ExamMonitorPage from './pages/ContestPage/ExamMonitorPage';
 import MachinesPage from './pages/ContestPage/MachinesPage';
 import ExamMachinesListPage from './pages/ContestPage/ExamMachinesListPage';
 import ListContestPage from './pages/ContestPage/ListContestPage';
+import ImportContestPage from './pages/ContestPage/ImportContestPage';
 import FileManagerAcPage from './pages/FileManagerPage/FileManagerAcPage';
 import FileManagerPage from './pages/FileManagerPage/FileManagerPage';
 import IndexPage from './pages/IndexPage/IndexPage';
@@ -61,6 +62,7 @@ const App = () => {
 
                         <Route path="/admin/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
+                        <Route path="/admin/contests/import" element={<PrivateRoute><ImportContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/edit/:contestId" element={<PrivateRoute><EditContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/:contestId/monitor" element={<PrivateRoute><ExamMonitorPage /></PrivateRoute>} />
                         <Route path="/admin/contests/:contestId/machines" element={<PrivateRoute><MachinesPage /></PrivateRoute>} />
