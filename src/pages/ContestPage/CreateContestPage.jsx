@@ -106,7 +106,6 @@ const CreateContestPage = () => {
     return (
         <>
             <Formik
-                enableReinitialize="true"
                 initialValues={initialValues}
                 validationSchema={validationSchema}
                 onSubmit={Submit}
@@ -218,7 +217,7 @@ const CreateContestPage = () => {
                                 {formik.values.isOfficial && (
                                     <p className="mb-4 text-xs text-gray-500">Concurso oficial: queda abierto para práctica sin fecha de cierre.</p>
                                 )}
-                                <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={[]} />
+                                <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={[]} selectAllByDefault />
                             </div>
 
                             <div className="w-3/5">

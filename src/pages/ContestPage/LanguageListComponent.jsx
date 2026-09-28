@@ -2,41 +2,40 @@ import { useEffect, useState } from 'react';
 import AsyncSelect from 'react-select/async';
 import { apiService } from '../../services/apiService';
 
-const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
+const LanguageListComponent = ({ setFieldValue, userSelectedList, selectAllByDefault = false }) => {
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [errorMessages, setErrorMessages] = useState([]);
 
     useEffect(() => {
-        if (userSelectedList == "") {
-            return
+        if (userSelectedList?.length) {
+            const options = userSelectedList.map(language => ({
+                value: language.languageId,
+                label: language.name
+            }));
+            setSelectedLanguages(options);
+            setFieldValue('selectedLanguages', JSON.stringify(options.map(({ value }) => ({ languageId: value }))));
+            return;
         }
 
-        const options = userSelectedList.map(language => ({
-            value: language.languageId,
-            label: language.name
-        }));
+        if (selectAllByDefault) {
+            loadOptions('').then(options => {
+                setSelectedLanguages(options);
+                setFieldValue('selectedLanguages', JSON.stringify(options.map(({ value }) => ({ languageId: value }))));
+            });
+        }
+    }, [userSelectedList, selectAllByDefault]);
 
-        const formattedLanguages = userSelectedList.map((language) => ({
-            languageId: language.languageId,
-        }));
-
-        setFieldValue('selectedLanguages', JSON.stringify(formattedLanguages));
-        setSelectedLanguages(options)
-    }, [userSelectedList]);
-
-    const loadOptions = async (inputValue, callback) => {
+    const loadOptions = async () => {
         try {
-            return await apiService.get("programmingLanguages").then((data) => {
-                const options = data.map(language => ({
-                    value: language.languageId,
-                    label: language.name
-                }));
-                return options
-            })
+            const data = await apiService.get("programmingLanguages");
+            return data.map(language => ({
+                value: language.languageId,
+                label: language.name
+            }));
         } catch (err) {
             console.error('Error loading language list:', err);
             setErrorMessages([`Error loading language list: ${err.message}`]);
-            callback([]);
+            return [];
         }
     };
 

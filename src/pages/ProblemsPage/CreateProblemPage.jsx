@@ -148,7 +148,6 @@ const CreateProblemPage = () => {
     });
 
     const formik = useFormik({
-        enableReinitialize: true,
         initialValues: initialValues,
         validationSchema: validationSchema,
         onSubmit: Submit,
