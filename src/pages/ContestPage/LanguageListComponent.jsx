@@ -4,41 +4,31 @@ import { apiService } from '../../services/apiService';
 
 const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
     const [selectedLanguages, setSelectedLanguages] = useState([]);
-    const [errorMessages, setErrorMessages] = useState([]);
+    const [languageOptions, setLanguageOptions] = useState([]);
+    const [errorMessage, setErrorMessage] = useState('');
+    const selectedLanguageKey = (userSelectedList || []).map(language => language.languageId).join(',');
 
     useEffect(() => {
-        if (userSelectedList == "") {
-            return
-        }
+        let active = true;
+        apiService.get('programmingLanguages').then(data => {
+            if (!active) return;
+            const selectedLanguageIds = selectedLanguageKey ? selectedLanguageKey.split(',') : [];
+            const options = data.map(language => ({ value: language.languageId, label: language.name }));
+            const selected = selectedLanguageIds.length
+                ? options.filter(option => selectedLanguageIds.includes(String(option.value)))
+                : options;
+            setLanguageOptions(options);
+            setSelectedLanguages(selected);
+            setFieldValue('selectedLanguages', JSON.stringify(selected.map(language => ({ languageId: language.value }))));
+            setErrorMessage('');
+        }).catch(err => {
+            if (active) setErrorMessage(`Error loading language list: ${err.message}`);
+        });
+        return () => { active = false; };
+    }, [selectedLanguageKey, setFieldValue]);
 
-        const options = userSelectedList.map(language => ({
-            value: language.languageId,
-            label: language.name
-        }));
-
-        const formattedLanguages = userSelectedList.map((language) => ({
-            languageId: language.languageId,
-        }));
-
-        setFieldValue('selectedLanguages', JSON.stringify(formattedLanguages));
-        setSelectedLanguages(options)
-    }, [userSelectedList]);
-
-    const loadOptions = async (inputValue, callback) => {
-        try {
-            return await apiService.get("programmingLanguages").then((data) => {
-                const options = data.map(language => ({
-                    value: language.languageId,
-                    label: language.name
-                }));
-                return options
-            })
-        } catch (err) {
-            console.error('Error loading language list:', err);
-            setErrorMessages([`Error loading language list: ${err.message}`]);
-            callback([]);
-        }
-    };
+    const loadOptions = inputValue => languageOptions.filter(option =>
+        option.label.toLowerCase().includes(inputValue.toLowerCase()));
 
     const handleInputChange = (newValue, actionMeta) => {
         if (actionMeta.action === 'remove-value') {
@@ -67,17 +57,13 @@ const LanguageListComponent = ({ setFieldValue, userSelectedList }) => {
             <AsyncSelect
                 isMulti
                 loadOptions={loadOptions}
-                defaultOptions
+                defaultOptions={languageOptions}
                 onChange={handleInputChange}
                 value={selectedLanguages}
                 placeholder="Click para seleccionar un lenguaje."
                 className="text-base w-full"
             />
-            {errorMessages.length > 0 && (
-                <div className="text-red-500 text-sm mt-1">
-                    {errorMessages[0]}
-                </div>
-            )}
+            {errorMessage && <div className="text-red-500 text-sm mt-1">{errorMessage}</div>}
         </div>
     );
 }
