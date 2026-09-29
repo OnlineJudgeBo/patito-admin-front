@@ -136,13 +136,17 @@ function ListContestPage2() {
                             <tr>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.email')}>Id</th>
                                 <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userId')}>Nombre</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.nick')}>Fecha de Inicio▲▼</th>
-                                <th className="px-4 py-2 cursor-pointer" onClick={() => requestSort('userProfile.lastname')}>Fecha de Fin▲▼</th>
+                                <th className="px-4 py-2">
+                                    <div>Fechas</div>
+                                    <div className="flex gap-3 text-xs">
+                                        <button type="button" onClick={() => requestSort('startTime')}>Inicio ▲▼</button>
+                                        <button type="button" onClick={() => requestSort('endTime')}>Fin ▲▼</button>
+                                    </div>
+                                </th>
                                 <th className="px-4 py-2">Publico/Privado</th>
                                 <th className="px-4 py-2">Estado</th>
                                 <th className="px-4 py-2">Promover a Practica</th>
-                                <th className="px-4 py-2">Editar</th>
-                                {isAdmin && <th className="px-4 py-2">Exportar</th>}
+                                <th className="px-4 py-2">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -160,15 +164,11 @@ function ListContestPage2() {
                                                 Examen · Monitoreo
                                             </a>
                                         )}
-                                        {problem.isExam && (
-                                            <a className="ml-2 inline-block rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800 hover:bg-blue-200"
-                                                href={`/admin/contests/${problem.contestId}/machines`}>
-                                                Máquinas
-                                            </a>
-                                        )}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.startTime}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.endTime}</td>
+                                    <td className="px-6 py-4 text-sm text-gray-500">
+                                        <div><span className="font-medium">Inicio:</span> {problem.startTime}</div>
+                                        <div><span className="font-medium">Fin:</span> {problem.endTime}</div>
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.private == false ? "Publico" : "Privado"}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         {problem.defunct === 'O'
@@ -180,22 +180,23 @@ function ListContestPage2() {
                                             ? <span className="text-gray-400">—</span>
                                             : <PromoteComponent contestId={problem.contestId} />}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <a className="text-blue-600 hover:text-blue-900"
-                                            target="_blank"
-                                            href={`/admin/contests/edit/${problem.contestId}`}>
-                                            Editar
-                                        </a>
-                                    </td>
-                                    {isAdmin && (
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td className="px-6 py-4 text-sm">
+                                        <div>
+                                            <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/edit/${problem.contestId}`}>Editar</a>
+                                        </div>
+                                        {isAdmin && (
+                                            <div>
                                             <button type="button" disabled={exportingId !== null}
                                                 className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
                                                 onClick={() => exportContest(problem.contestId)}>
                                                 {exportingId === problem.contestId ? 'Exportando…' : 'Exportar ZIP'}
                                             </button>
-                                        </td>
-                                    )}
+                                            </div>
+                                        )}
+                                        {problem.isExam && (
+                                            <div><a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/machines`}>Máquinas</a></div>
+                                        )}
+                                    </td>
 
                                 </tr>
                             ))}

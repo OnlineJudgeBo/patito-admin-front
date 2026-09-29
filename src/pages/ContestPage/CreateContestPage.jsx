@@ -18,19 +18,11 @@ import { problemSelectAtom, userSelectAtom } from "../../context/manager";
 import ManualProblemAddComponent from "./Problem/ManualProblemAddComponent";
 import ProblemListComponent from "./Problem/ProblemListComponent";
 
-const OPEN_WINDOW_YEARS = 50;
-
 const getCurrentTime = () => {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
-};
-
-const getDatePlusYears = (years) => {
-    const future = new Date();
-    future.setFullYear(future.getFullYear() + years);
-    return future.toISOString().substring(0, 10);
 };
 
 const CreateContestPage = () => {
@@ -39,7 +31,7 @@ const CreateContestPage = () => {
     const { toast } = useToast()
     const navigate = useNavigate();
     const today = new Date();
-    const currentDate = today.toISOString().substring(0, 10);
+    const currentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
     const initialValues = {
         title: '',
@@ -49,8 +41,8 @@ const CreateContestPage = () => {
         examLabIps: '',
         startDate: currentDate,
         startTime: getCurrentTime(),
-        endDate: getDatePlusYears(OPEN_WINDOW_YEARS),
-        endTime: getCurrentTime(),
+        endDate: currentDate,
+        endTime: '23:59',
         isPrivate: '',
         users: '',
         selectedUser: [],
