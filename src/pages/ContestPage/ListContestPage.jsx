@@ -184,6 +184,9 @@ function ListContestPage2() {
                                         <div>
                                             <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/edit/${problem.contestId}`}>Editar</a>
                                         </div>
+                                        <div>
+                                            <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/similarity`}>Anti-plagio</a>
+                                        </div>
                                         {isAdmin && (
                                             <div>
                                             <button type="button" disabled={exportingId !== null}
