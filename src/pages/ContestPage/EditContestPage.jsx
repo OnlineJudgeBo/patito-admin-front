@@ -11,6 +11,7 @@ import { apiService } from '../../services/apiService.js';
 import { fixTimeFormat, parseJSON } from '../../utils/Utils';
 import CkeditorComponent from "./CkeditorComponent";
 import ExamFields from "./ExamFields";
+import OfficialPdfUpload from "./OfficialPdfUpload";
 import LanguageListComponent from "./LanguageListComponent";
 
 import ManualUserAddComponent from "./User/ManualUserAddComponent.jsx";
@@ -232,7 +233,10 @@ const EditContestPage = () => {
                                         </div>
                                         )}
                                         {formik.values.isOfficial && (
-                                            <p className="mb-4 text-xs text-gray-500">Concurso oficial: queda abierto para práctica sin fecha de cierre.</p>
+                                            <>
+                                                <p className="mb-4 text-xs text-gray-500">Concurso oficial: queda abierto para práctica sin fecha de cierre.</p>
+                                                <OfficialPdfUpload title={formik.values.title} />
+                                            </>
                                         )}
                                         <LanguageListComponent setFieldValue={formik.setFieldValue} userSelectedList={selectedLanguages} />
                                     </div>
