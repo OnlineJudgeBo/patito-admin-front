@@ -109,6 +109,7 @@ const CreateProblemPage = () => {
         SampleCases: [{ Input: '', Output: '' }],
         Source: '',
         Hint: '',
+        Spj: 'N',
         Classifications: [],
     });
 
@@ -129,6 +130,7 @@ const CreateProblemPage = () => {
                     SampleCases: [{ Input: '', Output: '' }],
                     Source: '',
                     Hint: '',
+                    Spj: 'N',
                 });
                 setDataLoaded(true);
             } catch (error) {
@@ -223,6 +225,16 @@ const CreateProblemPage = () => {
                                 {formik.touched.MemoryLimit && formik.errors.MemoryLimit ? (
                                     <div className="text-red-500">{formik.errors.MemoryLimit}</div>
                                 ) : null}
+                            </div>
+                            <div className="rounded-lg mt-5">
+                                <label htmlFor="problem-special-judge" className="inline-flex items-center gap-2 text-xl font-semibold">
+                                    <input id="problem-special-judge" type="checkbox" checked={formik.values.Spj === 'Y'}
+                                        onChange={(event) => formik.setFieldValue('Spj', event.target.checked ? 'Y' : 'N')} />
+                                    Juez especial (varias respuestas válidas)
+                                </label>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Requiere un checker escrito con testlib.h, subido como <span className="font-mono">checker.cpp</span> en los archivos del problema.
+                                </p>
                             </div>
                         </div>
 
