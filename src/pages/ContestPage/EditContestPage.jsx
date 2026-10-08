@@ -40,6 +40,7 @@ const EditContestPage = () => {
         isPrivate: '',
         isOfficial: false,
         isExam: false,
+        obi: false,
         examLabIps: '',
         users: '',
         selectedUser: [],
@@ -76,6 +77,7 @@ const EditContestPage = () => {
                 isPrivate: data.private == 1 ? true : false,
                 isOfficial: data.defunct === 'O',
                 isExam: Boolean(data.isExam),
+                obi: Boolean(data.obi),
                 examLabIps: data.examLabIps || '',
                 selectedUser: data.selectedUser || '',
                 selectedProblem: data.selectedProblem || '',
@@ -180,6 +182,14 @@ const EditContestPage = () => {
                                         </div>
 
 
+                                        <div className="mb-4">
+                                            <label htmlFor="obi" className="inline-flex items-center gap-2 text-sm font-medium text-gray-900">
+                                                <input id="obi" type="checkbox" checked={formik.values.obi}
+                                                    onChange={() => formik.setFieldValue('obi', !formik.values.obi)} />
+                                                ¿Es por puntos? (estilo IOI/OBI)
+                                            </label>
+                                            <p className="mt-1 text-xs text-gray-500">Se evalúan todos los casos y el ranking suma el mejor puntaje de cada problema.</p>
+                                        </div>
                                         <ExamFields formik={formik} />
 
                                         <CkeditorComponent setFieldValue={formik.setFieldValue} valueElement={descriptionData} />
