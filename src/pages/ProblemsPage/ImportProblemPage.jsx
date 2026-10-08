@@ -8,7 +8,7 @@ function ImportProblemPage() {
     const [file, setFile] = useState(null);
     const [isImporting, setIsImporting] = useState(false);
     const [error, setError] = useState('');
-    // 'package' is this judge's own (ICPC based) package; 'cms' is a CMS task folder zipped.
+    // 'package' is this judge's own (ICPC based) package; 'task' is an olympiad task (CMS or TPS) zipped.
     const [format, setFormat] = useState('package');
 
     const onDrop = useCallback((acceptedFiles) => {
@@ -33,8 +33,8 @@ function ImportProblemPage() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const problem = format === 'cms'
-                ? await apiService.postFile('problems/import-cms', formData)
+            const problem = format === 'task'
+                ? await apiService.postFile('problems/import-task', formData)
                 : await apiService.importProblem(formData);
             navigate(`/admin/problems/edit/${problem.problemId}`);
         } catch (apiError) {
@@ -53,11 +53,13 @@ function ImportProblemPage() {
                 <select id="import-format" className="rounded border border-gray-300 px-2 py-1 text-sm"
                     value={format} onChange={(event) => setFormat(event.target.value)}>
                     <option value="package">Paquete de problema (Patito / ICPC)</option>
-                    <option value="cms">Tarea de CMS (task.yaml, input/, output/)</option>
+                    <option value="task">Tarea de olimpiada (CMS o TPS)</option>
                 </select>
-                {format === 'cms' && (
+                {format === 'task' && (
                     <p className="mt-1 text-xs text-gray-500">
-                        Importa los casos, las subtareas de gen/GEN y el checker de check/checker.cpp. Revisa el enunciado después de importar.
+                        Comprime la carpeta de la tarea: con <span className="font-mono">task.yaml</span> si es de CMS, o con{' '}
+                        <span className="font-mono">problem.json</span> si es de TPS (después de ejecutar <span className="font-mono">tps gen</span>).
+                        Se importan los casos, las subtareas con sus puntos y el checker. Revisa el enunciado después de importar.
                     </p>
                 )}
             </div>
@@ -70,7 +72,7 @@ function ImportProblemPage() {
                 {file ? (
                     <p>Archivo seleccionado: {file.name}</p>
                 ) : (
-                    <p>{format === 'cms' ? 'Arrastra el .zip de la tarea de CMS aquí' : 'Arrastra el .zip del paquete de problema aquí'}</p>
+                    <p>{format === 'task' ? 'Arrastra el .zip de la tarea aquí' : 'Arrastra el .zip del paquete de problema aquí'}</p>
                 )}
             </div>
 
