@@ -22,6 +22,8 @@ import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
 import { StatementPreview } from '../../components/Statement/StatementPreview';
 import TopicClassificationComponent from '../../components/TopicClassification/TopicClassification.jsx';
 import { apiService } from '../../services/apiService';
+import FileManagerPage from '../FileManagerPage/FileManagerPage';
+import ScoringPage from './ScoringPage';
 
 const EditForm = () => {
     const { problemId } = useParams();
@@ -215,6 +217,7 @@ const EditForm = () => {
         };
     }
     return (
+        <>
         <form onSubmit={formik.handleSubmit}>
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
                 <label htmlFor="problem-title" className="block text-xl font-semibold mb-2">Título</label>
@@ -259,9 +262,9 @@ const EditForm = () => {
                                     Requiere un checker escrito con testlib.h, subido como <span className="font-mono">checker.cpp</span> en los archivos del problema.
                                 </p>
                                 <p className="mt-2 text-sm">
-                                    <a className="text-blue-600 hover:text-blue-900" href={`/admin/fileManager/${problemId}`}>Archivos del problema</a>
+                                    <a className="text-blue-600 hover:text-blue-900" href="#problem-files">Archivos del problema</a>
                                     <span className="text-gray-500"> (casos, checker, grader) · </span>
-                                    <a className="text-blue-600 hover:text-blue-900" href={`/admin/problems/${problemId}/scoring`}>Grupos de puntaje</a>
+                                    <a className="text-blue-600 hover:text-blue-900" href="#problem-scoring">Grupos de puntaje</a>
                                 </p>
                             </div>
                         </div>
@@ -565,6 +568,16 @@ const EditForm = () => {
                 </DialogContent>
             </Dialog>
         </form>
+
+        {/* Each one loads and saves on its own, apart from the form above. */}
+        <div id="problem-files" className="mt-6 bg-white rounded-lg shadow-lg">
+            <h2 className="px-4 pt-4 text-xl font-semibold">Archivos del problema</h2>
+            <FileManagerPage />
+        </div>
+        <div id="problem-scoring" className="mt-6 bg-white rounded-lg shadow-lg">
+            <ScoringPage />
+        </div>
+        </>
     );
 };
 
