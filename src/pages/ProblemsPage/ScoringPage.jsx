@@ -3,8 +3,9 @@ import { useParams } from 'react-router-dom';
 import ScoringGroupsEditor, { groupsForApi } from '../../components/JudgeFiles/ScoringGroupsEditor';
 import { apiService } from '../../services/apiService';
 
-// Test groups (subtasks) of a problem: points per group and which tests belong to each.
-export default function ScoringPage() {
+/* eslint-disable react/prop-types */
+// Subtasks of a problem: points of each one and which tests belong to it. `embedded` is the edit page, which has its own title.
+export default function ScoringPage({ embedded }) {
     const { problemId } = useParams();
     const [groups, setGroups] = useState(null);
     const [tests, setTests] = useState([]);
@@ -33,10 +34,11 @@ export default function ScoringPage() {
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
-            <h1 className="text-2xl font-bold">Puntaje por grupos: problema {problemId}</h1>
-            <p className="mb-4 mt-1 text-sm text-gray-500">
-                Cada grupo reparte sus puntos entre sus casos. Sin grupos, el problema se juzga como aceptado o rechazado.
-                Los casos se eligen por nombre con comodines, separados por comas: <span className="font-mono">s1_*</span>, <span className="font-mono">caso?</span>.
+            {!embedded && <h1 className="text-2xl font-bold">Subtareas y puntaje: problema {problemId}</h1>}
+            <p className="mb-4 mt-1 text-sm text-gray-600">
+                {groups.length === 0
+                    ? 'Este problema no tiene subtareas: una solución se acepta o se rechaza. Agrega subtareas para dar puntos por partes.'
+                    : 'Cada subtarea vale sus puntos y agrupa algunos casos de prueba. Entre todas deberían sumar 100.'}
             </p>
 
             <ScoringGroupsEditor groups={groups} tests={tests} onChange={setGroups} />
@@ -44,7 +46,7 @@ export default function ScoringPage() {
 
             <div className="mt-4">
                 <button type="button" className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                    onClick={save}>Guardar</button>
+                    onClick={save}>Guardar puntaje</button>
             </div>
         </div>
     );

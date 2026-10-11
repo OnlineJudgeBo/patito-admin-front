@@ -53,8 +53,11 @@ const FileManagerPage = () => {
 
     const { getRootProps, getInputProps } = useDropzone({ onDrop, multiple: true });
 
-    const inFiles = files.filter(file => file.name.endsWith(".in"));
-    const outFiles = files.filter(file => !file.name.endsWith(".in"));
+    const columns = [
+        { title: 'Entradas (.in)', files: files.filter(file => file.name.endsWith('.in')) },
+        { title: 'Salidas (.out)', files: files.filter(file => file.name.endsWith('.out')) },
+        { title: 'Archivos del problema', hint: 'Checker, grader, testlib.h y puntaje.', files: files.filter(file => !/\.(in|out)$/.test(file.name)) },
+    ];
 
     return (
         <div className="container mx-auto p-4">
@@ -63,32 +66,21 @@ const FileManagerPage = () => {
                 <p>Arrastra archivos aquí o haz clic para seleccionar</p>
             </div>
             <div className="flex flex-wrap mt-5 gap-10">
-                {/* .in */}
-                <div className="flex-1">
-                    <h2 className="text-center font-bold mb-4">Archivos .IN</h2>
-                    {inFiles.map((file, index) => (
-                        <div key={index} className={`border rounded-lg p-4 flex justify-between items-center bg-blue-100 border-blue-500`}>
-                            <span className="text-sm font-semibold truncate">{file.name}</span>
-                            <div className="flex space-x-2">
-                                <ViewFileContainer fileName={file.name} problemId={problemId} />
-                                <DeleteFileContainer fileName={file.name} problemId={problemId} />
+                {columns.map(column => (
+                    <div key={column.title} className="flex-1 min-w-0">
+                        <h2 className="text-center font-bold">{column.title}</h2>
+                        <p className="mb-4 h-4 text-center text-xs text-gray-500">{column.hint}</p>
+                        {column.files.map(file => (
+                            <div key={file.name} className="border rounded-lg p-4 flex justify-between items-center bg-blue-100 border-blue-500">
+                                <span className="text-sm font-semibold truncate">{file.name}</span>
+                                <div className="flex space-x-2">
+                                    <ViewFileContainer fileName={file.name} problemId={problemId} />
+                                    <DeleteFileContainer fileName={file.name} problemId={problemId} />
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-                {/* .out */}
-                <div className="flex-1">
-                    <h2 className="text-center font-bold mb-4">Archivos .OUT</h2>
-                    {outFiles.map((file, index) => (
-                        <div key={index} className={`border rounded-lg p-4 flex justify-between items-center bg-blue-100 border-blue-500`}>
-                            <span className="text-sm font-semibold truncate">{file.name}</span>
-                            <div className="flex space-x-2">
-                                <ViewFileContainer fileName={file.name} problemId={problemId} />
-                                <DeleteFileContainer fileName={file.name} problemId={problemId} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ))}
             </div>
         </div>
     );

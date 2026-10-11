@@ -218,7 +218,6 @@ const EditForm = () => {
     }
     return (
         <>
-        <form onSubmit={formik.handleSubmit}>
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
                 <label htmlFor="problem-title" className="block text-xl font-semibold mb-2">Título</label>
                 <input id="problem-title" name="Title" type="text"
@@ -229,6 +228,23 @@ const EditForm = () => {
                 ) : null}
             </div>
 
+            {/* Same order as the create page. Files and subtasks load and save on their own, apart from the form. */}
+            <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
+                <h2 className="text-2xl font-bold mb-2">Evaluación</h2>
+                <label htmlFor="problem-special-judge" className="inline-flex items-center gap-2 text-sm">
+                    <input id="problem-special-judge" type="checkbox" checked={formik.values.Spj === 'Y'}
+                        onChange={(event) => formik.setFieldValue('Spj', event.target.checked ? 'Y' : 'N')} />
+                    Tiene varias respuestas válidas y las revisa un checker
+                </label>
+                <p className="mt-1 text-xs text-gray-500">Esta casilla se guarda con el botón Guardar del final.</p>
+
+                <h3 className="mt-5 text-xl font-semibold">Casos de prueba y archivos</h3>
+                <FileManagerPage />
+                <h3 className="mt-3 text-xl font-semibold">Subtareas y puntaje</h3>
+                <ScoringPage embedded />
+            </div>
+
+        <form onSubmit={formik.handleSubmit}>
             <div className="mb-6">
                 <fieldset className="p-4 mb-6 bg-white rounded-lg shadow-lg">
                     <legend className="text-2xl font-bold mb-4">Restricciones</legend>
@@ -251,21 +267,6 @@ const EditForm = () => {
                                 {formik.touched.MemoryLimit && formik.errors.MemoryLimit ? (
                                     <div className="text-red-500">{formik.errors.MemoryLimit}</div>
                                 ) : null}
-                            </div>
-                            <div className="rounded-lg mt-5">
-                                <label htmlFor="problem-special-judge" className="inline-flex items-center gap-2 text-xl font-semibold">
-                                    <input id="problem-special-judge" type="checkbox" checked={formik.values.Spj === 'Y'}
-                                        onChange={(event) => formik.setFieldValue('Spj', event.target.checked ? 'Y' : 'N')} />
-                                    Juez especial (varias respuestas válidas)
-                                </label>
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Requiere un checker escrito con testlib.h, subido como <span className="font-mono">checker.cpp</span> en los archivos del problema.
-                                </p>
-                                <p className="mt-2 text-sm">
-                                    <a className="text-blue-600 hover:text-blue-900" href="#problem-files">Archivos del problema</a>
-                                    <span className="text-gray-500"> (casos, checker, grader) · </span>
-                                    <a className="text-blue-600 hover:text-blue-900" href="#problem-scoring">Grupos de puntaje</a>
-                                </p>
                             </div>
                         </div>
 
@@ -569,14 +570,6 @@ const EditForm = () => {
             </Dialog>
         </form>
 
-        {/* Each one loads and saves on its own, apart from the form above. */}
-        <div id="problem-files" className="mt-6 bg-white rounded-lg shadow-lg">
-            <h2 className="px-4 pt-4 text-xl font-semibold">Archivos del problema</h2>
-            <FileManagerPage />
-        </div>
-        <div id="problem-scoring" className="mt-6 bg-white rounded-lg shadow-lg">
-            <ScoringPage />
-        </div>
         </>
     );
 };
