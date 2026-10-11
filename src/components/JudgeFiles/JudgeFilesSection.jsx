@@ -8,6 +8,63 @@ const KINDS = [
     { value: 'ioi', title: 'IOI — por puntos', text: 'Los casos se agrupan en subtareas con puntos. Se evalúan todos y el envío recibe un puntaje.' },
 ];
 
+const CORRECTIONS = [
+    { value: 'compare', title: 'Comparar con la respuesta', text: 'Hay una sola respuesta correcta: la salida debe ser igual al archivo .out.' },
+    { value: 'checker', title: 'Juez especial (varias respuestas válidas)', text: 'Un programa (checker) revisa la salida y decide si es correcta. Puede dar puntaje parcial.' },
+];
+
+const CHECKERS = [
+    { value: 'testlib', title: 'testlib', text: 'El de Codeforces y Polygon. Termina con ok, wa o un puntaje parcial.' },
+    { value: 'cms', title: 'CMS / TPS', text: 'El de las tareas de la IOI. Imprime el puntaje del caso, de 0 a 1.' },
+];
+
+const CHECKER_EXAMPLES = {
+    testlib: `#include "testlib.h"
+
+// Se ejecuta como: checker <entrada> <salida del participante> <respuesta>
+int main(int argc, char *argv[]) {
+    registerTestlibCmd(argc, argv);
+    long esperado = ans.readLong();
+    long recibido = ouf.readLong();
+    if (recibido == esperado) quitf(_ok, "correcto");
+    if (recibido == esperado + 1) quitp(0.5, "casi");   // medio puntaje
+    quitf(_wa, "esperaba %ld y llegó %ld", esperado, recibido);
+}`,
+    cms: `#include <fstream>
+#include <iostream>
+
+// Se ejecuta como: checker <entrada> <respuesta> <salida del participante>
+int main(int argc, char *argv[]) {
+    std::ifstream respuesta(argv[2]), salida(argv[3]);
+    long esperado, recibido;
+    respuesta >> esperado;
+    if (!(salida >> recibido)) { std::cout << 0 << std::endl; return 0; }
+    // Imprime el puntaje del caso: 1 correcto, 0 incorrecto, o una fracción.
+    std::cout << (recibido == esperado ? 1.0 : 0.0) << std::endl;
+}`,
+};
+
+const SOLVING = [
+    { value: 'program', title: 'Programa completo', text: 'El participante lee la entrada y escribe la salida. Cualquier lenguaje.' },
+    { value: 'function', title: 'Función (con grader)', text: 'El participante solo implementa una función; el grader del problema lee, la llama y escribe. Solo C++.' },
+];
+
+const FUNCTION_EXAMPLE = `// suma.h — cabecera pública, la incluye la solución
+long suma(long a, long b);
+
+// grader.cpp — del autor, tiene el main y no se muestra
+#include <iostream>
+#include "suma.h"
+int main() {
+    long a, b;
+    std::cin >> a >> b;
+    std::cout << suma(a, b) << std::endl;
+}
+
+// Lo que envía el participante
+#include "suma.h"
+long suma(long a, long b) { return a + b; }`;
+
 export const emptyJudgeFiles = {
     kind: 'icpc',
     tests: [],
@@ -49,8 +106,8 @@ export const judgeFilesProblems = (value, specialJudge) => {
     return [
         value.kind === 'ioi' && groups.length === 0 && 'Un problema por puntos necesita al menos una subtarea.',
         tests.some(test => !test.input || !test.output) && 'Hay casos de prueba sin su par .in / .out.',
-        specialJudge && !value.checker && 'El juez especial está marcado y falta el checker.',
-        value.function && !value.grader && 'El problema de función está marcado y falta el grader.',
+        specialJudge && !value.checker && 'El juez especial necesita el código del checker.',
+        value.function && !value.grader && 'Un problema de función necesita el grader.',
         groups.length > 0 && complete.length === 0 && 'Las subtareas necesitan casos de prueba.',
         groups.some(group => !(Number(group.points) > 0)) && 'Cada subtarea necesita puntos mayores que 0.',
         groups.some(group => !group.tests.trim()) && 'Cada subtarea necesita indicar sus casos.',
@@ -63,6 +120,27 @@ const Block = ({ title, help, children }) => (
         {help && <p className="mb-3 mt-1 text-sm text-gray-600">{help}</p>}
         {children}
     </div>
+);
+
+// Two or more options shown as cards, each with a line that says what it means.
+const Choice = ({ name, label, options, selected, onSelect }) => (
+    <div className="mt-2 grid gap-3 md:grid-cols-2" role="radiogroup" aria-label={label}>
+        {options.map(option => (
+            <label key={option.value} className={`cursor-pointer rounded-lg border-2 p-3 ${selected === option.value ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                <input type="radio" name={name} className="mr-2" value={option.value}
+                    checked={selected === option.value} onChange={() => onSelect(option.value)} />
+                <span className="font-semibold">{option.title}</span>
+                <p className="mt-1 text-sm text-gray-600">{option.text}</p>
+            </label>
+        ))}
+    </div>
+);
+
+const Example = ({ title, code }) => (
+    <details className="mt-2 text-sm">
+        <summary className="cursor-pointer text-indigo-700">{title}</summary>
+        <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-xs text-slate-100">{code}</pre>
+    </details>
 );
 
 const FilePick = ({ id, label, accept, file, onPick, multiple = false }) => (
@@ -96,20 +174,12 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
         <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-1">Evaluación</h2>
             <p className="mb-4 text-sm text-gray-600">
-                Todo es opcional y se sube al guardar. Después se puede cambiar desde los archivos del problema.
+                Cómo se juzga el problema. Los archivos se suben al guardar y después se pueden cambiar desde los archivos del problema.
             </p>
 
             <Block title="Tipo de problema">
-                <div className="mt-2 grid gap-3 md:grid-cols-2" role="radiogroup" aria-label="Tipo de problema">
-                    {KINDS.map(kind => (
-                        <label key={kind.value} className={`cursor-pointer rounded-lg border-2 p-3 ${value.kind === kind.value ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200'}`}>
-                            <input type="radio" name="problem-kind" className="mr-2" value={kind.value}
-                                checked={value.kind === kind.value} onChange={() => set({ kind: kind.value })} />
-                            <span className="font-semibold">{kind.title}</span>
-                            <p className="mt-1 text-sm text-gray-600">{kind.text}</p>
-                        </label>
-                    ))}
-                </div>
+                <Choice name="problem-kind" label="Tipo de problema" options={KINDS}
+                    selected={value.kind} onSelect={kind => set({ kind })} />
             </Block>
 
             <Block title="Casos de prueba" help="Cada caso son dos archivos con el mismo nombre: la entrada .in y la respuesta .out.">
@@ -145,23 +215,15 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                 </Block>
             )}
 
-            <Block title="Corrección">
-                <label htmlFor="problem-special-judge" className="inline-flex items-center gap-2 font-medium">
-                    <input id="problem-special-judge" type="checkbox" checked={specialJudge}
-                        onChange={event => onSpecialJudgeChange(event.target.checked)} />
-                    Juez especial (varias respuestas válidas)
-                </label>
-                <p className="mt-1 text-sm text-gray-600">
-                    Sin marcar, la salida se compara con la respuesta. Marcado, un programa (checker) decide si es correcta y puede dar puntaje parcial.
-                </p>
+            <Block title="Corrección" help="Cómo se decide si la salida de un caso es correcta.">
+                <Choice name="problem-correction" label="Corrección" options={CORRECTIONS}
+                    selected={specialJudge ? 'checker' : 'compare'} onSelect={choice => onSpecialJudgeChange(choice === 'checker')} />
                 {specialJudge && (
-                    <div className="mt-3 rounded bg-gray-50 p-3">
-                        <label htmlFor="problem-checker-kind" className="block text-sm font-medium">Tipo de checker</label>
-                        <select id="problem-checker-kind" className="mt-1 rounded border border-gray-300 px-2 py-1 text-sm"
-                            value={value.checkerKind} onChange={event => set({ checkerKind: event.target.value })}>
-                            <option value="testlib">testlib (Codeforces, Polygon): checker entrada salida respuesta</option>
-                            <option value="cms">CMS / TPS (IOI): checker entrada respuesta salida, imprime el puntaje</option>
-                        </select>
+                    <div className="mt-3 rounded-lg bg-gray-50 p-3">
+                        <p className="text-sm font-medium">Tipo de checker</p>
+                        <Choice name="problem-checker-kind" label="Tipo de checker" options={CHECKERS}
+                            selected={value.checkerKind} onSelect={checkerKind => set({ checkerKind })} />
+                        <Example title="Ver un ejemplo de este tipo de checker" code={CHECKER_EXAMPLES[value.checkerKind]} />
                         <FilePick id="problem-checker" label="Código del checker (.cpp)" accept=".cpp,.cc" file={value.checker}
                             onPick={file => set({ checker: file })} />
                         <FilePick id="problem-testlib" label="testlib.h propio (opcional; el juez ya trae la versión 0.9.45)" accept=".h" file={value.testlib}
@@ -170,22 +232,18 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                 )}
             </Block>
 
-            <Block title="Forma de resolver">
-                <label htmlFor="problem-function" className="inline-flex items-center gap-2 font-medium">
-                    <input id="problem-function" type="checkbox" checked={value.function}
-                        onChange={event => set({ function: event.target.checked })} />
-                    Problema de función (con grader)
-                </label>
-                <p className="mt-1 text-sm text-gray-600">
-                    Sin marcar, el participante envía un programa completo. Marcado, implementa una función y el grader tiene el main. Solo C++.
-                </p>
+            <Block title="Forma de resolver" help="Qué escribe el participante.">
+                <Choice name="problem-solving" label="Forma de resolver" options={SOLVING}
+                    selected={value.function ? 'function' : 'program'} onSelect={choice => set({ function: choice === 'function' })} />
                 {value.function && (
-                    <div className="mt-3 rounded bg-gray-50 p-3">
+                    <div className="mt-3 rounded-lg bg-gray-50 p-3">
+                        <Example title="Ver un ejemplo de grader, cabecera y solución" code={FUNCTION_EXAMPLE} />
                         <FilePick id="problem-grader" label="Grader (.cpp)" accept=".cpp,.cc" file={value.grader}
                             onPick={file => set({ grader: file })} />
                         <FilePick id="problem-headers" label="Cabeceras públicas (.h) que incluye la solución" accept=".h" multiple
                             onPick={files => set({ headers: files })} />
                         {value.headers.length > 0 && <p className="mt-1 text-sm text-gray-600 font-mono">{value.headers.map(file => file.name).join(', ')}</p>}
+                        <p className="mt-2 text-sm text-gray-600">El enunciado debe indicar la firma de la función y el nombre de la cabecera.</p>
                     </div>
                 )}
             </Block>

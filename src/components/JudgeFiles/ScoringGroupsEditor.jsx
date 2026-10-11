@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types, react-refresh/only-export-components */
 const TYPES = [
-    { value: 'sum', label: 'Proporcional a los casos pasados' },
-    { value: 'min', label: 'Todo o nada' },
-    { value: 'mul', label: 'Producto' },
+    { value: 'min', label: 'Todo o nada: debe pasar todos sus casos' },
+    { value: 'sum', label: 'Proporcional: puntos por cada caso pasado' },
+    { value: 'mul', label: 'Parcial multiplicado (solo con checker de puntaje parcial)' },
 ];
 
 // Same glob the judge uses: *, ? and [set].
@@ -95,8 +95,19 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
             <p className="mt-3 text-sm">
                 {groups.length === 0
                     ? 'Sin subtareas: el problema se juzga como aceptado o rechazado.'
-                    : <>Total: <strong>{total}</strong> puntos · {tests.length} casos de prueba</>}
+                    : <>Total: <strong className={total === 100 ? 'text-green-700' : 'text-amber-700'}>{total}</strong> de 100 puntos · {tests.length} casos de prueba</>}
             </p>
+            {groups.length > 0 && total !== 100 && (
+                <p className="mt-1 text-sm text-amber-700">
+                    Lo habitual es que las subtareas sumen 100. Con otro total el puntaje se muestra igual sobre 100, en proporción.
+                </p>
+            )}
+            {groups.length > 0 && (
+                <p className="mt-1 text-xs text-gray-500">
+                    Todo o nada es lo normal en la IOI: la subtarea da sus puntos solo si pasa todos sus casos.
+                    Proporcional reparte los puntos entre los casos: 2 de 5 casos de una subtarea de 20 dan 8.
+                </p>
+            )}
             {groups.length > 0 && unassigned.length > 0 && (
                 <p className="mt-1 text-sm text-amber-700">
                     Casos sin grupo (no dan puntos): <span className="font-mono">{unassigned.join(', ')}</span>
@@ -105,7 +116,7 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
 
             <div className="mt-3 flex gap-3">
                 <button type="button" className="rounded bg-gray-200 px-4 py-2 text-sm hover:bg-gray-300"
-                    onClick={() => onChange([...groups, { name: `Subtarea ${groups.length + 1}`, points: 10, type: 'sum', tests: '' }])}>
+                    onClick={() => onChange([...groups, { name: `Subtarea ${groups.length + 1}`, points: Math.max(100 - total, 10), type: 'min', tests: '' }])}>
                     Agregar subtarea
                 </button>
                 {groups.length === 0 && prefixed && (

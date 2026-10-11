@@ -232,7 +232,7 @@ const CreateProblemPage = () => {
     return (
         <form onSubmit={formik.handleSubmit} className='mx-10 my-10'>
             <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
-                Edición de problema.
+                Nuevo problema
             </h2>
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
                 <label htmlFor="problem-title" className="block text-xl font-semibold mb-2">Título</label>
@@ -243,6 +243,10 @@ const CreateProblemPage = () => {
                     <div className="text-red-500">{formik.errors.Title}</div>
                 ) : null}
             </div>
+
+            <JudgeFilesSection value={judgeFiles} onChange={setJudgeFiles}
+                specialJudge={formik.values.Spj === 'Y'}
+                onSpecialJudgeChange={(checked) => formik.setFieldValue('Spj', checked ? 'Y' : 'N')} />
 
             <div className="mb-6">
                 <fieldset className="p-4 mb-6 bg-white rounded-lg shadow-lg">
@@ -354,10 +358,6 @@ const CreateProblemPage = () => {
                     + Agregar caso
                 </button>
             </div>
-
-            <JudgeFilesSection value={judgeFiles} onChange={setJudgeFiles}
-                specialJudge={formik.values.Spj === 'Y'}
-                onSpecialJudgeChange={(checked) => formik.setFieldValue('Spj', checked ? 'Y' : 'N')} />
 
             {/* Hits */}
             <div className="mb-6">
