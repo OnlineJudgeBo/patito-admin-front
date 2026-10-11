@@ -5,13 +5,37 @@ import ScoringGroupsEditor from './ScoringGroupsEditor';
 
 // The type is not stored: a problem is scored by points when it has subtasks.
 const KINDS = [
-    { value: 'icpc', title: 'ICPC (todo o nada)', hint: 'Aceptado solo si pasa todos los casos.' },
-    { value: 'ioi', title: 'IOI (por puntos)', hint: 'Los casos se agrupan en subtareas y cada una da puntos.' },
+    {
+        value: 'icpc', title: 'ICPC (todo o nada)', tips: [
+            'El envío es aceptado solo si pasa todos los casos.',
+            'La evaluación se detiene en el primer caso que falla.',
+        ],
+    },
+    {
+        value: 'ioi', title: 'IOI (por puntos)', tips: [
+            'Los casos se agrupan en subtareas y cada una da puntos.',
+            'El puntaje máximo del problema es 100: las subtareas deben sumar 100.',
+            'Se evalúan todos los casos y el envío recibe el puntaje que alcanzó.',
+            'Para que el ranking sea por puntos, el concurso debe tener marcado «¿Es por puntos?».',
+        ],
+    },
 ];
 
 const CORRECTIONS = [
-    { value: 'compare', title: 'Comparar con la respuesta', hint: 'La salida debe ser igual al archivo .out.' },
-    { value: 'checker', title: 'Juez especial (varias respuestas válidas)', hint: 'Un checker revisa la salida.' },
+    {
+        value: 'compare', title: 'Comparar con la respuesta', tips: [
+            'Para problemas donde cada caso tiene una sola respuesta correcta.',
+            'La salida debe ser igual al archivo .out.',
+        ],
+    },
+    {
+        value: 'checker', title: 'Juez especial (varias respuestas válidas)', tips: [
+            'Para problemas donde un caso admite varias respuestas correctas.',
+            'Un programa del autor, el checker, lee la salida del participante y decide si es correcta.',
+            'El checker se escribe en C++, sin importar el lenguaje del participante.',
+            'Puede dar puntaje parcial a un caso.',
+        ],
+    },
 ];
 
 const CHECKER_EXAMPLES = {
@@ -42,8 +66,19 @@ int main(int argc, char *argv[]) {
 };
 
 const SOLVING = [
-    { value: 'program', title: 'Programa completo', hint: 'Lee la entrada y escribe la salida.' },
-    { value: 'function', title: 'Función con grader', hint: 'Solo implementa una función. Se acepta en los lenguajes que tengan grader.' },
+    {
+        value: 'program', title: 'Programa completo', tips: [
+            'El participante envía un programa que lee la entrada y escribe la salida.',
+        ],
+    },
+    {
+        value: 'function', title: 'Función con grader', tips: [
+            'El participante envía solo la función, no un programa completo: sin main y sin leer la entrada.',
+            'El grader es del autor: lee el caso, llama a la función y escribe el resultado.',
+            'Solo se aceptan los lenguajes para los que subas un grader.',
+            'El enunciado debe indicar el nombre y los parámetros de la función.',
+        ],
+    },
 ];
 
 // One grader per language the problem accepts; the judge looks for these file names.
@@ -133,6 +168,7 @@ export const judgeFilesProblems = (value, specialJudge) => {
     const complete = tests.filter(test => test.input && test.output).map(test => test.name);
     const incomplete = tests.filter(test => !test.input || !test.output).map(test => test.name);
     const groups = judgeGroups(value);
+    const total = groups.reduce((sum, group) => sum + (Number(group.points) || 0), 0);
     return [
         value.kind === 'ioi' && groups.length === 0 && 'Un problema por puntos necesita al menos una subtarea.',
         incomplete.length > 0 && `Casos sin su par .in / .out: ${incomplete.join(', ')}.`,
@@ -140,6 +176,7 @@ export const judgeFilesProblems = (value, specialJudge) => {
         value.function && !GRADERS.some(grader => value.graders[grader.key]) && 'Un problema de función necesita el grader de al menos un lenguaje.',
         groups.length > 0 && complete.length === 0 && 'Las subtareas necesitan casos de prueba.',
         groups.some(group => !(Number(group.points) > 0)) && 'Cada subtarea necesita puntos mayores que 0.',
+        groups.length > 0 && total !== 100 && `Las subtareas deben sumar 100 puntos; ahora suman ${total}.`,
         groups.some(group => !group.tests.trim()) && 'Cada subtarea necesita indicar sus casos.',
     ].filter(Boolean);
 };
@@ -151,7 +188,7 @@ const Field = ({ title, children }) => (
     </div>
 );
 
-// Radio buttons in a row, with the hint of the chosen one underneath.
+// Radio buttons in a row, with the tips of the chosen one underneath.
 const Choice = ({ name, label, options, selected, onSelect }) => (
     <div role="radiogroup" aria-label={label}>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
@@ -163,7 +200,9 @@ const Choice = ({ name, label, options, selected, onSelect }) => (
                 </label>
             ))}
         </div>
-        <p className="mt-1 text-xs text-gray-500">{options.find(option => option.value === selected)?.hint}</p>
+        <ul className="mt-2 list-disc pl-5 text-sm text-gray-600">
+            {options.find(option => option.value === selected)?.tips.map(tip => <li key={tip}>{tip}</li>)}
+        </ul>
     </div>
 );
 
@@ -266,9 +305,6 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                                             <span className="text-gray-500"> (versión 0.9.45, la del juez) para probar el checker en tu máquina.</span>
                                         </p>
                                     )}
-                                    <p className="mt-3 text-xs text-gray-500">
-                                        El checker siempre se escribe en C++, sin importar en qué lenguaje envíe el participante.
-                                    </p>
                                 </div>
                                 <Examples key={value.checkerKind} title={value.checkerKind === 'cms' ? 'Ejemplo de checker CMS o TPS' : 'Ejemplo de checker testlib'}
                                     tabs={[{ key: value.checkerKind, code: CHECKER_EXAMPLES[value.checkerKind] }]} />
@@ -294,9 +330,6 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                                     ))}
                                     <p className="mt-3 text-sm">
                                         Lenguajes que aceptará el problema: <strong>{accepted.length > 0 ? accepted.join(', ') : 'ninguno todavía'}</strong>
-                                    </p>
-                                    <p className="mt-1 text-xs text-gray-500">
-                                        Sube un grader por cada lenguaje que quieras permitir. En el enunciado indica el nombre y los parámetros de la función.
                                     </p>
                                     {specialJudge && (
                                         <p className="mt-1 text-xs text-gray-500">
