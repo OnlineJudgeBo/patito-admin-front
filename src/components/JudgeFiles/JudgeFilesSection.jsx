@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types, react-refresh/only-export-components */
+import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import ScoringGroupsEditor from './ScoringGroupsEditor';
 
@@ -16,25 +17,26 @@ const CORRECTIONS = [
 const CHECKER_EXAMPLES = {
     testlib: `#include "testlib.h"
 
-// Se ejecuta como: checker <entrada> <salida del participante> <respuesta>
+// Recibe: entrada, salida del participante, respuesta
 int main(int argc, char *argv[]) {
     registerTestlibCmd(argc, argv);
     long esperado = ans.readLong();
     long recibido = ouf.readLong();
     if (recibido == esperado) quitf(_ok, "correcto");
-    if (recibido == esperado + 1) quitp(0.5, "casi");   // medio puntaje
-    quitf(_wa, "esperaba %ld y llegó %ld", esperado, recibido);
+    // quitp da puntaje parcial, de 0 a 1
+    if (recibido == esperado + 1) quitp(0.5, "casi");
+    quitf(_wa, "esperaba %ld", esperado);
 }`,
     cms: `#include <fstream>
 #include <iostream>
 
-// Se ejecuta como: checker <entrada> <respuesta> <salida del participante>
+// Recibe: entrada, respuesta, salida del participante
 int main(int argc, char *argv[]) {
     std::ifstream respuesta(argv[2]), salida(argv[3]);
     long esperado, recibido;
     respuesta >> esperado;
     if (!(salida >> recibido)) { std::cout << 0 << std::endl; return 0; }
-    // Imprime el puntaje del caso: 1 correcto, 0 incorrecto, o una fracción.
+    // Imprime el puntaje: 1 correcto, 0 incorrecto o una fracción
     std::cout << (recibido == esperado ? 1.0 : 0.0) << std::endl;
 }`,
 };
@@ -47,7 +49,7 @@ const SOLVING = [
 // One grader per language the problem accepts; the judge looks for these file names.
 const GRADERS = [
     {
-        key: 'cpp', file: 'grader.cpp', label: 'Grader de C++ (.cpp)', accept: '.cpp,.cc',
+        key: 'cpp', name: 'C++', file: 'grader.cpp', label: 'Grader de C++ (.cpp)', accept: '.cpp,.cc',
         example: `// suma.h: cabecera pública, la incluye la solución
 long suma(long a, long b);
 
@@ -65,7 +67,7 @@ int main() {
 long suma(long a, long b) { return a + b; }`,
     },
     {
-        key: 'java', file: 'grader.java', label: 'Grader de Java (.java)', accept: '.java',
+        key: 'java', name: 'Java', file: 'grader.java', label: 'Grader de Java (.java)', accept: '.java',
         example: `// grader.java: la clase se llama grader y tiene el main
 import java.util.Scanner;
 public class grader {
@@ -81,7 +83,7 @@ public class Main {
 }`,
     },
     {
-        key: 'py', file: 'grader.py', label: 'Grader de Python (.py)', accept: '.py',
+        key: 'py', name: 'Python', file: 'grader.py', label: 'Grader de Python (.py)', accept: '.py',
         example: `# grader.py: importa la función desde Main
 from Main import suma
 a, b = map(int, input().split())
@@ -166,19 +168,32 @@ const Choice = ({ name, label, options, selected, onSelect }) => (
     </div>
 );
 
-const Example = ({ code }) => (
-    <details className="mt-2 text-sm">
-        <summary className="cursor-pointer text-blue-600">Ver ejemplo</summary>
-        <pre className="mt-2 overflow-x-auto rounded bg-gray-100 p-3 font-mono text-xs">{code}</pre>
-    </details>
-);
+// Sample code next to the fields it explains. With several tabs, one per language.
+const Examples = ({ title, tabs }) => {
+    const [selected, setSelected] = useState(tabs[0].key);
+    const shown = tabs.find(tab => tab.key === selected) ?? tabs[0];
+    return (
+        <div className="rounded border border-gray-200">
+            <div className="flex items-center justify-between border-b border-gray-200 px-3 py-2 text-sm">
+                <span className="font-medium">{title}</span>
+                <span className="flex gap-3">
+                    {tabs.length > 1 && tabs.map(tab => (
+                        <button key={tab.key} type="button" onClick={() => setSelected(tab.key)}
+                            className={tab.key === shown.key ? 'font-semibold underline' : 'text-blue-600'}>{tab.label}</button>
+                    ))}
+                    <button type="button" className="text-blue-600" onClick={() => navigator.clipboard?.writeText(shown.code)}>Copiar</button>
+                </span>
+            </div>
+            <pre className="overflow-x-auto bg-gray-50 p-3 font-mono text-xs leading-5">{shown.code}</pre>
+        </div>
+    );
+};
 
-const FilePick = ({ id, label, accept, file, onPick, multiple = false }) => (
+const FilePick = ({ id, label, accept, onPick, multiple = false }) => (
     <div className="mt-3">
         <label htmlFor={id} className="block text-sm font-medium mb-1">{label}</label>
         <input id={id} type="file" accept={accept} multiple={multiple} className="text-sm"
             onChange={event => onPick(multiple ? Array.from(event.target.files) : event.target.files[0] ?? null)} />
-        {!multiple && file && <span className="ml-2 text-sm text-gray-600">{file.name}</span>}
     </div>
 );
 
@@ -201,6 +216,7 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
     const problems = judgeFilesProblems(value, specialJudge).filter(problem => !problem.startsWith('Hay casos'));
 
     const incomplete = tests.filter(test => !test.input || !test.output);
+    const accepted = GRADERS.filter(grader => value.graders[grader.key]).map(grader => grader.name);
 
     return (
         <div className="mb-6">
@@ -242,21 +258,25 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                         <Choice name="problem-correction" label="Corrección" options={CORRECTIONS}
                             selected={specialJudge ? 'checker' : 'compare'} onSelect={choice => onSpecialJudgeChange(choice === 'checker')} />
                         {specialJudge && (
-                            <>
-                                <div className="mt-3">
+                            <div className="mt-3 grid gap-6 lg:grid-cols-2">
+                                <div>
                                     <label htmlFor="problem-checker-kind" className="block text-sm font-medium mb-1">Tipo de checker</label>
                                     <select id="problem-checker-kind" className="rounded border border-gray-300 px-2 py-1 text-sm"
                                         value={value.checkerKind} onChange={event => set({ checkerKind: event.target.value })}>
                                         <option value="testlib">testlib (Codeforces, Polygon)</option>
                                         <option value="cms">CMS o TPS (IOI)</option>
                                     </select>
-                                    <Example code={CHECKER_EXAMPLES[value.checkerKind]} />
+                                    <FilePick id="problem-checker" label="Checker (.cpp)" accept=".cpp,.cc"
+                                        onPick={file => set({ checker: file })} />
+                                    <FilePick id="problem-testlib" label="testlib.h propio (opcional)" accept=".h"
+                                        onPick={file => set({ testlib: file })} />
+                                    <p className="mt-3 text-xs text-gray-500">
+                                        El checker siempre se escribe en C++, sin importar en qué lenguaje envíe el participante.
+                                    </p>
                                 </div>
-                                <FilePick id="problem-checker" label="Checker (.cpp)" accept=".cpp,.cc" file={value.checker}
-                                    onPick={file => set({ checker: file })} />
-                                <FilePick id="problem-testlib" label="testlib.h propio (opcional)" accept=".h" file={value.testlib}
-                                    onPick={file => set({ testlib: file })} />
-                            </>
+                                <Examples key={value.checkerKind} title={value.checkerKind === 'cms' ? 'Ejemplo de checker CMS o TPS' : 'Ejemplo de checker testlib'}
+                                    tabs={[{ key: value.checkerKind, code: CHECKER_EXAMPLES[value.checkerKind] }]} />
+                            </div>
                         )}
                     </Field>
 
@@ -264,19 +284,33 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                         <Choice name="problem-solving" label="Forma de resolver" options={SOLVING}
                             selected={value.function ? 'function' : 'program'} onSelect={choice => set({ function: choice === 'function' })} />
                         {value.function && (
-                            <>
-                                {GRADERS.map(grader => (
-                                    <div key={grader.key}>
-                                        <FilePick id={`problem-grader-${grader.key}`} label={grader.label} accept={grader.accept} file={value.graders[grader.key]}
-                                            onPick={file => onChange(previous => ({ ...previous, graders: { ...previous.graders, [grader.key]: file } }))} />
-                                        <Example code={grader.example} />
-                                        {grader.key === 'cpp' && (
-                                            <FilePick id="problem-headers" label="Cabeceras de C++ (.h)" accept=".h" multiple
-                                                onPick={files => set({ headers: files })} />
-                                        )}
-                                    </div>
-                                ))}
-                            </>
+                            <div className="mt-3 grid gap-6 lg:grid-cols-2">
+                                <div>
+                                    {GRADERS.map(grader => (
+                                        <div key={grader.key}>
+                                            <FilePick id={`problem-grader-${grader.key}`} label={grader.label} accept={grader.accept}
+                                                onPick={file => onChange(previous => ({ ...previous, graders: { ...previous.graders, [grader.key]: file } }))} />
+                                            {grader.key === 'cpp' && (
+                                                <FilePick id="problem-headers" label="Cabeceras de C++ (.h)" accept=".h" multiple
+                                                    onPick={files => set({ headers: files })} />
+                                            )}
+                                        </div>
+                                    ))}
+                                    <p className="mt-3 text-sm">
+                                        Lenguajes que aceptará el problema: <strong>{accepted.length > 0 ? accepted.join(', ') : 'ninguno todavía'}</strong>
+                                    </p>
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Sube un grader por cada lenguaje que quieras permitir. En el enunciado indica el nombre y los parámetros de la función.
+                                    </p>
+                                    {specialJudge && (
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Con juez especial, el grader imprime el resultado y el checker lo revisa.
+                                        </p>
+                                    )}
+                                </div>
+                                <Examples title="Ejemplo: sumar dos números"
+                                    tabs={GRADERS.map(grader => ({ key: grader.key, label: grader.name, code: grader.example }))} />
+                            </div>
                         )}
                     </Field>
 
