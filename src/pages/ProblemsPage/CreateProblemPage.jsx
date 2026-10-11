@@ -102,11 +102,6 @@ const CreateProblemPage = () => {
             console.log(error);
             return;
         }
-        if (!problemId) {
-            toast({ description: 'Problema creado correctamente.' });
-            setTimeout(() => navigate('/admin/problems/'), 2000);
-            return;
-        }
         const failed = [];
         const uploads = judgeUploads(judgeFiles, specialJudge);
         for (const [name, file] of uploads) {

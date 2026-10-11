@@ -100,7 +100,6 @@ export const emptyJudgeFiles = {
     tests: [],
     checkerKind: 'testlib',
     checker: null,
-    testlib: null,
     function: false,
     graders: {},
     headers: [],
@@ -121,7 +120,6 @@ export const pairedTests = (files) => {
 export const judgeUploads = (value, specialJudge) => [
     ...value.tests.map(file => [file.name, file]),
     ...(specialJudge && value.checker ? [[value.checkerKind === 'cms' ? 'checker_cms.cpp' : 'checker.cpp', value.checker]] : []),
-    ...(specialJudge && value.checker && value.testlib ? [['testlib.h', value.testlib]] : []),
     ...(value.function ? GRADERS.filter(grader => value.graders[grader.key]).map(grader => [grader.file, value.graders[grader.key]]) : []),
     ...(value.function && value.graders.cpp ? value.headers.map(file => [file.name, file]) : []),
 ];
@@ -133,10 +131,11 @@ export const judgeGroups = (value) => (value.kind === 'ioi' ? value.groups : [])
 export const judgeFilesProblems = (value, specialJudge) => {
     const tests = pairedTests(value.tests);
     const complete = tests.filter(test => test.input && test.output).map(test => test.name);
+    const incomplete = tests.filter(test => !test.input || !test.output).map(test => test.name);
     const groups = judgeGroups(value);
     return [
         value.kind === 'ioi' && groups.length === 0 && 'Un problema por puntos necesita al menos una subtarea.',
-        tests.some(test => !test.input || !test.output) && 'Hay casos de prueba sin su par .in / .out.',
+        incomplete.length > 0 && `Casos sin su par .in / .out: ${incomplete.join(', ')}.`,
         specialJudge && !value.checker && 'El juez especial necesita el código del checker.',
         value.function && !GRADERS.some(grader => value.graders[grader.key]) && 'Un problema de función necesita el grader de al menos un lenguaje.',
         groups.length > 0 && complete.length === 0 && 'Las subtareas necesitan casos de prueba.',
@@ -181,7 +180,6 @@ const Examples = ({ title, tabs }) => {
                         <button key={tab.key} type="button" onClick={() => setSelected(tab.key)}
                             className={tab.key === shown.key ? 'font-semibold underline' : 'text-blue-600'}>{tab.label}</button>
                     ))}
-                    <button type="button" className="text-blue-600" onClick={() => navigator.clipboard?.writeText(shown.code)}>Copiar</button>
                 </span>
             </div>
             <pre className="overflow-x-auto bg-gray-50 p-3 font-mono text-xs leading-5">{shown.code}</pre>
@@ -213,9 +211,8 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
 
     const tests = pairedTests(value.tests);
     const complete = tests.filter(test => test.input && test.output).map(test => test.name);
-    const problems = judgeFilesProblems(value, specialJudge).filter(problem => !problem.startsWith('Hay casos'));
+    const problems = judgeFilesProblems(value, specialJudge);
 
-    const incomplete = tests.filter(test => !test.input || !test.output);
     const accepted = GRADERS.filter(grader => value.graders[grader.key]).map(grader => grader.name);
 
     return (
@@ -239,13 +236,6 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                                 <button type="button" className="ml-3 text-red-600 hover:text-red-900" onClick={() => set({ tests: [] })}>Quitar todos</button>
                             </p>
                         )}
-                        {incomplete.map(test => (
-                            <p key={test.name} className="mt-1 text-sm text-red-600">
-                                A <span className="font-mono">{test.name}</span> le falta el {test.input ? '.out' : '.in'}.
-                                <button type="button" className="ml-2 underline"
-                                    onClick={() => onChange(previous => ({ ...previous, tests: previous.tests.filter(file => stem(file.name) !== test.name) }))}>Quitar</button>
-                            </p>
-                        ))}
                     </Field>
 
                     {value.kind === 'ioi' && (
@@ -268,8 +258,6 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                                     </select>
                                     <FilePick id="problem-checker" label="Checker (.cpp)" accept=".cpp,.cc"
                                         onPick={file => set({ checker: file })} />
-                                    <FilePick id="problem-testlib" label="testlib.h propio (opcional)" accept=".h"
-                                        onPick={file => set({ testlib: file })} />
                                     <p className="mt-3 text-xs text-gray-500">
                                         El checker siempre se escribe en C++, sin importar en qué lenguaje envíe el participante.
                                     </p>

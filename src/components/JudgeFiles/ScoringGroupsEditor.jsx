@@ -21,18 +21,6 @@ export const patternsOf = (text) => text.split(',').map(item => item.trim()).fil
 export const groupsForApi = (groups) =>
     groups.map(group => ({ ...group, points: Number(group.points), tests: patternsOf(group.tests) }));
 
-// One all-or-nothing group per name prefix, the way olympiad tasks name their tests: s1_1, s1_2, s2_1...
-const groupsByPrefix = (tests) => {
-    const prefixes = [...new Set(tests.map(test => test.match(/^(.*\D)\d+$/)?.[1]).filter(Boolean))].sort();
-    const points = Math.floor(100 / prefixes.length);
-    return prefixes.map((prefix, index) => ({
-        name: `Subtarea ${index + 1}`,
-        points: index === prefixes.length - 1 ? 100 - points * (prefixes.length - 1) : points,
-        type: 'min',
-        tests: `${prefix}*`,
-    }));
-};
-
 // Test groups (subtasks): points per group and which tests belong to each. `groups` hold their
 // patterns as the text typed, separated by commas; `tests` are the names of the existing tests.
 export default function ScoringGroupsEditor({ groups, tests, onChange }) {
@@ -42,7 +30,6 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
 
     const total = groups.reduce((sum, group) => sum + (Number(group.points) || 0), 0);
     const unassigned = tests.filter(test => !groups.some(group => members(group).includes(test)));
-    const prefixed = tests.some(test => /\D\d+$/.test(test));
 
     return (
         <div>
@@ -110,12 +97,6 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
                     onClick={() => onChange([...groups, { name: `Subtarea ${groups.length + 1}`, points: Math.max(100 - total, 10), type: 'min', tests: '' }])}>
                     Agregar subtarea
                 </button>
-                {groups.length === 0 && prefixed && (
-                    <button type="button" className="rounded bg-gray-200 px-4 py-2 text-sm hover:bg-gray-300"
-                        onClick={() => onChange(groupsByPrefix(tests))}>
-                        Crear según el nombre de los casos
-                    </button>
-                )}
             </div>
         </div>
     );
