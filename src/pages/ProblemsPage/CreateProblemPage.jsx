@@ -78,22 +78,48 @@ const CreateProblemPage = () => {
     const { toast } = useToast()
     const navigate = useNavigate();
 
-    const Submit = (values) => {
-        apiService.create('problems', values).then(() => {
-            toast({
-                description: 'Problema creado correctamente.',
-            })
-            setTimeout(() => {
-                navigate('/admin/problems/');
-            }, 2000);
-        }).catch((error) => {
+    // Casos, checker, grader y scoring.json: se suben a los archivos del problema apenas tiene id.
+    const [judgeFiles, setJudgeFiles] = useState([]);
+
+    const Submit = async (values) => {
+        let problemId;
+        try {
+            const created = await apiService.create('problems', values);
+            problemId = created?.problemId;
+        } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error al crear el problema",
                 description: "Error al crear el problema, revise todos los campos.",
             })
             console.log(error);
-        })
+            return;
+        }
+        if (!problemId) {
+            toast({ description: 'Problema creado correctamente.' });
+            setTimeout(() => navigate('/admin/problems/'), 2000);
+            return;
+        }
+        const failed = [];
+        for (const file of judgeFiles) {
+            const formData = new FormData();
+            formData.append("file", file);
+            try {
+                await apiService.postFile(`FileManager/local-storage?problemId=${problemId}&fileName=${encodeURIComponent(file.name)}`, formData);
+            } catch {
+                failed.push(file.name);
+            }
+        }
+        if (failed.length > 0) {
+            toast({
+                variant: "destructive",
+                title: "Problema creado, pero faltan archivos",
+                description: `No se pudo subir: ${failed.join(', ')}. Súbelos desde los archivos del problema.`,
+            });
+        } else {
+            toast({ description: judgeFiles.length > 0 ? `Problema creado con ${judgeFiles.length} archivo(s).` : 'Problema creado correctamente.' });
+        }
+        setTimeout(() => navigate(`/admin/problems/edit/${problemId}`), 2000);
     };
 
     const [topicClassificationList, setTopicClassificationList] = useState();
@@ -233,7 +259,7 @@ const CreateProblemPage = () => {
                                     Juez especial (varias respuestas válidas)
                                 </label>
                                 <p className="mt-1 text-xs text-gray-500">
-                                    Requiere un checker escrito con testlib.h, subido como <span className="font-mono">checker.cpp</span> en los archivos del problema.
+                                    Requiere un checker: súbelo abajo, en «Archivos del juez».
                                 </p>
                             </div>
                         </div>
@@ -322,6 +348,28 @@ const CreateProblemPage = () => {
                     onClick={addSampleCase}>
                     + Agregar caso
                 </button>
+            </div>
+
+            {/* Archivos del juez */}
+            <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
+                <label htmlFor="problem-judge-files" className="block text-xl font-semibold mb-2">Archivos del juez</label>
+                <p className="mb-3 text-sm text-gray-600">
+                    Opcional: se suben al guardar. También se pueden agregar o cambiar después, desde los archivos del problema.
+                </p>
+                <ul className="mb-3 list-disc pl-5 text-sm text-gray-600">
+                    <li>Casos de prueba: <span className="font-mono">nombre.in</span> y <span className="font-mono">nombre.out</span>.</li>
+                    <li>Checker del juez especial: <span className="font-mono">checker.cpp</span> (testlib) o <span className="font-mono">checker_cms.cpp</span> (estilo CMS).</li>
+                    <li>Problema de función: <span className="font-mono">grader.cpp</span> y sus cabeceras <span className="font-mono">.h</span>.</li>
+                    <li>Subtareas: <span className="font-mono">scoring.json</span>, o se definen después en «Grupos de puntaje».</li>
+                </ul>
+                <input id="problem-judge-files" type="file" multiple
+                    onChange={(event) => setJudgeFiles(Array.from(event.target.files))} />
+                {judgeFiles.length > 0 && (
+                    <p className="mt-2 text-sm text-gray-700">{judgeFiles.map((file) => file.name).join(', ')}</p>
+                )}
+                {formik.values.Spj === 'Y' && !judgeFiles.some((file) => file.name === 'checker.cpp' || file.name === 'checker_cms.cpp') && (
+                    <p className="mt-2 text-sm text-amber-700">El juez especial está marcado y no hay checker entre los archivos.</p>
+                )}
             </div>
 
             {/* Hits */}
