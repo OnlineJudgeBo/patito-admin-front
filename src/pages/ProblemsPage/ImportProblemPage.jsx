@@ -1,15 +1,31 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
+
+// Each format has its own entry in the menu; without ?format= it is this judge's own (ICPC based) package.
+const FORMATS = {
+    cms: {
+        title: 'Importar de CMS',
+        help: <>Comprime la carpeta de la tarea, la que tiene <span className="font-mono">task.yaml</span>.</>,
+    },
+    tps: {
+        title: 'Importar de TPS',
+        help: (
+            <>
+                Sube el .zip de <span className="font-mono">tps export</span>, o comprime la carpeta de la tarea
+                (la que tiene <span className="font-mono">problem.json</span>) después de ejecutar <span className="font-mono">tps gen</span>.
+            </>
+        ),
+    },
+};
 
 function ImportProblemPage() {
     const navigate = useNavigate();
     const [file, setFile] = useState(null);
     const [isImporting, setIsImporting] = useState(false);
     const [error, setError] = useState('');
-    // 'package' is this judge's own (ICPC based) package; 'task' is an olympiad task (CMS or TPS) zipped.
-    const [format, setFormat] = useState('package');
+    const format = FORMATS[useSearchParams()[0].get('format')];
 
     const onDrop = useCallback((acceptedFiles) => {
         setFile(acceptedFiles[0] ?? null);
@@ -33,7 +49,7 @@ function ImportProblemPage() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const problem = format === 'task'
+            const problem = format
                 ? await apiService.postFile('problems/import-task', formData)
                 : await apiService.importProblem(formData);
             navigate(`/admin/problems/edit/${problem.problemId}`);
@@ -46,25 +62,14 @@ function ImportProblemPage() {
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
-            <h1 className="text-xl font-semibold mb-4">Importar problema</h1>
+            <h1 className="text-xl font-semibold mb-4">{format?.title ?? 'Importar problema'}</h1>
 
-            <div className="mb-4">
-                <label htmlFor="import-format" className="mr-2 text-sm font-medium text-gray-700">Formato</label>
-                <select id="import-format" className="rounded border border-gray-300 px-2 py-1 text-sm"
-                    value={format} onChange={(event) => setFormat(event.target.value)}>
-                    <option value="package">Paquete de problema (Patito / ICPC)</option>
-                    <option value="task">Tarea de olimpiada (CMS o TPS)</option>
-                </select>
-                {format === 'task' && (
-                    <p className="mt-1 text-xs text-gray-500">
-                        Comprime la carpeta de la tarea: con <span className="font-mono">task.yaml</span> si es de CMS, o con{' '}
-                        <span className="font-mono">problem.json</span> si es de TPS. De TPS sirve el .zip de{' '}
-                        <span className="font-mono">tps export</span> o la carpeta después de ejecutar <span className="font-mono">tps gen</span>.
-                        Se importan los casos, las subtareas con sus puntos, el checker, el grader y el enunciado.
-                        Las imágenes del enunciado no se importan: agrégalas después desde el editor.
-                    </p>
-                )}
-            </div>
+            {format && (
+                <p className="mb-4 text-sm text-gray-600">
+                    {format.help} Se importan los casos, las subtareas con sus puntos, el checker, el grader y el enunciado.
+                    Las imágenes del enunciado no se importan: agrégalas después desde el editor.
+                </p>
+            )}
 
             <div
                 {...getRootProps()}
@@ -74,7 +79,7 @@ function ImportProblemPage() {
                 {file ? (
                     <p>Archivo seleccionado: {file.name}</p>
                 ) : (
-                    <p>{format === 'task' ? 'Arrastra el .zip de la tarea aquí' : 'Arrastra el .zip del paquete de problema aquí'}</p>
+                    <p>{format ? 'Arrastra el .zip de la tarea aquí' : 'Arrastra el .zip del paquete de problema aquí'}</p>
                 )}
             </div>
 
