@@ -258,6 +258,11 @@ const EditForm = () => {
                                 <p className="mt-1 text-xs text-gray-500">
                                     Requiere un checker escrito con testlib.h, subido como <span className="font-mono">checker.cpp</span> en los archivos del problema.
                                 </p>
+                                <p className="mt-2 text-sm">
+                                    <a className="text-blue-600 hover:text-blue-900" href={`/admin/fileManager/${problemId}`}>Archivos del problema</a>
+                                    <span className="text-gray-500"> (casos, checker, grader) · </span>
+                                    <a className="text-blue-600 hover:text-blue-900" href={`/admin/problems/${problemId}/scoring`}>Grupos de puntaje</a>
+                                </p>
                             </div>
                         </div>
 
