@@ -258,6 +258,14 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                                     </select>
                                     <FilePick id="problem-checker" label="Checker (.cpp)" accept=".cpp,.cc"
                                         onPick={file => set({ checker: file })} />
+                                    {value.checkerKind === 'testlib' && (
+                                        <p className="mt-3 text-sm">
+                                            {/* The exact file the judge compiles checkers with (testlib 0.9.45). */}
+                                            <a className="text-blue-600 hover:text-blue-900" target="_blank" rel="noreferrer"
+                                                href="https://raw.githubusercontent.com/MikeMirzayanov/testlib/2d20123984e9479b8a56ebe0d6a51e23ad7c35b3/testlib.h">Descargar testlib.h</a>
+                                            <span className="text-gray-500"> (versión 0.9.45, la del juez) para probar el checker en tu máquina.</span>
+                                        </p>
+                                    )}
                                     <p className="mt-3 text-xs text-gray-500">
                                         El checker siempre se escribe en C++, sin importar en qué lenguaje envíe el participante.
                                     </p>
