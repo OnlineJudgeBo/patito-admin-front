@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
-import JudgeFilesSection, { emptyJudgeFiles, judgeFilesProblems, judgeUploads } from '../../components/JudgeFiles/JudgeFilesSection';
+import JudgeFilesSection, { emptyJudgeFiles, judgeFilesProblems, judgeGroups, judgeUploads } from '../../components/JudgeFiles/JudgeFilesSection';
 import { groupsForApi } from '../../components/JudgeFiles/ScoringGroupsEditor';
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
 import { MathStatementEditor } from '../../components/Statement/MathStatementEditor';
@@ -118,9 +118,9 @@ const CreateProblemPage = () => {
                 failed.push(name);
             }
         }
-        if (judgeFiles.groups.length > 0) {
+        if (judgeGroups(judgeFiles).length > 0) {
             try {
-                await apiService.put(`problems/${problemId}/scoring`, { groups: groupsForApi(judgeFiles.groups) });
+                await apiService.put(`problems/${problemId}/scoring`, { groups: groupsForApi(judgeGroups(judgeFiles)) });
             } catch {
                 failed.push('las subtareas');
             }

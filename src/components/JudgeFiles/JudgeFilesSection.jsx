@@ -2,7 +2,14 @@
 import { useDropzone } from 'react-dropzone';
 import ScoringGroupsEditor from './ScoringGroupsEditor';
 
+// The type is not stored: a problem is scored by points when it has subtasks.
+const KINDS = [
+    { value: 'icpc', title: 'ICPC — todo o nada', text: 'El envío es aceptado solo si pasa todos los casos. Se detiene en el primer fallo.' },
+    { value: 'ioi', title: 'IOI — por puntos', text: 'Los casos se agrupan en subtareas con puntos. Se evalúan todos y el envío recibe un puntaje.' },
+];
+
 export const emptyJudgeFiles = {
+    kind: 'icpc',
     tests: [],
     checkerKind: 'testlib',
     checker: null,
@@ -31,17 +38,22 @@ export const judgeUploads = (value, specialJudge) => [
     ...(value.function && value.grader ? [['grader.cpp', value.grader], ...value.headers.map(file => [file.name, file])] : []),
 ];
 
+// Subtasks only count for a problem scored by points.
+export const judgeGroups = (value) => (value.kind === 'ioi' ? value.groups : []);
+
 // What stops the problem from being judged as configured; empty when it can be saved.
 export const judgeFilesProblems = (value, specialJudge) => {
     const tests = pairedTests(value.tests);
     const complete = tests.filter(test => test.input && test.output).map(test => test.name);
+    const groups = judgeGroups(value);
     return [
+        value.kind === 'ioi' && groups.length === 0 && 'Un problema por puntos necesita al menos una subtarea.',
         tests.some(test => !test.input || !test.output) && 'Hay casos de prueba sin su par .in / .out.',
         specialJudge && !value.checker && 'El juez especial está marcado y falta el checker.',
         value.function && !value.grader && 'El problema de función está marcado y falta el grader.',
-        value.groups.length > 0 && complete.length === 0 && 'Las subtareas necesitan casos de prueba.',
-        value.groups.some(group => !(Number(group.points) > 0)) && 'Cada subtarea necesita puntos mayores que 0.',
-        value.groups.some(group => !group.tests.trim()) && 'Cada subtarea necesita indicar sus casos.',
+        groups.length > 0 && complete.length === 0 && 'Las subtareas necesitan casos de prueba.',
+        groups.some(group => !(Number(group.points) > 0)) && 'Cada subtarea necesita puntos mayores que 0.',
+        groups.some(group => !group.tests.trim()) && 'Cada subtarea necesita indicar sus casos.',
     ].filter(Boolean);
 };
 
@@ -62,7 +74,7 @@ const FilePick = ({ id, label, accept, file, onPick, multiple = false }) => (
     </div>
 );
 
-// Everything the judge needs besides the statement: tests, checker, grader and subtasks.
+// Everything the judge needs besides the statement: type of problem, tests, subtasks, checker and grader.
 // Nothing is uploaded here; the page uploads judgeUploads(value) once the problem exists.
 export default function JudgeFilesSection({ value, onChange, specialJudge, onSpecialJudgeChange }) {
     // onChange is a state setter: updates build on the latest value, since the dropzone reports late.
@@ -86,6 +98,19 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
             <p className="mb-4 text-sm text-gray-600">
                 Todo es opcional y se sube al guardar. Después se puede cambiar desde los archivos del problema.
             </p>
+
+            <Block title="Tipo de problema">
+                <div className="mt-2 grid gap-3 md:grid-cols-2" role="radiogroup" aria-label="Tipo de problema">
+                    {KINDS.map(kind => (
+                        <label key={kind.value} className={`cursor-pointer rounded-lg border-2 p-3 ${value.kind === kind.value ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200'}`}>
+                            <input type="radio" name="problem-kind" className="mr-2" value={kind.value}
+                                checked={value.kind === kind.value} onChange={() => set({ kind: kind.value })} />
+                            <span className="font-semibold">{kind.title}</span>
+                            <p className="mt-1 text-sm text-gray-600">{kind.text}</p>
+                        </label>
+                    ))}
+                </div>
+            </Block>
 
             <Block title="Casos de prueba" help="Cada caso son dos archivos con el mismo nombre: la entrada .in y la respuesta .out.">
                 <div {...getRootProps()} className={`flex justify-center items-center p-6 border-2 border-dashed cursor-pointer rounded ${isDragActive ? 'border-indigo-500 bg-indigo-50' : 'border-gray-400'}`}>
@@ -112,6 +137,13 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                     </>
                 )}
             </Block>
+
+            {value.kind === 'ioi' && (
+                <Block title="Subtareas y puntaje"
+                    help="Cada subtarea reparte sus puntos entre sus casos. Los casos de cada subtarea se eligen por nombre con comodines, separados por comas: s1_*, caso?.">
+                    <ScoringGroupsEditor groups={value.groups} tests={complete} onChange={groups => set({ groups })} />
+                </Block>
+            )}
 
             <Block title="Corrección">
                 <label htmlFor="problem-special-judge" className="inline-flex items-center gap-2 font-medium">
@@ -156,11 +188,6 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                         {value.headers.length > 0 && <p className="mt-1 text-sm text-gray-600 font-mono">{value.headers.map(file => file.name).join(', ')}</p>}
                     </div>
                 )}
-            </Block>
-
-            <Block title="Subtareas y puntaje"
-                help="Para problemas por puntos (estilo IOI). Los casos de cada subtarea se eligen por nombre con comodines, separados por comas: s1_*, caso?.">
-                <ScoringGroupsEditor groups={value.groups} tests={complete} onChange={groups => set({ groups })} />
             </Block>
 
             {problems.length > 0 && (
