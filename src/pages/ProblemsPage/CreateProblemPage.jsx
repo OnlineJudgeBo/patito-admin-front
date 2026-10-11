@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 import '../../components/CKEditor/ckeditor.css';
+import JudgeFilesSection, { emptyJudgeFiles, judgeFilesProblems, judgeGroups, judgeUploads } from '../../components/JudgeFiles/JudgeFilesSection';
+import { groupsForApi } from '../../components/JudgeFiles/ScoringGroupsEditor';
 import UploadAdapter from "../../components/CKEditor/upload_adapter.js";
 import { MathStatementEditor } from '../../components/Statement/MathStatementEditor';
 import { StatementPreview } from '../../components/Statement/StatementPreview';
@@ -78,10 +80,15 @@ const CreateProblemPage = () => {
     const { toast } = useToast()
     const navigate = useNavigate();
 
-    // Casos, checker, grader y scoring.json: se suben a los archivos del problema apenas tiene id.
-    const [judgeFiles, setJudgeFiles] = useState([]);
+    // Casos, checker, grader y subtareas: se suben a los archivos del problema apenas tiene id.
+    const [judgeFiles, setJudgeFiles] = useState(emptyJudgeFiles);
 
     const Submit = async (values) => {
+        const specialJudge = values.Spj === 'Y';
+        if (judgeFilesProblems(judgeFiles, specialJudge).length > 0) {
+            toast({ variant: "destructive", title: "Revisa la sección Evaluación", description: "Hay datos incompletos antes de guardar." });
+            return;
+        }
         let problemId;
         try {
             const created = await apiService.create('problems', values);
@@ -95,29 +102,32 @@ const CreateProblemPage = () => {
             console.log(error);
             return;
         }
-        if (!problemId) {
-            toast({ description: 'Problema creado correctamente.' });
-            setTimeout(() => navigate('/admin/problems/'), 2000);
-            return;
-        }
         const failed = [];
-        for (const file of judgeFiles) {
+        const uploads = judgeUploads(judgeFiles, specialJudge);
+        for (const [name, file] of uploads) {
             const formData = new FormData();
             formData.append("file", file);
             try {
-                await apiService.postFile(`FileManager/local-storage?problemId=${problemId}&fileName=${encodeURIComponent(file.name)}`, formData);
+                await apiService.postFile(`FileManager/local-storage?problemId=${problemId}&fileName=${encodeURIComponent(name)}`, formData);
             } catch {
-                failed.push(file.name);
+                failed.push(name);
+            }
+        }
+        if (judgeGroups(judgeFiles).length > 0) {
+            try {
+                await apiService.put(`problems/${problemId}/scoring`, { groups: groupsForApi(judgeGroups(judgeFiles)) });
+            } catch {
+                failed.push('las subtareas');
             }
         }
         if (failed.length > 0) {
             toast({
                 variant: "destructive",
-                title: "Problema creado, pero faltan archivos",
-                description: `No se pudo subir: ${failed.join(', ')}. Súbelos desde los archivos del problema.`,
+                title: "Problema creado, pero quedó incompleto",
+                description: `No se pudo guardar: ${failed.join(', ')}. Complétalo desde los archivos del problema.`,
             });
         } else {
-            toast({ description: judgeFiles.length > 0 ? `Problema creado con ${judgeFiles.length} archivo(s).` : 'Problema creado correctamente.' });
+            toast({ description: uploads.length > 0 ? `Problema creado con ${uploads.length} archivo(s).` : 'Problema creado correctamente.' });
         }
         setTimeout(() => navigate(`/admin/problems/edit/${problemId}`), 2000);
     };
@@ -217,7 +227,7 @@ const CreateProblemPage = () => {
     return (
         <form onSubmit={formik.handleSubmit} className='mx-10 my-10'>
             <h2 className="text-dark mb-2 text-2xl font-semibold dark:text-white">
-                Edición de problema.
+                Nuevo problema
             </h2>
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
                 <label htmlFor="problem-title" className="block text-xl font-semibold mb-2">Título</label>
@@ -228,6 +238,10 @@ const CreateProblemPage = () => {
                     <div className="text-red-500">{formik.errors.Title}</div>
                 ) : null}
             </div>
+
+            <JudgeFilesSection value={judgeFiles} onChange={setJudgeFiles}
+                specialJudge={formik.values.Spj === 'Y'}
+                onSpecialJudgeChange={(checked) => formik.setFieldValue('Spj', checked ? 'Y' : 'N')} />
 
             <div className="mb-6">
                 <fieldset className="p-4 mb-6 bg-white rounded-lg shadow-lg">
@@ -251,16 +265,6 @@ const CreateProblemPage = () => {
                                 {formik.touched.MemoryLimit && formik.errors.MemoryLimit ? (
                                     <div className="text-red-500">{formik.errors.MemoryLimit}</div>
                                 ) : null}
-                            </div>
-                            <div className="rounded-lg mt-5">
-                                <label htmlFor="problem-special-judge" className="inline-flex items-center gap-2 text-xl font-semibold">
-                                    <input id="problem-special-judge" type="checkbox" checked={formik.values.Spj === 'Y'}
-                                        onChange={(event) => formik.setFieldValue('Spj', event.target.checked ? 'Y' : 'N')} />
-                                    Juez especial (varias respuestas válidas)
-                                </label>
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Requiere un checker: súbelo abajo, en «Archivos del juez».
-                                </p>
                             </div>
                         </div>
 
@@ -348,28 +352,6 @@ const CreateProblemPage = () => {
                     onClick={addSampleCase}>
                     + Agregar caso
                 </button>
-            </div>
-
-            {/* Archivos del juez */}
-            <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
-                <label htmlFor="problem-judge-files" className="block text-xl font-semibold mb-2">Archivos del juez</label>
-                <p className="mb-3 text-sm text-gray-600">
-                    Opcional: se suben al guardar. También se pueden agregar o cambiar después, desde los archivos del problema.
-                </p>
-                <ul className="mb-3 list-disc pl-5 text-sm text-gray-600">
-                    <li>Casos de prueba: <span className="font-mono">nombre.in</span> y <span className="font-mono">nombre.out</span>.</li>
-                    <li>Checker del juez especial: <span className="font-mono">checker.cpp</span> (testlib) o <span className="font-mono">checker_cms.cpp</span> (estilo CMS).</li>
-                    <li>Problema de función: <span className="font-mono">grader.cpp</span> y sus cabeceras <span className="font-mono">.h</span>.</li>
-                    <li>Subtareas: <span className="font-mono">scoring.json</span>, o se definen después en «Grupos de puntaje».</li>
-                </ul>
-                <input id="problem-judge-files" type="file" multiple
-                    onChange={(event) => setJudgeFiles(Array.from(event.target.files))} />
-                {judgeFiles.length > 0 && (
-                    <p className="mt-2 text-sm text-gray-700">{judgeFiles.map((file) => file.name).join(', ')}</p>
-                )}
-                {formik.values.Spj === 'Y' && !judgeFiles.some((file) => file.name === 'checker.cpp' || file.name === 'checker_cms.cpp') && (
-                    <p className="mt-2 text-sm text-amber-700">El juez especial está marcado y no hay checker entre los archivos.</p>
-                )}
             </div>
 
             {/* Hits */}
