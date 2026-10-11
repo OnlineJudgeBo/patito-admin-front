@@ -68,8 +68,9 @@ const FileManagerPage = () => {
             <div className="flex flex-wrap mt-5 gap-10">
                 {columns.map(column => (
                     <div key={column.title} className="flex-1 min-w-0">
-                        <h2 className="text-center font-bold">{column.title}</h2>
+                        <h2 className="text-center font-bold">{column.title} ({column.files.length})</h2>
                         <p className="mb-4 h-4 text-center text-xs text-gray-500">{column.hint}</p>
+                        <div className="max-h-96 overflow-y-auto">
                         {column.files.map(file => (
                             <div key={file.name} className="border rounded-lg p-4 flex justify-between items-center bg-blue-100 border-blue-500">
                                 <span className="text-sm font-semibold truncate">{file.name}</span>
@@ -79,6 +80,7 @@ const FileManagerPage = () => {
                                 </div>
                             </div>
                         ))}
+                        </div>
                     </div>
                 ))}
             </div>
