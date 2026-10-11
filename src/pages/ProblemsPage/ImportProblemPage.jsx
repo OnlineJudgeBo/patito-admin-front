@@ -58,8 +58,10 @@ function ImportProblemPage() {
                 {format === 'task' && (
                     <p className="mt-1 text-xs text-gray-500">
                         Comprime la carpeta de la tarea: con <span className="font-mono">task.yaml</span> si es de CMS, o con{' '}
-                        <span className="font-mono">problem.json</span> si es de TPS (después de ejecutar <span className="font-mono">tps gen</span>).
-                        Se importan los casos, las subtareas con sus puntos y el checker. Revisa el enunciado después de importar.
+                        <span className="font-mono">problem.json</span> si es de TPS. De TPS sirve el .zip de{' '}
+                        <span className="font-mono">tps export</span> o la carpeta después de ejecutar <span className="font-mono">tps gen</span>.
+                        Se importan los casos, las subtareas con sus puntos, el checker, el grader y el enunciado.
+                        Las imágenes del enunciado no se importan: agrégalas después desde el editor.
                     </p>
                 )}
             </div>
