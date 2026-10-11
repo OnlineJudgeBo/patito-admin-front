@@ -114,6 +114,14 @@ const Sidebar = () => {
                             <span className="ml-2 text-sm font-medium">Rejudge</span>
                         </Link>
                     </li>
+                    <li>
+                        <Link to="/admin/problems/review" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/clipboard-check.svg" className="w-5 h-5" alt="Revisión de problemas Icon" />
+                            </span>
+                            <span className="ml-2 text-sm font-medium">Revisión de problemas</span>
+                        </Link>
+                    </li>
 
                     <div className="px-6 text-xs text-gray-600 mt-4">Temas y Clasificación</div>
 
