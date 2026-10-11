@@ -41,13 +41,17 @@ int main(int argc, char *argv[]) {
 
 const SOLVING = [
     { value: 'program', title: 'Programa completo', hint: 'Lee la entrada y escribe la salida.' },
-    { value: 'function', title: 'Función con grader', hint: 'Solo implementa una función. Solo C++.' },
+    { value: 'function', title: 'Función con grader', hint: 'Solo implementa una función. Se acepta en los lenguajes que tengan grader.' },
 ];
 
-const FUNCTION_EXAMPLE = `// suma.h: cabecera pública, la incluye la solución
+// One grader per language the problem accepts; the judge looks for these file names.
+const GRADERS = [
+    {
+        key: 'cpp', file: 'grader.cpp', label: 'Grader de C++ (.cpp)', accept: '.cpp,.cc',
+        example: `// suma.h: cabecera pública, la incluye la solución
 long suma(long a, long b);
 
-// grader.cpp: del autor, tiene el main y no se muestra
+// grader.cpp: tiene el main y no se muestra
 #include <iostream>
 #include "suma.h"
 int main() {
@@ -58,7 +62,36 @@ int main() {
 
 // Lo que envía el participante
 #include "suma.h"
-long suma(long a, long b) { return a + b; }`;
+long suma(long a, long b) { return a + b; }`,
+    },
+    {
+        key: 'java', file: 'grader.java', label: 'Grader de Java (.java)', accept: '.java',
+        example: `// grader.java: la clase se llama grader y tiene el main
+import java.util.Scanner;
+public class grader {
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+        System.out.println(Main.suma(in.nextLong(), in.nextLong()));
+    }
+}
+
+// Lo que envía el participante: la clase Main con el método estático
+public class Main {
+    public static long suma(long a, long b) { return a + b; }
+}`,
+    },
+    {
+        key: 'py', file: 'grader.py', label: 'Grader de Python (.py)', accept: '.py',
+        example: `# grader.py: importa la función desde Main
+from Main import suma
+a, b = map(int, input().split())
+print(suma(a, b))
+
+# Lo que envía el participante
+def suma(a, b):
+    return a + b`,
+    },
+];
 
 export const emptyJudgeFiles = {
     kind: 'icpc',
@@ -67,7 +100,7 @@ export const emptyJudgeFiles = {
     checker: null,
     testlib: null,
     function: false,
-    grader: null,
+    graders: {},
     headers: [],
     groups: [],
 };
@@ -87,7 +120,8 @@ export const judgeUploads = (value, specialJudge) => [
     ...value.tests.map(file => [file.name, file]),
     ...(specialJudge && value.checker ? [[value.checkerKind === 'cms' ? 'checker_cms.cpp' : 'checker.cpp', value.checker]] : []),
     ...(specialJudge && value.checker && value.testlib ? [['testlib.h', value.testlib]] : []),
-    ...(value.function && value.grader ? [['grader.cpp', value.grader], ...value.headers.map(file => [file.name, file])] : []),
+    ...(value.function ? GRADERS.filter(grader => value.graders[grader.key]).map(grader => [grader.file, value.graders[grader.key]]) : []),
+    ...(value.function && value.graders.cpp ? value.headers.map(file => [file.name, file]) : []),
 ];
 
 // Subtasks only count for a problem scored by points.
@@ -102,7 +136,7 @@ export const judgeFilesProblems = (value, specialJudge) => {
         value.kind === 'ioi' && groups.length === 0 && 'Un problema por puntos necesita al menos una subtarea.',
         tests.some(test => !test.input || !test.output) && 'Hay casos de prueba sin su par .in / .out.',
         specialJudge && !value.checker && 'El juez especial necesita el código del checker.',
-        value.function && !value.grader && 'Un problema de función necesita el grader.',
+        value.function && !GRADERS.some(grader => value.graders[grader.key]) && 'Un problema de función necesita el grader de al menos un lenguaje.',
         groups.length > 0 && complete.length === 0 && 'Las subtareas necesitan casos de prueba.',
         groups.some(group => !(Number(group.points) > 0)) && 'Cada subtarea necesita puntos mayores que 0.',
         groups.some(group => !group.tests.trim()) && 'Cada subtarea necesita indicar sus casos.',
@@ -231,11 +265,17 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
                             selected={value.function ? 'function' : 'program'} onSelect={choice => set({ function: choice === 'function' })} />
                         {value.function && (
                             <>
-                                <Example code={FUNCTION_EXAMPLE} />
-                                <FilePick id="problem-grader" label="Grader (.cpp)" accept=".cpp,.cc" file={value.grader}
-                                    onPick={file => set({ grader: file })} />
-                                <FilePick id="problem-headers" label="Cabeceras (.h)" accept=".h" multiple
-                                    onPick={files => set({ headers: files })} />
+                                {GRADERS.map(grader => (
+                                    <div key={grader.key}>
+                                        <FilePick id={`problem-grader-${grader.key}`} label={grader.label} accept={grader.accept} file={value.graders[grader.key]}
+                                            onPick={file => onChange(previous => ({ ...previous, graders: { ...previous.graders, [grader.key]: file } }))} />
+                                        <Example code={grader.example} />
+                                        {grader.key === 'cpp' && (
+                                            <FilePick id="problem-headers" label="Cabeceras de C++ (.h)" accept=".h" multiple
+                                                onPick={files => set({ headers: files })} />
+                                        )}
+                                    </div>
+                                ))}
                             </>
                         )}
                     </Field>
