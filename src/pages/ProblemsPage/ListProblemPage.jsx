@@ -181,6 +181,7 @@ function ListProblemsPage() {
                                     </td>
                                     <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 flex gap-4">
                                         <a className="text-blue-600 hover:text-blue-900" href={`/admin/problems/edit/${problem.problemId}`}>Editar</a>
+                                        <a className="ml-2 text-blue-600 hover:text-blue-900" href={`/admin/problems/${problem.problemId}/scoring`}>Puntaje</a>
                                         {isAdmin && (
                                             <a className="text-blue-600 hover:text-blue-900" href="#" onClick={(e) => {
                                                 e.preventDefault();
