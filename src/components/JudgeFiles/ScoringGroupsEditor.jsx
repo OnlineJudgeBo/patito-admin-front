@@ -37,17 +37,16 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
                 <table className="min-w-full divide-y divide-gray-200 text-sm">
                     <thead className="bg-gray-50 text-left text-xs font-medium uppercase text-gray-500">
                         <tr>
-                            <th className="px-3 py-2">Nombre</th>
+                            <th className="px-3 py-2">Subtarea</th>
                             <th className="px-3 py-2">Puntos</th>
-                            <th className="px-3 py-2">Tipo</th>
-                            <th className="px-3 py-2">Casos</th>
-                            <th className="px-3 py-2">Coinciden</th>
+                            <th className="px-3 py-2">Cómo se gana</th>
+                            <th className="px-3 py-2">Casos de prueba</th>
                             <th className="px-3 py-2"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white">
                         {groups.map((group, index) => (
-                            <tr key={index}>
+                            <tr key={index} className="align-top">
                                 <td className="px-3 py-2">
                                     <input className="w-full rounded border border-gray-300 px-2 py-1" aria-label="Nombre del grupo"
                                         value={group.name ?? ''} onChange={event => update(index, 'name', event.target.value)} />
@@ -58,17 +57,17 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
                                 </td>
                                 <td className="px-3 py-2">
                                     <select className="rounded border border-gray-300 px-2 py-1" aria-label="Tipo de grupo"
-                                        title={TYPES.find(type => type.value === group.type)?.hint}
                                         value={group.type} onChange={event => update(index, 'type', event.target.value)}>
-                                        {TYPES.map(type => <option key={type.value} value={type.value} title={type.hint}>{type.label}</option>)}
+                                        {TYPES.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}
                                     </select>
+                                    <p className="mt-1 text-xs text-gray-500">{TYPES.find(type => type.value === group.type)?.hint}</p>
                                 </td>
                                 <td className="px-3 py-2">
                                     <input className="w-full rounded border border-gray-300 px-2 py-1 font-mono" aria-label="Casos del grupo"
-                                        placeholder="s1_*, extra" value={group.tests} onChange={event => update(index, 'tests', event.target.value)} />
-                                </td>
-                                <td className={`px-3 py-2 ${members(group).length === 0 ? 'font-semibold text-red-600' : ''}`}>
-                                    {members(group).length}
+                                        placeholder="1-*, extra" value={group.tests} onChange={event => update(index, 'tests', event.target.value)} />
+                                    {members(group).length === 0
+                                        ? <p className="mt-1 text-xs font-semibold text-red-600">Ningún caso coincide.</p>
+                                        : <p className="mt-1 text-xs text-gray-500">{members(group).length} casos: <span className="font-mono">{members(group).join(', ')}</span></p>}
                                 </td>
                                 <td className="px-3 py-2">
                                     <button type="button" className="text-red-600 hover:text-red-900"
@@ -80,6 +79,12 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
                 </table>
             )}
 
+            {groups.length > 0 && (
+                <p className="mt-2 text-xs text-gray-500">
+                    En casos de prueba van los nombres separados por comas. Un <span className="font-mono">*</span> vale por cualquier texto:{' '}
+                    <span className="font-mono">1-*</span> toma 1-01, 1-02, etc.
+                </p>
+            )}
             {groups.length > 0 && (
                 <p className="mt-3 text-sm">
                     Total: <strong>{total}</strong> puntos
