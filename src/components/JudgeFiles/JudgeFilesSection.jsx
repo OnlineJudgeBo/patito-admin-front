@@ -4,18 +4,13 @@ import ScoringGroupsEditor from './ScoringGroupsEditor';
 
 // The type is not stored: a problem is scored by points when it has subtasks.
 const KINDS = [
-    { value: 'icpc', title: 'ICPC — todo o nada', text: 'El envío es aceptado solo si pasa todos los casos. Se detiene en el primer fallo.' },
-    { value: 'ioi', title: 'IOI — por puntos', text: 'Los casos se agrupan en subtareas con puntos. Se evalúan todos y el envío recibe un puntaje.' },
+    { value: 'icpc', title: 'ICPC (todo o nada)', hint: 'Aceptado solo si pasa todos los casos.' },
+    { value: 'ioi', title: 'IOI (por puntos)', hint: 'Los casos se agrupan en subtareas y cada una da puntos.' },
 ];
 
 const CORRECTIONS = [
-    { value: 'compare', title: 'Comparar con la respuesta', text: 'Hay una sola respuesta correcta: la salida debe ser igual al archivo .out.' },
-    { value: 'checker', title: 'Juez especial (varias respuestas válidas)', text: 'Un programa (checker) revisa la salida y decide si es correcta. Puede dar puntaje parcial.' },
-];
-
-const CHECKERS = [
-    { value: 'testlib', title: 'testlib', text: 'El de Codeforces y Polygon. Termina con ok, wa o un puntaje parcial.' },
-    { value: 'cms', title: 'CMS / TPS', text: 'El de las tareas de la IOI. Imprime el puntaje del caso, de 0 a 1.' },
+    { value: 'compare', title: 'Comparar con la respuesta', hint: 'La salida debe ser igual al archivo .out.' },
+    { value: 'checker', title: 'Juez especial (varias respuestas válidas)', hint: 'Un checker revisa la salida.' },
 ];
 
 const CHECKER_EXAMPLES = {
@@ -45,14 +40,14 @@ int main(int argc, char *argv[]) {
 };
 
 const SOLVING = [
-    { value: 'program', title: 'Programa completo', text: 'El participante lee la entrada y escribe la salida. Cualquier lenguaje.' },
-    { value: 'function', title: 'Función (con grader)', text: 'El participante solo implementa una función; el grader del problema lee, la llama y escribe. Solo C++.' },
+    { value: 'program', title: 'Programa completo', hint: 'Lee la entrada y escribe la salida.' },
+    { value: 'function', title: 'Función con grader', hint: 'Solo implementa una función. Solo C++.' },
 ];
 
-const FUNCTION_EXAMPLE = `// suma.h — cabecera pública, la incluye la solución
+const FUNCTION_EXAMPLE = `// suma.h: cabecera pública, la incluye la solución
 long suma(long a, long b);
 
-// grader.cpp — del autor, tiene el main y no se muestra
+// grader.cpp: del autor, tiene el main y no se muestra
 #include <iostream>
 #include "suma.h"
 int main() {
@@ -114,39 +109,40 @@ export const judgeFilesProblems = (value, specialJudge) => {
     ].filter(Boolean);
 };
 
-const Block = ({ title, help, children }) => (
-    <div className="border-t border-gray-200 pt-4 mt-4 first:border-t-0 first:pt-0 first:mt-0">
-        <h3 className="text-lg font-semibold">{title}</h3>
-        {help && <p className="mb-3 mt-1 text-sm text-gray-600">{help}</p>}
+const Field = ({ title, children }) => (
+    <div className="rounded-lg mt-5 first:mt-0">
+        <span className="block text-xl font-semibold mb-2">{title}</span>
         {children}
     </div>
 );
 
-// Two or more options shown as cards, each with a line that says what it means.
+// Radio buttons in a row, with the hint of the chosen one underneath.
 const Choice = ({ name, label, options, selected, onSelect }) => (
-    <div className="mt-2 grid gap-3 md:grid-cols-2" role="radiogroup" aria-label={label}>
-        {options.map(option => (
-            <label key={option.value} className={`cursor-pointer rounded-lg border-2 p-3 ${selected === option.value ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                <input type="radio" name={name} className="mr-2" value={option.value}
-                    checked={selected === option.value} onChange={() => onSelect(option.value)} />
-                <span className="font-semibold">{option.title}</span>
-                <p className="mt-1 text-sm text-gray-600">{option.text}</p>
-            </label>
-        ))}
+    <div role="radiogroup" aria-label={label}>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {options.map(option => (
+                <label key={option.value} className="inline-flex items-center gap-2">
+                    <input type="radio" name={name} value={option.value}
+                        checked={selected === option.value} onChange={() => onSelect(option.value)} />
+                    {option.title}
+                </label>
+            ))}
+        </div>
+        <p className="mt-1 text-xs text-gray-500">{options.find(option => option.value === selected)?.hint}</p>
     </div>
 );
 
-const Example = ({ title, code }) => (
+const Example = ({ code }) => (
     <details className="mt-2 text-sm">
-        <summary className="cursor-pointer text-indigo-700">{title}</summary>
-        <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-950 p-3 font-mono text-xs text-slate-100">{code}</pre>
+        <summary className="cursor-pointer text-blue-600">Ver ejemplo</summary>
+        <pre className="mt-2 overflow-x-auto rounded bg-gray-100 p-3 font-mono text-xs">{code}</pre>
     </details>
 );
 
 const FilePick = ({ id, label, accept, file, onPick, multiple = false }) => (
-    <div className="mt-2">
-        <label htmlFor={id} className="block text-sm font-medium">{label}</label>
-        <input id={id} type="file" accept={accept} multiple={multiple} className="mt-1 text-sm"
+    <div className="mt-3">
+        <label htmlFor={id} className="block text-sm font-medium mb-1">{label}</label>
+        <input id={id} type="file" accept={accept} multiple={multiple} className="text-sm"
             onChange={event => onPick(multiple ? Array.from(event.target.files) : event.target.files[0] ?? null)} />
         {!multiple && file && <span className="ml-2 text-sm text-gray-600">{file.name}</span>}
     </div>
@@ -168,91 +164,85 @@ export default function JudgeFilesSection({ value, onChange, specialJudge, onSpe
 
     const tests = pairedTests(value.tests);
     const complete = tests.filter(test => test.input && test.output).map(test => test.name);
-    const problems = judgeFilesProblems(value, specialJudge);
+    const problems = judgeFilesProblems(value, specialJudge).filter(problem => !problem.startsWith('Hay casos'));
+
+    const incomplete = tests.filter(test => !test.input || !test.output);
 
     return (
-        <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-1">Evaluación</h2>
-            <p className="mb-4 text-sm text-gray-600">
-                Cómo se juzga el problema. Los archivos se suben al guardar y después se pueden cambiar desde los archivos del problema.
-            </p>
+        <div className="mb-6">
+            <fieldset className="p-4 mb-6 bg-white rounded-lg shadow-lg">
+                <legend className="text-2xl font-bold mb-4">Evaluación</legend>
+                <div className="mx-10">
+                    <Field title="Tipo de problema">
+                        <Choice name="problem-kind" label="Tipo de problema" options={KINDS}
+                            selected={value.kind} onSelect={kind => set({ kind })} />
+                    </Field>
 
-            <Block title="Tipo de problema">
-                <Choice name="problem-kind" label="Tipo de problema" options={KINDS}
-                    selected={value.kind} onSelect={kind => set({ kind })} />
-            </Block>
+                    <Field title="Casos de prueba">
+                        <div {...getRootProps()} className={`flex justify-center items-center p-6 border-2 border-dashed cursor-pointer ${isDragActive ? 'border-indigo-500' : 'border-gray-400'}`}>
+                            <input {...getInputProps()} aria-label="Casos de prueba" />
+                            <p>Arrastra los archivos .in y .out aquí o haz clic para seleccionar</p>
+                        </div>
+                        {tests.length > 0 && (
+                            <p className="mt-2 text-sm text-gray-700">
+                                {complete.length} casos: <span className="font-mono">{complete.join(', ')}</span>
+                                <button type="button" className="ml-3 text-red-600 hover:text-red-900" onClick={() => set({ tests: [] })}>Quitar todos</button>
+                            </p>
+                        )}
+                        {incomplete.map(test => (
+                            <p key={test.name} className="mt-1 text-sm text-red-600">
+                                A <span className="font-mono">{test.name}</span> le falta el {test.input ? '.out' : '.in'}.
+                                <button type="button" className="ml-2 underline"
+                                    onClick={() => onChange(previous => ({ ...previous, tests: previous.tests.filter(file => stem(file.name) !== test.name) }))}>Quitar</button>
+                            </p>
+                        ))}
+                    </Field>
 
-            <Block title="Casos de prueba" help="Cada caso son dos archivos con el mismo nombre: la entrada .in y la respuesta .out.">
-                <div {...getRootProps()} className={`flex justify-center items-center p-6 border-2 border-dashed cursor-pointer rounded ${isDragActive ? 'border-indigo-500 bg-indigo-50' : 'border-gray-400'}`}>
-                    <input {...getInputProps()} aria-label="Casos de prueba" />
-                    <p className="text-sm">Arrastra los archivos .in y .out aquí, o haz clic para elegirlos</p>
+                    {value.kind === 'ioi' && (
+                        <Field title="Subtareas">
+                            <ScoringGroupsEditor groups={value.groups} tests={complete} onChange={groups => set({ groups })} />
+                        </Field>
+                    )}
+
+                    <Field title="Corrección">
+                        <Choice name="problem-correction" label="Corrección" options={CORRECTIONS}
+                            selected={specialJudge ? 'checker' : 'compare'} onSelect={choice => onSpecialJudgeChange(choice === 'checker')} />
+                        {specialJudge && (
+                            <>
+                                <div className="mt-3">
+                                    <label htmlFor="problem-checker-kind" className="block text-sm font-medium mb-1">Tipo de checker</label>
+                                    <select id="problem-checker-kind" className="rounded border border-gray-300 px-2 py-1 text-sm"
+                                        value={value.checkerKind} onChange={event => set({ checkerKind: event.target.value })}>
+                                        <option value="testlib">testlib (Codeforces, Polygon)</option>
+                                        <option value="cms">CMS o TPS (IOI)</option>
+                                    </select>
+                                    <Example code={CHECKER_EXAMPLES[value.checkerKind]} />
+                                </div>
+                                <FilePick id="problem-checker" label="Checker (.cpp)" accept=".cpp,.cc" file={value.checker}
+                                    onPick={file => set({ checker: file })} />
+                                <FilePick id="problem-testlib" label="testlib.h propio (opcional)" accept=".h" file={value.testlib}
+                                    onPick={file => set({ testlib: file })} />
+                            </>
+                        )}
+                    </Field>
+
+                    <Field title="Forma de resolver">
+                        <Choice name="problem-solving" label="Forma de resolver" options={SOLVING}
+                            selected={value.function ? 'function' : 'program'} onSelect={choice => set({ function: choice === 'function' })} />
+                        {value.function && (
+                            <>
+                                <Example code={FUNCTION_EXAMPLE} />
+                                <FilePick id="problem-grader" label="Grader (.cpp)" accept=".cpp,.cc" file={value.grader}
+                                    onPick={file => set({ grader: file })} />
+                                <FilePick id="problem-headers" label="Cabeceras (.h)" accept=".h" multiple
+                                    onPick={files => set({ headers: files })} />
+                            </>
+                        )}
+                    </Field>
+
+                    {problems.map(problem => <div key={problem} className="mt-3 text-red-500">{problem}</div>)}
                 </div>
-                {tests.length > 0 && (
-                    <>
-                        <p className="mt-3 text-sm">
-                            <strong>{complete.length}</strong> caso(s) completo(s)
-                            <button type="button" className="ml-3 text-red-600 hover:text-red-900" onClick={() => set({ tests: [] })}>Quitar todos</button>
-                        </p>
-                        <ul className="mt-2 flex flex-wrap gap-2 text-sm">
-                            {tests.map(test => (
-                                <li key={test.name} className={`rounded border px-2 py-1 font-mono ${test.input && test.output ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'}`}>
-                                    {test.name}
-                                    {!test.input && <span className="ml-1 text-red-700">falta .in</span>}
-                                    {!test.output && <span className="ml-1 text-red-700">falta .out</span>}
-                                    <button type="button" className="ml-2 text-red-600" aria-label={`Quitar ${test.name}`}
-                                        onClick={() => onChange(previous => ({ ...previous, tests: previous.tests.filter(file => stem(file.name) !== test.name) }))}>×</button>
-                                </li>
-                            ))}
-                        </ul>
-                    </>
-                )}
-            </Block>
-
-            {value.kind === 'ioi' && (
-                <Block title="Subtareas y puntaje"
-                    help="Cada subtarea reparte sus puntos entre sus casos. Los casos de cada subtarea se eligen por nombre con comodines, separados por comas: s1_*, caso?.">
-                    <ScoringGroupsEditor groups={value.groups} tests={complete} onChange={groups => set({ groups })} />
-                </Block>
-            )}
-
-            <Block title="Corrección" help="Cómo se decide si la salida de un caso es correcta.">
-                <Choice name="problem-correction" label="Corrección" options={CORRECTIONS}
-                    selected={specialJudge ? 'checker' : 'compare'} onSelect={choice => onSpecialJudgeChange(choice === 'checker')} />
-                {specialJudge && (
-                    <div className="mt-3 rounded-lg bg-gray-50 p-3">
-                        <p className="text-sm font-medium">Tipo de checker</p>
-                        <Choice name="problem-checker-kind" label="Tipo de checker" options={CHECKERS}
-                            selected={value.checkerKind} onSelect={checkerKind => set({ checkerKind })} />
-                        <Example title="Ver un ejemplo de este tipo de checker" code={CHECKER_EXAMPLES[value.checkerKind]} />
-                        <FilePick id="problem-checker" label="Código del checker (.cpp)" accept=".cpp,.cc" file={value.checker}
-                            onPick={file => set({ checker: file })} />
-                        <FilePick id="problem-testlib" label="testlib.h propio (opcional; el juez ya trae la versión 0.9.45)" accept=".h" file={value.testlib}
-                            onPick={file => set({ testlib: file })} />
-                    </div>
-                )}
-            </Block>
-
-            <Block title="Forma de resolver" help="Qué escribe el participante.">
-                <Choice name="problem-solving" label="Forma de resolver" options={SOLVING}
-                    selected={value.function ? 'function' : 'program'} onSelect={choice => set({ function: choice === 'function' })} />
-                {value.function && (
-                    <div className="mt-3 rounded-lg bg-gray-50 p-3">
-                        <Example title="Ver un ejemplo de grader, cabecera y solución" code={FUNCTION_EXAMPLE} />
-                        <FilePick id="problem-grader" label="Grader (.cpp)" accept=".cpp,.cc" file={value.grader}
-                            onPick={file => set({ grader: file })} />
-                        <FilePick id="problem-headers" label="Cabeceras públicas (.h) que incluye la solución" accept=".h" multiple
-                            onPick={files => set({ headers: files })} />
-                        {value.headers.length > 0 && <p className="mt-1 text-sm text-gray-600 font-mono">{value.headers.map(file => file.name).join(', ')}</p>}
-                        <p className="mt-2 text-sm text-gray-600">El enunciado debe indicar la firma de la función y el nombre de la cabecera.</p>
-                    </div>
-                )}
-            </Block>
-
-            {problems.length > 0 && (
-                <ul className="mt-4 list-disc pl-5 text-sm text-red-600">
-                    {problems.map(problem => <li key={problem}>{problem}</li>)}
-                </ul>
-            )}
+            </fieldset>
         </div>
     );
 }

@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types, react-refresh/only-export-components */
 const TYPES = [
-    { value: 'min', label: 'Todo o nada: debe pasar todos sus casos' },
-    { value: 'sum', label: 'Proporcional: puntos por cada caso pasado' },
-    { value: 'mul', label: 'Parcial multiplicado (solo con checker de puntaje parcial)' },
+    { value: 'min', label: 'Todo o nada', hint: 'Da sus puntos solo si pasa todos sus casos.' },
+    { value: 'sum', label: 'Proporcional', hint: 'Reparte sus puntos entre los casos pasados.' },
+    { value: 'mul', label: 'Parcial multiplicado', hint: 'Multiplica los puntajes parciales que da el checker.' },
 ];
 
 // Same glob the judge uses: *, ? and [set].
@@ -71,8 +71,9 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
                                 </td>
                                 <td className="px-3 py-2">
                                     <select className="rounded border border-gray-300 px-2 py-1" aria-label="Tipo de grupo"
+                                        title={TYPES.find(type => type.value === group.type)?.hint}
                                         value={group.type} onChange={event => update(index, 'type', event.target.value)}>
-                                        {TYPES.map(type => <option key={type.value} value={type.value}>{type.label}</option>)}
+                                        {TYPES.map(type => <option key={type.value} value={type.value} title={type.hint}>{type.label}</option>)}
                                     </select>
                                 </td>
                                 <td className="px-3 py-2">
@@ -92,25 +93,15 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
                 </table>
             )}
 
-            <p className="mt-3 text-sm">
-                {groups.length === 0
-                    ? 'Sin subtareas: el problema se juzga como aceptado o rechazado.'
-                    : <>Total: <strong className={total === 100 ? 'text-green-700' : 'text-amber-700'}>{total}</strong> de 100 puntos · {tests.length} casos de prueba</>}
-            </p>
-            {groups.length > 0 && total !== 100 && (
-                <p className="mt-1 text-sm text-amber-700">
-                    Lo habitual es que las subtareas sumen 100. Con otro total el puntaje se muestra igual sobre 100, en proporción.
-                </p>
-            )}
             {groups.length > 0 && (
-                <p className="mt-1 text-xs text-gray-500">
-                    Todo o nada es lo normal en la IOI: la subtarea da sus puntos solo si pasa todos sus casos.
-                    Proporcional reparte los puntos entre los casos: 2 de 5 casos de una subtarea de 20 dan 8.
+                <p className="mt-3 text-sm">
+                    Total: <strong>{total}</strong> puntos
+                    {total !== 100 && <span className="text-amber-700"> (lo habitual es 100)</span>}
                 </p>
             )}
             {groups.length > 0 && unassigned.length > 0 && (
                 <p className="mt-1 text-sm text-amber-700">
-                    Casos sin grupo (no dan puntos): <span className="font-mono">{unassigned.join(', ')}</span>
+                    Casos sin subtarea, no dan puntos: <span className="font-mono">{unassigned.join(', ')}</span>
                 </p>
             )}
 
@@ -122,7 +113,7 @@ export default function ScoringGroupsEditor({ groups, tests, onChange }) {
                 {groups.length === 0 && prefixed && (
                     <button type="button" className="rounded bg-gray-200 px-4 py-2 text-sm hover:bg-gray-300"
                         onClick={() => onChange(groupsByPrefix(tests))}>
-                        Crear una por prefijo de los casos
+                        Crear según el nombre de los casos
                     </button>
                 )}
             </div>
