@@ -240,7 +240,7 @@ const EditForm = () => {
 
                 <h3 className="mt-5 text-xl font-semibold">Casos de prueba y archivos</h3>
                 <FileManagerPage />
-                <h3 className="mt-3 text-xl font-semibold">Subtareas y puntaje</h3>
+                <h3 className="mt-3 text-xl font-semibold">Tipo de problema y subtareas</h3>
                 <ScoringPage embedded />
             </div>
 

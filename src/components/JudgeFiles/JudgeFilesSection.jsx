@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import ScoringGroupsEditor from './ScoringGroupsEditor';
 
 // The type is not stored: a problem is scored by points when it has subtasks.
-const KINDS = [
+export const KINDS = [
     {
         value: 'icpc', title: 'ICPC (todo o nada)', tips: [
             'El envío es aceptado solo si pasa todos los casos.',
@@ -189,7 +189,7 @@ const Field = ({ title, children }) => (
 );
 
 // Radio buttons in a row, with the tips of the chosen one underneath.
-const Choice = ({ name, label, options, selected, onSelect }) => (
+export const Choice = ({ name, label, options, selected, onSelect }) => (
     <div role="radiogroup" aria-label={label}>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
             {options.map(option => (
