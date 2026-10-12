@@ -7,7 +7,7 @@ import {
     DialogTitle
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "../../components/CKEditor/editor";
 import { useFormik } from 'formik';
 import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";

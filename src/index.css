@@ -92,6 +92,15 @@
   border: 1px solid #e5e7eb;
 }
 
+/* What the editor writes for a resized or aligned image. */
+.rich-content figure.image { display: table; clear: both; margin: 0.75rem auto; }
+.rich-content figure.image img { display: block; margin: 0 auto; }
+.rich-content figure.image figcaption { display: table-caption; caption-side: bottom; text-align: center; font-size: 0.85em; color: #475569; }
+.rich-content .image_resized { max-width: 100%; }
+.rich-content figure.image_resized img { width: 100%; }
+.rich-content .image-style-align-left { float: left; margin: 0.25rem 1rem 0.5rem 0; }
+.rich-content .image-style-align-right { float: right; margin: 0.25rem 0 0.5rem 1rem; }
+
 .rich-content .rich-math {
   font-family: "Times New Roman", "Cambria Math", "STIX Two Math", serif;
   color: inherit;
