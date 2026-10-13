@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Choice, KINDS } from '../../components/JudgeFiles/JudgeFilesSection';
 import ScoringGroupsEditor, { groupsForApi } from '../../components/JudgeFiles/ScoringGroupsEditor';
 import { apiService } from '../../services/apiService';
 
@@ -9,10 +10,12 @@ export default function ScoringPage({ embedded }) {
     const { problemId } = useParams();
     const [groups, setGroups] = useState(null);
     const [tests, setTests] = useState([]);
+    const [kind, setKind] = useState('icpc');
     const [message, setMessage] = useState(null);
 
     const apply = useCallback((data) => {
         setTests(data.availableTests ?? []);
+        setKind((data.groups ?? []).length > 0 ? 'ioi' : 'icpc');
         setGroups((data.groups ?? []).map(group => ({ ...group, tests: (group.tests ?? []).join(', ') })));
     }, []);
 
@@ -23,7 +26,11 @@ export default function ScoringPage({ embedded }) {
     }, [problemId, apply]);
 
     const save = () => {
-        apiService.put(`problems/${problemId}/scoring`, { groups: groupsForApi(groups) })
+        if (kind === 'ioi' && groups.length === 0) {
+            setMessage({ error: true, text: 'Un problema por puntos necesita al menos una subtarea.' });
+            return;
+        }
+        apiService.put(`problems/${problemId}/scoring`, { groups: kind === 'ioi' ? groupsForApi(groups) : [] })
             .then(data => { apply(data); setMessage({ error: false, text: 'Puntaje guardado.' }); })
             .catch(err => setMessage({ error: true, text: err?.response?.data?.message ?? 'No se pudo guardar el puntaje.' }));
     };
@@ -35,18 +42,16 @@ export default function ScoringPage({ embedded }) {
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
             {!embedded && <h1 className="text-2xl font-bold">Subtareas y puntaje: problema {problemId}</h1>}
-            <p className="mb-4 mt-1 text-sm text-gray-600">
-                {groups.length === 0
-                    ? 'Este problema no tiene subtareas: una solución se acepta o se rechaza. Agrega subtareas para dar puntos por partes.'
-                    : 'Cada subtarea vale sus puntos y agrupa algunos casos de prueba. Entre todas deberían sumar 100.'}
-            </p>
+            <div className="mb-4 mt-2">
+                <Choice name="problem-kind" label="Tipo de problema" options={KINDS} selected={kind} onSelect={setKind} />
+            </div>
 
-            <ScoringGroupsEditor groups={groups} tests={tests} onChange={setGroups} />
+            {kind === 'ioi' && <ScoringGroupsEditor groups={groups} tests={tests} onChange={setGroups} />}
             {message && <p className={`mt-2 text-sm ${message.error ? 'text-red-600' : 'text-green-700'}`}>{message.text}</p>}
 
             <div className="mt-4">
                 <button type="button" className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                    onClick={save}>Guardar puntaje</button>
+                    onClick={save}>Guardar tipo y puntaje</button>
             </div>
         </div>
     );
