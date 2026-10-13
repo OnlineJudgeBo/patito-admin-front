@@ -1,5 +1,6 @@
 import parse from 'html-react-parser';
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import UseAuth from '../../hooks/UseAuth';
 import { apiService } from '../../services/apiService';
 import { PromoteComponent } from './PromoteComponent';
@@ -9,7 +10,9 @@ function ListContestPage2() {
     const isAdmin = roles.some((role) => String(role).trim().toLowerCase() === 'administrador');
     const [problems, setProblems] = useState([]);
     const [filter, setFilter] = useState('');
-    const [onlyOfficial, setOnlyOfficial] = useState(false);
+    // In the URL so the menu can link straight to the official ones.
+    const [searchParams, setSearchParams] = useSearchParams();
+    const onlyOfficial = searchParams.get('official') === '1';
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -118,7 +121,7 @@ function ListContestPage2() {
                 />
                 <button
                     type="button"
-                    onClick={() => { setOnlyOfficial(prev => !prev); setCurrentPage(1); }}
+                    onClick={() => { setSearchParams(onlyOfficial ? {} : { official: '1' }); setCurrentPage(1); }}
                     className={`whitespace-nowrap rounded px-4 py-2 text-sm font-medium ${onlyOfficial ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700'}`}
                 >
                     {onlyOfficial ? 'Viendo solo oficiales de práctica' : 'Ver concursos oficiales de práctica'}

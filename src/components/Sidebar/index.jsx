@@ -59,6 +59,14 @@ const Sidebar = () => {
                         </Link>
                     </li>
                     <li>
+                        <Link to="/admin/contests?official=1" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/award-fill.svg" className="w-5 h-5" alt="Concursos Oficiales Icon" />
+                            </span>
+                            <span className="ml-2 text-sm font-medium">Contest oficiales</span>
+                        </Link>
+                    </li>
+                    <li>
                         <Link to="/admin/contests/add" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/plus-circle-fill.svg" className="w-5 h-5" alt="Crear Concurso Icon" />                            </span>
