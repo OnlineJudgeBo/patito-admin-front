@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import ClassicEditor from "../../components/CKEditor/editor";
 import { MathStatementEditor } from '../../components/Statement/MathStatementEditor';
 import { ErrorMessage } from 'formik';
 import { useAtom } from "jotai";
