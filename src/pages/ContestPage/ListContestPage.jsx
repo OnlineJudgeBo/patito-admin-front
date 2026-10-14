@@ -20,14 +20,16 @@ function ListContestPage2() {
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
     const [exportingId, setExportingId] = useState(null);
 
-    const exportContest = async (contestId) => {
+    const exportContest = async (contestId, solutions = false) => {
         setExportingId(contestId);
         try {
-            const blob = await apiService.exportContest(contestId);
+            const blob = solutions
+                ? await apiService.exportContestSubmissions(contestId)
+                : await apiService.exportContest(contestId);
             const url = window.URL.createObjectURL(blob);
             const anchor = document.createElement('a');
             anchor.href = url;
-            anchor.download = `contest-${contestId}.zip`;
+            anchor.download = solutions ? `contest-${contestId}-solutions.zip` : `contest-${contestId}.zip`;
             anchor.click();
             window.URL.revokeObjectURL(url);
         } catch (apiError) {
@@ -189,6 +191,13 @@ function ListContestPage2() {
                                         </div>
                                         <div>
                                             <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/similarity`}>Anti-plagio</a>
+                                        </div>
+                                        <div>
+                                            <button type="button" disabled={exportingId !== null}
+                                                className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
+                                                onClick={() => exportContest(problem.contestId, true)}>
+                                                Exportar soluciones
+                                            </button>
                                         </div>
                                         {isAdmin && (
                                             <div>
