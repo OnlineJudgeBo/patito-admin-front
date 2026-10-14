@@ -236,5 +236,6 @@ export const apiService = {
     },
     importProblem: (formData) => postApiFile('problems/import', { method: 'POST', body: formData }),
     exportContest: (contestId) => apiService.getBlob(`contests/${contestId}/export`),
+    exportContestSubmissions: (contestId) => apiService.getBlob(`contests/${contestId}/submissions/export`),
     importContest: (formData) => postApiFile('contests/import', { method: 'POST', body: formData }),
 };
