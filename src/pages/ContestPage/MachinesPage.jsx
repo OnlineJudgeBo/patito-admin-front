@@ -306,7 +306,7 @@ function MachineDetail({ contestId, base, machine, onClose, onChanged, sendComma
                         <pre className="max-h-64 overflow-auto whitespace-pre-wrap rounded border bg-gray-50 p-2 text-xs">{detail.journal || '—'}</pre>
                     </div>
                 )}
-                <p className="mt-2 text-xs text-gray-400">Concurso {contestId}</p>
+                {contestId && <p className="mt-2 text-xs text-gray-400">Concurso {contestId}</p>}
             </div>
         </div>
     );
@@ -372,7 +372,7 @@ function GroupSettings({ base, groupId, onChanged }) {
     return (
         <div className="space-y-3">
             <details className={box}>
-                <summary className="cursor-pointer font-semibold">Allowlist de red del examen (persistente)</summary>
+                <summary className="cursor-pointer font-semibold">Allowlist de red del grupo (persistente)</summary>
                 <p className="mt-1 text-xs text-gray-500">
                     Un dominio o IP por línea. Se guarda y se vuelve a aplicar a cada PC al reconectar o reiniciar. Incluye el dominio de Patito o los alumnos pierden el juez.
                 </p>
@@ -410,7 +410,8 @@ function GroupSettings({ base, groupId, onChanged }) {
 
 export default function MachinesPage() {
     const { contestId } = useParams();
-    const base = `contests/${contestId}/machines`;
+    // Without a contest it is the lobby: machines that booted the ISO but are in no exam.
+    const base = contestId ? `contests/${contestId}/machines` : 'lobby/machines';
     const [group, setGroup] = useState(null);
     const [machines, setMachines] = useState([]);
     const [alerts, setAlerts] = useState([]);
@@ -446,9 +447,11 @@ export default function MachinesPage() {
 
     useEffect(() => {
         apiService.get(`${base}/group`).then(setGroup).catch(err => setError(apiError(err)));
-        apiService.get(`contests/${contestId}/exam-monitor`)
-            .then(data => setParticipants(data.participants || []))
-            .catch(() => setParticipants([]));
+        if (contestId) {
+            apiService.get(`contests/${contestId}/exam-monitor`)
+                .then(data => setParticipants(data.participants || []))
+                .catch(() => setParticipants([]));
+        }
         refresh();
         const timer = setInterval(refresh, REFRESH_MS);
         return () => clearInterval(timer);
@@ -525,7 +528,7 @@ export default function MachinesPage() {
             sendCommand(action, picked.map(machineId => ({ machine_id: machineId })), picked.length);
         } else {
             if (machines.length === 0) {
-                alert('No hay máquinas en este examen.');
+                alert('No hay máquinas en este grupo.');
                 return;
             }
             sendCommand(action, [{ group_id: group.groupId, machine_id: '*' }], machines.length);
@@ -579,7 +582,7 @@ export default function MachinesPage() {
                 </label>
                 <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="buscar alumno o PC…" className="rounded border p-1 text-sm" />
                 <button type="button" onClick={openReport} className="text-sm font-semibold text-blue-600">reporte</button>
-                <a href={`/admin/contests/${contestId}/monitor`} className="text-sm font-semibold text-blue-600">monitoreo de IPs</a>
+                {contestId && <a href={`/admin/contests/${contestId}/monitor`} className="text-sm font-semibold text-blue-600">monitoreo de IPs</a>}
                 <span className="ml-auto text-xs text-gray-500">
                     {machines.length} máquinas · {selected.size} marcadas · {updatedAt ? updatedAt.toLocaleTimeString() : '—'} (cada 10 s)
                 </span>
@@ -599,7 +602,7 @@ export default function MachinesPage() {
             )}
 
             <div className={section}>
-                <div className={label}>Acciones · a las máquinas marcadas o a todo el examen</div>
+                <div className={label}>Acciones · a las máquinas marcadas o a todo el grupo</div>
                 <div className="flex flex-wrap gap-1">
                     {ACTIONS.map(([action, text]) => (
                         <button key={action} type="button" disabled={sending} onClick={() => sendToSelection(action)}
@@ -610,7 +613,7 @@ export default function MachinesPage() {
                     {sending && <span className="self-center text-xs text-gray-500">enviando…</span>}
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                    <button type="button" onClick={downloadHomes} className="text-blue-600 underline">descargar código del examen (zip)</button>
+                    <button type="button" onClick={downloadHomes} className="text-blue-600 underline">descargar código del grupo (zip)</button>
                     <span className="text-xs text-gray-500">primero usa &quot;Recoger código&quot;; cada .tar.gz lleva el usuario del alumno</span>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
@@ -620,7 +623,7 @@ export default function MachinesPage() {
                 </div>
             </div>
 
-            <div className={section}>
+            {contestId && <div className={section}>
                 <div className={label}>Asistencia · alumnos inscritos con una PC conectada</div>
                 {participants.length === 0 ? <p className="text-sm text-gray-500">—</p> : (
                     <details>
@@ -633,7 +636,7 @@ export default function MachinesPage() {
                         </div>
                     </details>
                 )}
-            </div>
+            </div>}
 
             <div className={section}>
                 <div className={label}>Máquinas activas ({active.length})</div>
@@ -642,7 +645,7 @@ export default function MachinesPage() {
                 <MachineGrid machines={offline} byIp={byIp} selected={selected} userCount={userCount} onOpen={setOpen} onToggle={toggle} collapsed={collapsed} setCollapsed={setCollapsed} />
                 <pre className="mt-4 max-h-60 overflow-auto whitespace-pre-wrap rounded border bg-gray-50 p-2 text-xs">
                     {commands.map(command =>
-                        `${command.issued_at}  ${command.action.padEnd(13)} ${(command.machine_id === '*' ? 'todo el examen' : command.machine_id).padEnd(22)} ${command.delivered}/${command.acked}  [${command.status}]`
+                        `${command.issued_at}  ${command.action.padEnd(13)} ${(command.machine_id === '*' ? 'todo el grupo' : command.machine_id).padEnd(22)} ${command.delivered}/${command.acked}  [${command.status}]`
                     ).join('\n') || '—'}
                 </pre>
             </div>

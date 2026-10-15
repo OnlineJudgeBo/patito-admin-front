@@ -73,6 +73,7 @@ const App = () => {
                         <Route path="/admin/contests/:contestId/similarity" element={<PrivateRoute><SimilarityPage /></PrivateRoute>} />
                         <Route path="/admin/contests/:contestId/machines" element={<PrivateRoute><MachinesPage /></PrivateRoute>} />
                         <Route path="/admin/machines" element={<PrivateRoute><ExamMachinesListPage /></PrivateRoute>} />
+                        <Route path="/admin/lobby" element={<PrivateRoute><MachinesPage /></PrivateRoute>} />
 
                         <Route path="/admin/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
                         <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
