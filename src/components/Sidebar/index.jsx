@@ -179,6 +179,14 @@ const Sidebar = () => {
                         </Link>
                     </li>
                     <li>
+                        <Link to="/admin/management/blocks" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                            <span className="inline-flex justify-center items-center ml-4">
+                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/shield-slash-fill.svg" className="w-5 h-5" alt="Bloqueos Icon" />
+                            </span>
+                            <span className="ml-2 text-sm font-medium">Bloqueos</span>
+                        </Link>
+                    </li>
+                    <li>
                         <Link to="/admin/logout" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">
                                 <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/box-arrow-right.svg" className="w-5 h-5" alt="Cerrar Sesión Icon" />                            </span>

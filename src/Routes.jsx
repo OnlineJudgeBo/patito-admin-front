@@ -19,6 +19,7 @@ import RejudgePage from './pages/JudgePage/RejudgePage';
 import LoginPage from './pages/LoginPage/LoginPage';
 import LogoutPage from './pages/LogoutPage';
 import UserAdminPage from './pages/Managment/Users/UserAdminPage';
+import BlockRulesPage from './pages/Managment/BlockRules/BlockRulesPage';
 import BocaImportPage from './pages/ProblemsPage/BocaImportPage';
 import CreateProblemPage from './pages/ProblemsPage/CreateProblemPage';
 import EditProblemPage from './pages/ProblemsPage/EditProblemPage';
@@ -76,6 +77,7 @@ const App = () => {
                         <Route path="/admin/lobby" element={<PrivateRoute><MachinesPage /></PrivateRoute>} />
 
                         <Route path="/admin/management/users" element={<PrivateRoute><UserAdminPage /></PrivateRoute>} />
+                        <Route path="/admin/management/blocks" element={<PrivateRoute><BlockRulesPage /></PrivateRoute>} />
                         <Route path="/admin/management/roles" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
 
                         <Route path="/admin/fileManager/:problemId" element={<PrivateRoute><FileManagerPage /></PrivateRoute>} />
