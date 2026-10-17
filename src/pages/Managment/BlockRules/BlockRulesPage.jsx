@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiService } from "../../../services/apiService";
-import { getAdminAuthState, isAdministrator } from "../../../utils/auth";
 import { RecentRequests } from "./RecentRequests";
 
 // IPs and texts rejected with an empty 403 by the API and the PHP web (applied within 30 s).
@@ -11,9 +10,8 @@ function BlockRulesPage() {
     const [form, setForm] = useState({ type: "ip", value: "", note: "" });
     const [error, setError] = useState("");
 
-    const isAdmin = isAdministrator(getAdminAuthState().roles);
     const load = () => apiService.fetchBlockRules().then(setRules).catch(() => setError("No se pudieron cargar las reglas."));
-    useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
+    useEffect(() => { load(); }, []);
 
     const add = async (e) => {
         e.preventDefault();
@@ -38,10 +36,6 @@ function BlockRulesPage() {
         await apiService.deleteBlockRule(rule.id);
         load();
     };
-
-    if (!isAdmin) {
-        return <p className="p-4 text-gray-600">Solo el administrador puede ver y gestionar los bloqueos.</p>;
-    }
 
     return (
         <div className="w-full p-4">

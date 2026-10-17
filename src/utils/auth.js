@@ -75,9 +75,6 @@ export const hasAdminPanelRole = (roles) => roles.some((role) => {
     return ADMIN_ROLE_ALIASES.has(normalizedRole);
 });
 
-// Only Administrador, not Docente or Auxiliar, manages site-wide settings such as the block rules.
-export const isAdministrator = (roles) => roles.some((role) => String(role).trim().toLowerCase() === 'administrador');
-
 export const getAdminAuthState = () => {
     const token = getAccessToken();
     const hasValidToken = Boolean(token) && !isTokenExpired(token);
