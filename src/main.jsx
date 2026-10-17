@@ -5,6 +5,7 @@ import "tailwindcss/components.css";
 import "tailwindcss/utilities.css";
 import App from './App.jsx';
 import './index.css';
+import './utils/theme';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

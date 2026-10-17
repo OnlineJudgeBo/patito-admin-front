@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAdminAuthState, isAdministrator } from '../../utils/auth';
+import { isDark, toggleTheme } from '../../utils/theme';
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
     const isAdmin = isAdministrator(getAdminAuthState().roles);
+    const [dark, setDark] = useState(isDark());
 
     return (
         <aside className={`min-h-screen ${isOpen ? 'w-64' : 'w-14'} flex shrink-0 flex-col antialiased bg-gray-50 text-gray-800 transition-all duration-300 ease-in-out`}>
@@ -20,8 +22,17 @@ const Sidebar = () => {
                 </button>
             </div>
             <div className={`${isOpen ? 'block' : 'hidden'} flex-1 overflow-y-auto`}>
-                <div className="flex items-center justify-center h-14 border-b">
+                <div className="flex items-center justify-center gap-3 h-14 border-b">
                     <div className="text-lg font-semibold">Panel de Control</div>
+                    <button
+                        type="button"
+                        title={dark ? 'Modo claro' : 'Modo nocturno'}
+                        aria-label={dark ? 'Modo claro' : 'Modo nocturno'}
+                        onClick={() => setDark(toggleTheme())}
+                        className="rounded-md px-2 py-1 hover:bg-gray-100"
+                    >
+                        {dark ? '☀️' : '🌙'}
+                    </button>
                 </div>
                 <ul className="flex flex-col py-4 space-y-1">
 

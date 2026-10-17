@@ -44,12 +44,11 @@ function BlockRulesPage() {
     }
 
     return (
-        <div className="container mx-auto p-4 w-full">
+        <div className="w-full p-4">
             <h1 className="text-2xl font-bold mb-2">Bloqueos</h1>
             <p className="text-sm text-gray-600 mb-4">
                 Una <b>IP</b> bloquea esa dirección o rango (por ejemplo <code>190.129.0.0/16</code>).
-                Un <b>texto</b> bloquea las visitas cuyo navegador, página de origen o URL lo contengan (por ejemplo <code>GPTBot</code>).
-                Cuidado: en la universidad muchos estudiantes comparten la misma IP.
+                Un <b>texto</b> bloquea las visitas cuyo navegador, página de origen o URL contengan ese valor (por ejemplo <code>GPTBot</code>).
             </p>
             <form onSubmit={add} className="flex flex-wrap gap-2 mb-2">
                 <select className="border rounded-md px-3 h-10" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
