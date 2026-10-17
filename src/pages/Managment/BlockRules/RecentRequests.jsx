@@ -10,6 +10,9 @@ const statusColor = (status) =>
 
 const methodColor = (method) => (method === "GET" ? "text-slate-400" : "text-violet-400");
 
+// "BO" -> 🇧🇴 (regional indicator letters).
+const flag = (code) => (code ? String.fromCodePoint(...[...code.toUpperCase()].map((c) => 127397 + c.charCodeAt(0))) : "");
+
 const durationColor = (ms) => (ms > 3000 ? "text-red-400 font-bold" : ms > 1000 ? "text-amber-400" : "text-slate-500");
 
 // Latest requests from Traefik's access log, refreshed live, with a shortcut to block their IP or User-Agent.
@@ -98,6 +101,7 @@ export function RecentRequests({ onBlock }) {
                         <tr>
                             <th className="px-3 py-2 font-medium">Hora</th>
                             <th className="px-3 py-2 font-medium">IP</th>
+                            <th className="px-3 py-2 font-medium">País</th>
                             <th className="px-3 py-2 font-medium">Petición</th>
                             <th className="px-3 py-2 font-medium">Estado</th>
                             <th className="px-3 py-2 font-medium text-right">ms</th>
@@ -111,6 +115,9 @@ export function RecentRequests({ onBlock }) {
                                 <td className="px-3 py-1.5 whitespace-nowrap text-slate-500">{new Date(r.time).toLocaleTimeString()}</td>
                                 <td className="px-3 py-1.5 whitespace-nowrap">
                                     <button type="button" className="text-cyan-300 hover:underline" onClick={() => applyFilter({ ...filterRef.current, ip: r.ip })}>{r.ip}</button>
+                                </td>
+                                <td className="px-3 py-1.5 whitespace-nowrap" title={r.country ?? "desconocido"}>
+                                    {r.country ? <>{flag(r.country)} <span className={r.country === "BO" ? "text-slate-500" : "text-orange-300"}>{r.country}</span></> : <span className="text-slate-600">—</span>}
                                 </td>
                                 <td className="px-3 py-1.5 break-all">
                                     <span className={`${methodColor(r.method)} mr-2`}>{r.method}</span>{r.url}
@@ -132,11 +139,14 @@ export function RecentRequests({ onBlock }) {
                             </tr>
                         ))}
                         {requests.length === 0 && !loading && (
-                            <tr><td colSpan={7} className="px-3 py-6 text-slate-500 text-center">No hay peticiones (el registro de Traefik solo existe en producción).</td></tr>
+                            <tr><td colSpan={8} className="px-3 py-6 text-slate-500 text-center">No hay peticiones (el registro de Traefik solo existe en producción).</td></tr>
                         )}
                     </tbody>
                 </table>
             </div>
+            <p className="mt-2 text-xs text-gray-500">
+                Países: <a className="hover:underline" href="https://db-ip.com" target="_blank" rel="noreferrer">IP Geolocation by DB-IP</a>
+            </p>
         </div>
     );
 }
