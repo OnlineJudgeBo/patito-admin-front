@@ -6,14 +6,14 @@ import { apiService } from "../../../services/apiService";
 const REFRESH_MS = 4000;
 
 const statusColor = (status) =>
-    status >= 500 ? "text-red-400" : status >= 400 ? "text-amber-400" : status >= 300 ? "text-sky-400" : "text-emerald-400";
+    status >= 500 ? "text-red-600 dark:text-red-400" : status >= 400 ? "text-amber-600 dark:text-amber-400" : status >= 300 ? "text-sky-600 dark:text-sky-400" : "text-emerald-600 dark:text-emerald-400";
 
-const methodColor = (method) => (method === "GET" ? "text-slate-400" : "text-violet-400");
+const methodColor = (method) => (method === "GET" ? "text-slate-500 dark:text-slate-400" : "text-violet-600 dark:text-violet-400");
 
 // "BO" -> 🇧🇴 (regional indicator letters).
 const flag = (code) => (code ? String.fromCodePoint(...[...code.toUpperCase()].map((c) => 127397 + c.charCodeAt(0))) : "");
 
-const durationColor = (ms) => (ms > 3000 ? "text-red-400 font-bold" : ms > 1000 ? "text-amber-400" : "text-slate-500");
+const durationColor = (ms) => (ms > 3000 ? "text-red-600 dark:text-red-400 font-bold" : ms > 1000 ? "text-amber-600 dark:text-amber-400" : "text-slate-500");
 
 // Latest requests from Traefik's access log, refreshed live, with a shortcut to block their IP or User-Agent.
 export function RecentRequests({ onBlock }) {
@@ -95,9 +95,9 @@ export function RecentRequests({ onBlock }) {
                 </div>
             )}
 
-            <div className="rounded-lg bg-slate-950 text-slate-200 font-mono text-xs shadow-inner overflow-auto max-h-[70vh]">
+            <div className="rounded-lg border border-gray-200 bg-[#ffffff] text-slate-800 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 font-mono text-sm overflow-auto max-h-[70vh]">
                 <table className="w-full border-collapse">
-                    <thead className="sticky top-0 bg-slate-900 text-slate-400 text-left">
+                    <thead className="sticky top-0 bg-[#f1f5f9] text-slate-500 dark:bg-slate-900 dark:text-slate-400 text-left">
                         <tr>
                             <th className="px-3 py-2 font-medium">Hora</th>
                             <th className="px-3 py-2 font-medium">IP</th>
@@ -111,29 +111,29 @@ export function RecentRequests({ onBlock }) {
                     </thead>
                     <tbody>
                         {requests.map((r, i) => (
-                            <tr key={`${r.time}-${r.ip}-${i}`} className={`border-t border-slate-800 hover:bg-slate-900 ${r.blocked ? "bg-red-950/60" : ""}`}>
+                            <tr key={`${r.time}-${r.ip}-${i}`} className={`border-t border-gray-100 dark:border-slate-800 hover:bg-[#f8fafc] dark:hover:bg-slate-900 ${r.blocked ? "bg-red-50 dark:bg-red-950/60" : ""}`}>
                                 <td className="px-3 py-1.5 whitespace-nowrap text-slate-500">{new Date(r.time).toLocaleTimeString()}</td>
                                 <td className="px-3 py-1.5 whitespace-nowrap">
-                                    <button type="button" className="text-cyan-300 hover:underline" onClick={() => applyFilter({ ...filterRef.current, ip: r.ip })}>{r.ip}</button>
+                                    <button type="button" className="text-cyan-700 dark:text-cyan-300 hover:underline" onClick={() => applyFilter({ ...filterRef.current, ip: r.ip })}>{r.ip}</button>
                                 </td>
                                 <td className="px-3 py-1.5 whitespace-nowrap" title={r.country ?? "desconocido"}>
-                                    {r.country ? <>{flag(r.country)} <span className={r.country === "BO" ? "text-slate-500" : "text-orange-300"}>{r.country}</span></> : <span className="text-slate-600">—</span>}
+                                    {r.country ? <>{flag(r.country)} <span className={r.country === "BO" ? "text-slate-500" : "text-orange-600 dark:text-orange-300"}>{r.country}</span></> : <span className="text-slate-400 dark:text-slate-600">—</span>}
                                 </td>
                                 <td className="px-3 py-1.5 break-all">
                                     <span className={`${methodColor(r.method)} mr-2`}>{r.method}</span>{r.url}
                                 </td>
                                 <td className="px-3 py-1.5 whitespace-nowrap">
-                                    {r.blocked ? <span className="text-red-400 font-bold">BLOQUEADA</span> : <span className={statusColor(r.status)}>{r.status}</span>}
+                                    {r.blocked ? <span className="text-red-600 dark:text-red-400 font-bold">BLOQUEADA</span> : <span className={statusColor(r.status)}>{r.status}</span>}
                                 </td>
                                 <td className={`px-3 py-1.5 text-right whitespace-nowrap ${durationColor(r.durationMs)}`}>{Math.round(r.durationMs)}</td>
-                                <td className="px-3 py-1.5 text-slate-400 break-all max-w-lg">
+                                <td className="px-3 py-1.5 text-slate-500 dark:text-slate-400 break-all max-w-lg">
                                     {r.userAgent}
                                     {r.referer && <div className="text-slate-500">← {r.referer}</div>}
                                 </td>
                                 <td className="px-3 py-1.5 whitespace-nowrap space-x-1">
-                                    <button type="button" className="rounded border border-slate-700 px-2 py-0.5 hover:border-red-500 hover:text-red-400" onClick={() => onBlock("ip", r.ip)}>IP</button>
+                                    <button type="button" className="rounded border border-gray-300 dark:border-slate-700 px-2 py-0.5 hover:border-red-500 hover:text-red-500" onClick={() => onBlock("ip", r.ip)}>IP</button>
                                     {r.userAgent && (
-                                        <button type="button" className="rounded border border-slate-700 px-2 py-0.5 hover:border-red-500 hover:text-red-400" onClick={() => onBlock("text", r.userAgent)}>Navegador</button>
+                                        <button type="button" className="rounded border border-gray-300 dark:border-slate-700 px-2 py-0.5 hover:border-red-500 hover:text-red-500" onClick={() => onBlock("text", r.userAgent)}>Navegador</button>
                                     )}
                                 </td>
                             </tr>
