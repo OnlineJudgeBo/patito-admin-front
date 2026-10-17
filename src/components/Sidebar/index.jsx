@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getAdminAuthState, isAdministrator } from '../../utils/auth';
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(true);
+    const isAdmin = isAdministrator(getAdminAuthState().roles);
 
     return (
         <aside className={`min-h-screen ${isOpen ? 'w-64' : 'w-14'} flex shrink-0 flex-col antialiased bg-gray-50 text-gray-800 transition-all duration-300 ease-in-out`}>
@@ -178,14 +180,16 @@ const Sidebar = () => {
                             <span className="ml-2 text-sm font-medium">Permisos de Usuario</span>
                         </Link>
                     </li>
-                    <li>
-                        <Link to="/admin/management/blocks" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
-                            <span className="inline-flex justify-center items-center ml-4">
-                                <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/shield-slash-fill.svg" className="w-5 h-5" alt="Bloqueos Icon" />
-                            </span>
-                            <span className="ml-2 text-sm font-medium">Bloqueos</span>
-                        </Link>
-                    </li>
+                    {isAdmin && (
+                        <li>
+                            <Link to="/admin/management/blocks" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
+                                <span className="inline-flex justify-center items-center ml-4">
+                                    <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/icons/shield-slash-fill.svg" className="w-5 h-5" alt="Bloqueos Icon" />
+                                </span>
+                                <span className="ml-2 text-sm font-medium">Bloqueos</span>
+                            </Link>
+                        </li>
+                    )}
                     <li>
                         <Link to="/admin/logout" className="group flex flex-row items-center h-11 focus:outline-none hover:bg-gray-100 text-gray-700 hover:text-gray-900 border-l-4 border-transparent hover:border-indigo-500 pr-6">
                             <span className="inline-flex justify-center items-center ml-4">

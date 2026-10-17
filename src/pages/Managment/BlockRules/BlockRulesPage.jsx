@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiService } from "../../../services/apiService";
+import { getAdminAuthState, isAdministrator } from "../../../utils/auth";
+import { RecentRequests } from "./RecentRequests";
 
 // IPs and texts rejected with an empty 403 by the API and the PHP web (applied within 30 s).
 function BlockRulesPage() {
@@ -9,8 +11,9 @@ function BlockRulesPage() {
     const [form, setForm] = useState({ type: "ip", value: "", note: "" });
     const [error, setError] = useState("");
 
+    const isAdmin = isAdministrator(getAdminAuthState().roles);
     const load = () => apiService.fetchBlockRules().then(setRules).catch(() => setError("No se pudieron cargar las reglas."));
-    useEffect(() => { load(); }, []);
+    useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
 
     const add = async (e) => {
         e.preventDefault();
@@ -24,11 +27,21 @@ function BlockRulesPage() {
         }
     };
 
+    // From the requests table: fill the form so the administrator reviews it before blocking.
+    const prefill = (type, value) => {
+        setForm({ type, value, note: "" });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     const remove = async (rule) => {
         if (!window.confirm(`¿Quitar el bloqueo de "${rule.value}"?`)) return;
         await apiService.deleteBlockRule(rule.id);
         load();
     };
+
+    if (!isAdmin) {
+        return <p className="p-4 text-gray-600">Solo el administrador puede ver y gestionar los bloqueos.</p>;
+    }
 
     return (
         <div className="container mx-auto p-4 w-full">
@@ -73,6 +86,7 @@ function BlockRulesPage() {
                     )}
                 </tbody>
             </table>
+            <RecentRequests onBlock={prefill} />
         </div>
     );
 }

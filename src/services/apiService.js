@@ -133,6 +133,7 @@ export const apiService = {
     fetchBlockRules: () => fetchAPI('blockrules'),
     addBlockRule: (rule) => fetchAPI('blockrules', { method: 'POST', body: rule }),
     deleteBlockRule: (id) => fetchAPI(`blockrules/${id}`, { method: 'DELETE' }),
+    fetchRecentRequests: (params) => fetchAPI('blockrules/requests', { params }),
     rejudgeSolution: (solutionId) => fetchAPI(`Judge/rejudge/solution/${solutionId}`),
     rejudgeProblem: (problemId) => fetchAPI(`Judge/rejudge/problem/${problemId}`),
     rejudgeContest: (contestId) => fetchAPI(`Judge/rejudge/contest/${contestId}`),
