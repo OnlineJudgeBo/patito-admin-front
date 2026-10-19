@@ -8,6 +8,7 @@ import CreateContestPage from './pages/ContestPage/CreateContestPage';
 import EditContestPage from './pages/ContestPage/EditContestPage';
 import ExamMonitorPage from './pages/ContestPage/ExamMonitorPage';
 import SimilarityPage from './pages/ContestPage/SimilarityPage';
+import ClarificationsPage from './pages/ContestPage/ClarificationsPage';
 import MachinesPage from './pages/ContestPage/MachinesPage';
 import ExamMachinesListPage from './pages/ContestPage/ExamMachinesListPage';
 import ListContestPage from './pages/ContestPage/ListContestPage';
@@ -72,6 +73,7 @@ const App = () => {
                         <Route path="/admin/contests/edit/:contestId" element={<PrivateRoute><EditContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/:contestId/monitor" element={<PrivateRoute><ExamMonitorPage /></PrivateRoute>} />
                         <Route path="/admin/contests/:contestId/similarity" element={<PrivateRoute><SimilarityPage /></PrivateRoute>} />
+                        <Route path="/admin/contests/:contestId/clarifications" element={<PrivateRoute><ClarificationsPage /></PrivateRoute>} />
                         <Route path="/admin/contests/:contestId/machines" element={<PrivateRoute><MachinesPage /></PrivateRoute>} />
                         <Route path="/admin/machines" element={<PrivateRoute><ExamMachinesListPage /></PrivateRoute>} />
                         <Route path="/admin/lobby" element={<PrivateRoute><MachinesPage /></PrivateRoute>} />
