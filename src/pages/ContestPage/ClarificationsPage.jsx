@@ -205,12 +205,12 @@ export default function ClarificationsPage() {
             )}
             <ul className="space-y-3">
                 {visible.map(item => (
-                    <li key={item.id} className={`rounded border bg-white p-4 ${isPending(item) ? 'border-amber-400' : 'border-gray-200'}`}>
+                    <li key={item.id} className={`rounded border bg-white p-4 ${isPending(item) ? 'border-gray-700' : 'border-gray-200'}`}>
                         <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                             <span className="rounded bg-gray-100 px-2 py-0.5 font-semibold text-gray-700">{problemLabel(item.problemNum)}</span>
                             <span>{item.userId ? <>Pregunta de <b className="text-gray-700">{item.userId}</b></> : 'Anuncio'}</span>
                             <span>{formatTime(item.createdAt)}</span>
-                            {isPending(item) && <span className="rounded bg-amber-100 px-2 py-0.5 text-amber-800">Pendiente</span>}
+                            {isPending(item) && <span className="rounded bg-gray-700 px-2 py-0.5 text-white">Pendiente</span>}
                             {item.userId && item.answer && (
                                 <span className="rounded bg-green-100 px-2 py-0.5 text-green-800">
                                     {item.isPublic ? 'Respondida a todos' : 'Respondida solo al usuario'}{item.answeredBy ? ` · ${item.answeredBy}` : ''}

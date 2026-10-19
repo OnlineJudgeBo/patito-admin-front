@@ -241,7 +241,7 @@ function ListContestPage2() {
                                             <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/clarifications`}>
                                                 Aclaraciones
                                                 {pendingClarifications[problem.contestId] > 0 && (
-                                                    <span className="ml-1 rounded bg-amber-100 px-1.5 text-xs text-amber-800">{pendingClarifications[problem.contestId]}</span>
+                                                    <span className="ml-1 rounded bg-gray-700 px-1.5 text-xs text-white">{pendingClarifications[problem.contestId]}</span>
                                                 )}
                                             </a>
                                         </div>
