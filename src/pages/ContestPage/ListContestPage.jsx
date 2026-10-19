@@ -3,7 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import UseAuth from '../../hooks/UseAuth';
 import { apiService } from '../../services/apiService';
+import { getRuntimeValue } from '../../utils/runtimeConfig';
+import { DeleteContestComponent } from './DeleteContestComponent';
 import { PromoteComponent } from './PromoteComponent';
+
+// Public page of a contest: CONTEST_URL ('...?cid={id}') in config.js, or next to the site's logout.php.
+const contestUrl = (contestId) => {
+    const template = getRuntimeValue('CONTEST_URL');
+    return template
+        ? template.replace('{id}', contestId)
+        : new URL(`contest.php?cid=${contestId}`, getRuntimeValue('LOGOUT_URL', window.location.origin)).href;
+};
 
 function ListContestPage2() {
     const { roles } = UseAuth();
@@ -13,6 +23,19 @@ function ListContestPage2() {
     // In the URL so the menu can link straight to the official ones.
     const [searchParams, setSearchParams] = useSearchParams();
     const onlyOfficial = searchParams.get('official') === '1';
+    const showDeleted = searchParams.get('deleted') === '1';
+    const [copiedId, setCopiedId] = useState(null);
+
+    const copyLink = async (contestId) => {
+        await navigator.clipboard.writeText(contestUrl(contestId));
+        setCopiedId(contestId);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const restoreContest = async (contestId) => {
+        await apiService.update('contests', `${contestId}/restore`, '');
+        setProblems(items => items.filter(item => item.contestId !== contestId));
+    };
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -40,7 +63,8 @@ function ListContestPage2() {
     };
 
     useEffect(() => {
-        apiService.fetchContestsList()
+        setIsLoading(true);
+        apiService.fetchContestsList(showDeleted)
             .then(data => {
                 setProblems(data);
                 setIsLoading(false);
@@ -49,7 +73,7 @@ function ListContestPage2() {
                 setError(err.message);
                 setIsLoading(false);
             });
-    }, []);
+    }, [showDeleted]);
 
     const getNestedValue = (obj, path) => {
         return path.split('.').reduce((acc, part) => acc && acc[part], obj);
@@ -71,7 +95,7 @@ function ListContestPage2() {
             });
         }
 
-        sortableItems = onlyOfficial
+        sortableItems = showDeleted ? sortableItems : onlyOfficial
             ? sortableItems.filter(problem => problem.defunct === 'O')
             : sortableItems.filter(problem => problem.defunct !== 'O');
 
@@ -83,7 +107,7 @@ function ListContestPage2() {
         ) : sortableItems;
 
 
-    }, [problems, sortConfig, filter, onlyOfficial]);
+    }, [problems, sortConfig, filter, onlyOfficial, showDeleted]);
 
     const indexOfLastProblem = currentPage * problemsPerPage;
     const indexOfFirstProblem = indexOfLastProblem - problemsPerPage;
@@ -128,6 +152,15 @@ function ListContestPage2() {
                 >
                     {onlyOfficial ? 'Viendo solo oficiales de práctica' : 'Ver concursos oficiales de práctica'}
                 </button>
+                {isAdmin && (
+                    <button
+                        type="button"
+                        onClick={() => { setSearchParams(showDeleted ? {} : { deleted: '1' }); setCurrentPage(1); }}
+                        className={`whitespace-nowrap rounded px-4 py-2 text-sm font-medium ${showDeleted ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                    >
+                        {showDeleted ? 'Viendo eliminados' : 'Ver eliminados'}
+                    </button>
+                )}
             </div>
 
             {isLoading ? (
@@ -178,10 +211,14 @@ function ListContestPage2() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         {problem.defunct === 'O'
                                             ? <span className="inline-block rounded bg-green-100 px-2 py-1 text-green-800">Promovido a práctica</span>
+                                            : problem.defunct === 'H'
+                                            ? <span className="inline-block rounded bg-amber-100 px-2 py-1 text-amber-800">Oculto (solo link)</span>
+                                            : problem.defunct === 'Y'
+                                            ? <span className="inline-block rounded bg-red-100 px-2 py-1 text-red-800">Eliminado</span>
                                             : <span className="text-gray-500">Normal</span>}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {problem.defunct === 'O'
+                                        {problem.defunct === 'O' || problem.defunct === 'Y'
                                             ? <span className="text-gray-400">—</span>
                                             : <PromoteComponent contestId={problem.contestId} />}
                                     </td>
@@ -211,6 +248,16 @@ function ListContestPage2() {
                                         {problem.isExam && (
                                             <div><a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/machines`}>Máquinas</a></div>
                                         )}
+                                        {problem.defunct !== 'Y' && (
+                                            <div>
+                                                <button type="button" className="text-blue-600 hover:text-blue-900" onClick={() => copyLink(problem.contestId)}>
+                                                    {copiedId === problem.contestId ? 'Link copiado' : 'Copiar link'}
+                                                </button>
+                                            </div>
+                                        )}
+                                        {isAdmin && (problem.defunct === 'Y'
+                                            ? <div><button type="button" className="text-green-700 hover:text-green-900" onClick={() => restoreContest(problem.contestId)}>Restaurar (queda oculto)</button></div>
+                                            : <div className="mt-1"><DeleteContestComponent contestId={problem.contestId} /></div>)}
                                     </td>
 
                                 </tr>

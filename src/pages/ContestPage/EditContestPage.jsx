@@ -39,6 +39,7 @@ const EditContestPage = () => {
         endTime: '',
         isPrivate: '',
         isOfficial: false,
+        isHidden: false,
         isExam: false,
         obi: false,
         examLabIps: '',
@@ -76,6 +77,7 @@ const EditContestPage = () => {
                 endTime: endDate[1] || '',
                 isPrivate: data.private == 1 ? true : false,
                 isOfficial: data.defunct === 'O',
+                isHidden: data.defunct === 'H',
                 isExam: Boolean(data.isExam),
                 obi: Boolean(data.obi),
                 examLabIps: data.examLabIps || '',
@@ -163,6 +165,21 @@ const EditContestPage = () => {
                                                 />
                                                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                                                 <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Es Concurso Privado?</span>
+                                            </label>
+                                        </div>
+
+                                        <div className="mb-4">
+                                            <label htmlFor="isHidden" className="inline-flex relative items-center cursor-pointer">
+                                                <Field
+                                                    type="checkbox"
+                                                    id="isHidden"
+                                                    name="isHidden"
+                                                    className="sr-only peer"
+                                                    checked={formik.values.isHidden}
+                                                    onChange={() => formik.setFieldValue('isHidden', !formik.values.isHidden)}
+                                                />
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                                <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">¿Oculto? (no aparece en las listas, solo se entra con el link)</span>
                                             </label>
                                         </div>
 
