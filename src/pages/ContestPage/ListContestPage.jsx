@@ -26,6 +26,7 @@ function ListContestPage2() {
     const onlyOfficial = searchParams.get('official') === '1';
     const showDeleted = searchParams.get('deleted') === '1';
     const [copiedId, setCopiedId] = useState(null);
+    const [pendingClarifications, setPendingClarifications] = useState({});
 
     const copyLink = async (contestId) => {
         await navigator.clipboard.writeText(contestUrl(contestId));
@@ -75,6 +76,12 @@ function ListContestPage2() {
                 setIsLoading(false);
             });
     }, [showDeleted]);
+
+    useEffect(() => {
+        apiService.get('contests/clarifications/pending')
+            .then(items => setPendingClarifications(Object.fromEntries(items.map(item => [item.contestId, item.pending]))))
+            .catch(() => setPendingClarifications({}));
+    }, []);
 
     const getNestedValue = (obj, path) => {
         return path.split('.').reduce((acc, part) => acc && acc[part], obj);
@@ -229,6 +236,14 @@ function ListContestPage2() {
                                         </div>
                                         <div>
                                             <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/similarity`}>Anti-plagio</a>
+                                        </div>
+                                        <div>
+                                            <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/clarifications`}>
+                                                Aclaraciones
+                                                {pendingClarifications[problem.contestId] > 0 && (
+                                                    <span className="ml-1 rounded bg-gray-700 px-1.5 text-xs text-white">{pendingClarifications[problem.contestId]}</span>
+                                                )}
+                                            </a>
                                         </div>
                                         <div>
                                             <button type="button" disabled={exportingId !== null}
