@@ -6,6 +6,7 @@ import { apiService } from '../../services/apiService';
 import { getRuntimeValue } from '../../utils/runtimeConfig';
 import { DeleteContestComponent } from './DeleteContestComponent';
 import { PromoteComponent } from './PromoteComponent';
+import { DEFUNCT } from '../../utils/defunctStates';
 
 // Public page of a contest: CONTEST_URL ('...?cid={id}') in config.js, or next to the site's logout.php.
 const contestUrl = (contestId) => {
@@ -96,8 +97,8 @@ function ListContestPage2() {
         }
 
         sortableItems = showDeleted ? sortableItems : onlyOfficial
-            ? sortableItems.filter(problem => problem.defunct === 'O')
-            : sortableItems.filter(problem => problem.defunct !== 'O');
+            ? sortableItems.filter(problem => problem.defunct === DEFUNCT.OFFICIAL)
+            : sortableItems.filter(problem => problem.defunct !== DEFUNCT.OFFICIAL);
 
         return filter ? sortableItems.filter(problem =>
             (problem.contestId && problem.contestId.toString().includes(filter)) ||
@@ -209,16 +210,16 @@ function ListContestPage2() {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.private == false ? "Publico" : "Privado"}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {problem.defunct === 'O'
+                                        {problem.defunct === DEFUNCT.OFFICIAL
                                             ? <span className="inline-block rounded bg-green-100 px-2 py-1 text-green-800">Promovido a práctica</span>
-                                            : problem.defunct === 'H'
+                                            : problem.defunct === DEFUNCT.HIDDEN
                                             ? <span className="inline-block rounded bg-amber-100 px-2 py-1 text-amber-800">Oculto (solo link)</span>
-                                            : problem.defunct === 'Y'
+                                            : problem.defunct === DEFUNCT.DELETED
                                             ? <span className="inline-block rounded bg-red-100 px-2 py-1 text-red-800">Eliminado</span>
                                             : <span className="text-gray-500">Normal</span>}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {problem.defunct === 'O' || problem.defunct === 'Y'
+                                        {problem.defunct === DEFUNCT.OFFICIAL || problem.defunct === DEFUNCT.DELETED
                                             ? <span className="text-gray-400">—</span>
                                             : <PromoteComponent contestId={problem.contestId} />}
                                     </td>
@@ -248,14 +249,14 @@ function ListContestPage2() {
                                         {problem.isExam && (
                                             <div><a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/machines`}>Máquinas</a></div>
                                         )}
-                                        {problem.defunct !== 'Y' && (
+                                        {problem.defunct !== DEFUNCT.DELETED && (
                                             <div>
                                                 <button type="button" className="text-blue-600 hover:text-blue-900" onClick={() => copyLink(problem.contestId)}>
                                                     {copiedId === problem.contestId ? 'Link copiado' : 'Copiar link'}
                                                 </button>
                                             </div>
                                         )}
-                                        {isAdmin && (problem.defunct === 'Y'
+                                        {isAdmin && (problem.defunct === DEFUNCT.DELETED
                                             ? <div><button type="button" className="text-green-700 hover:text-green-900" onClick={() => restoreContest(problem.contestId)}>Restaurar (queda oculto)</button></div>
                                             : <div className="mt-1"><DeleteContestComponent contestId={problem.contestId} /></div>)}
                                     </td>
