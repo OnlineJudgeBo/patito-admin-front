@@ -19,6 +19,7 @@ import UserListComponent from "./User/UserListComponent.jsx";
 
 import ManualProblemAddComponent from "./Problem/ManualProblemAddComponent";
 import ProblemListComponent from "./Problem/ProblemListComponent";
+import { DEFUNCT } from '../../utils/defunctStates';
 
 const EditContestPage = () => {
     const [selectedUsers, setSelectedUsers] = useAtom(userSelectAtom);
@@ -76,8 +77,8 @@ const EditContestPage = () => {
                 endDate: endDate[0] || '',
                 endTime: endDate[1] || '',
                 isPrivate: data.private == 1 ? true : false,
-                isOfficial: data.defunct === 'O',
-                isHidden: data.defunct === 'H',
+                isOfficial: data.defunct === DEFUNCT.OFFICIAL,
+                isHidden: data.defunct === DEFUNCT.HIDDEN,
                 isExam: Boolean(data.isExam),
                 obi: Boolean(data.obi),
                 examLabIps: data.examLabIps || '',

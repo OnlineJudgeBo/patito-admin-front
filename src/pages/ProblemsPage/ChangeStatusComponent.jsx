@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { apiService } from '../../services/apiService';
+import { DEFUNCT } from '../../utils/defunctStates';
 
 export function ChangeStatusComponent({ problemId, initialDefunct }) {
     const [defunct, setDefunct] = useState(initialDefunct);
@@ -21,7 +22,7 @@ export function ChangeStatusComponent({ problemId, initialDefunct }) {
 
     const changeStatus = async () => {
         await apiService.update("Problems", `${problemId}/visibility`, "").then(response => {
-            setDefunct(defunct === 'Y' ? 'N' : 'Y');
+            setDefunct(defunct === DEFUNCT.HIDDEN ? DEFUNCT.VISIBLE : DEFUNCT.HIDDEN);
             toast({
                 description: 'Visibilidad del problema actualizado',
             })
@@ -34,7 +35,7 @@ export function ChangeStatusComponent({ problemId, initialDefunct }) {
         <AlertDialog>
             <AlertDialogTrigger asChild>
                 <Button variant="outline">
-                    {defunct === 'Y' ? 'No' : 'Sí'}
+                    {defunct === DEFUNCT.HIDDEN ? 'No' : 'Sí'}
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -42,7 +43,7 @@ export function ChangeStatusComponent({ problemId, initialDefunct }) {
                     <AlertDialogTitle>¿Cambiar estado de problema?</AlertDialogTitle>
                     <AlertDialogDescription>
                         <div className="text-xl">
-                            {defunct === 'Y'
+                            {defunct === DEFUNCT.HIDDEN
                                 ? 'El problema ya estará disponible para todos los usuarios.'
                                 : 'El problema se cambiará a modo borrador y no se listará en la sección de problemas.'}
                         </div>
