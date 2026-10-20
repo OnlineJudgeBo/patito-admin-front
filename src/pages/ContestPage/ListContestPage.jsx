@@ -195,7 +195,6 @@ function ListContestPage2() {
                                     </div>
                                 </th>
                                 <th className="px-4 py-2">Publico/Privado</th>
-                                <th className="px-4 py-2">Estado</th>
                                 <th className="px-4 py-2">Promover a Practica</th>
                                 <th className="px-4 py-2">Acciones</th>
                             </tr>
@@ -209,6 +208,9 @@ function ListContestPage2() {
                                             href={`/admin/contests/edit/${problem.contestId}`}>
                                             {parse(problem.title)}
                                         </a>
+                                        {problem.defunct === DEFUNCT.OFFICIAL && <span title="Sus problemas quedaron como práctica y el concurso está en el archivo de concursos oficiales." className="ml-2 inline-block rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">Promovido a práctica</span>}
+                                        {problem.defunct === DEFUNCT.HIDDEN && <span title="No aparece en la lista de la web; solo entra quien tiene el link." className="ml-2 inline-block rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-800">Oculto (solo link)</span>}
+                                        {problem.defunct === DEFUNCT.DELETED && <span title="No se ve en ningún lado, ni por link. Se puede restaurar." className="ml-2 inline-block rounded bg-red-100 px-2 py-0.5 text-xs text-red-800">Eliminado</span>}
                                         {problem.isExam && (
                                             <a className="ml-2 inline-block rounded bg-red-100 px-2 py-0.5 text-xs text-red-800 hover:bg-red-200"
                                                 href={`/admin/contests/${problem.contestId}/monitor`}>
@@ -221,15 +223,6 @@ function ListContestPage2() {
                                         <div><span className="font-medium">Fin:</span> {problem.endTime}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.private == false ? "Publico" : "Privado"}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        {problem.defunct === DEFUNCT.OFFICIAL
-                                            ? <span title="Sus problemas quedaron como práctica y el concurso está en el archivo de concursos oficiales." className="inline-block rounded bg-green-100 px-2 py-1 text-green-800">Promovido a práctica</span>
-                                            : problem.defunct === DEFUNCT.HIDDEN
-                                            ? <span title="No aparece en la lista de la web; solo entra quien tiene el link." className="inline-block rounded bg-amber-100 px-2 py-1 text-amber-800">Oculto (solo link)</span>
-                                            : problem.defunct === DEFUNCT.DELETED
-                                            ? <span title="No se ve en ningún lado, ni por link. Se puede restaurar." className="inline-block rounded bg-red-100 px-2 py-1 text-red-800">Eliminado</span>
-                                            : <span title="Aparece en la lista de concursos de la web." className="inline-block rounded bg-gray-100 px-2 py-1 text-gray-700">Visible</span>}
-                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {problem.defunct === DEFUNCT.OFFICIAL || problem.defunct === DEFUNCT.DELETED
                                             ? <span className="text-gray-400">—</span>
