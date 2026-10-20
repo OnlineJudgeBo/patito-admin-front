@@ -223,12 +223,12 @@ function ListContestPage2() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{problem.private == false ? "Publico" : "Privado"}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                                         {problem.defunct === DEFUNCT.OFFICIAL
-                                            ? <span className="inline-block rounded bg-green-100 px-2 py-1 text-green-800">Promovido a práctica</span>
+                                            ? <span title="Sus problemas quedaron como práctica y el concurso está en el archivo de concursos oficiales." className="inline-block rounded bg-green-100 px-2 py-1 text-green-800">Promovido a práctica</span>
                                             : problem.defunct === DEFUNCT.HIDDEN
-                                            ? <span className="inline-block rounded bg-amber-100 px-2 py-1 text-amber-800">Oculto (solo link)</span>
+                                            ? <span title="No aparece en la lista de la web; solo entra quien tiene el link." className="inline-block rounded bg-amber-100 px-2 py-1 text-amber-800">Oculto (solo link)</span>
                                             : problem.defunct === DEFUNCT.DELETED
-                                            ? <span className="inline-block rounded bg-red-100 px-2 py-1 text-red-800">Eliminado</span>
-                                            : <span className="text-gray-500">Normal</span>}
+                                            ? <span title="No se ve en ningún lado, ni por link. Se puede restaurar." className="inline-block rounded bg-red-100 px-2 py-1 text-red-800">Eliminado</span>
+                                            : <span title="Aparece en la lista de concursos de la web." className="inline-block rounded bg-gray-100 px-2 py-1 text-gray-700">Visible</span>}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {problem.defunct === DEFUNCT.OFFICIAL || problem.defunct === DEFUNCT.DELETED
