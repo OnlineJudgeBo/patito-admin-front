@@ -7,6 +7,11 @@ import { getRuntimeValue } from '../../utils/runtimeConfig';
 import { DeleteContestComponent } from './DeleteContestComponent';
 import { PromoteComponent } from './PromoteComponent';
 import { DEFUNCT } from '../../utils/defunctStates';
+import { ChevronDown, Download, FileArchive, Link2, MessageCircle, Monitor, Pencil, RotateCcw, ShieldCheck } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
+const ACTION_BUTTON = 'inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50';
+const MENU_ITEM = 'flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50';
 
 // Public page of a contest: CONTEST_URL ('...?cid={id}') in config.js, or next to the site's logout.php.
 const contestUrl = (contestId) => {
@@ -231,49 +236,53 @@ function ListContestPage2() {
                                             : <PromoteComponent contestId={problem.contestId} />}
                                     </td>
                                     <td className="px-6 py-4 text-sm">
-                                        <div>
-                                            <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/edit/${problem.contestId}`}>Editar</a>
-                                        </div>
-                                        <div>
-                                            <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/similarity`}>Anti-plagio</a>
-                                        </div>
-                                        <div>
-                                            <a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/clarifications`}>
-                                                Aclaraciones
+                                        <div className="flex items-center gap-2">
+                                            <a className={ACTION_BUTTON} href={`/admin/contests/edit/${problem.contestId}`}>
+                                                <Pencil className="h-4 w-4" /> Editar
+                                            </a>
+                                            <a className={ACTION_BUTTON} href={`/admin/contests/${problem.contestId}/clarifications`}>
+                                                <MessageCircle className="h-4 w-4" /> Aclaraciones
                                                 {pendingClarifications[problem.contestId] > 0 && (
-                                                    <span className="ml-1 rounded bg-gray-700 px-1.5 text-xs text-white">{pendingClarifications[problem.contestId]}</span>
+                                                    <span className="rounded-full bg-gray-700 px-1.5 text-xs text-white">{pendingClarifications[problem.contestId]}</span>
                                                 )}
                                             </a>
-                                        </div>
-                                        <div>
-                                            <button type="button" disabled={exportingId !== null}
-                                                className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
-                                                onClick={() => exportContest(problem.contestId, true)}>
-                                                Exportar soluciones
-                                            </button>
-                                        </div>
-                                        {isAdmin && (
-                                            <div>
-                                            <button type="button" disabled={exportingId !== null}
-                                                className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
-                                                onClick={() => exportContest(problem.contestId)}>
-                                                {exportingId === problem.contestId ? 'Exportando…' : 'Exportar ZIP'}
-                                            </button>
-                                            </div>
-                                        )}
-                                        {problem.isExam && (
-                                            <div><a className="text-blue-600 hover:text-blue-900" href={`/admin/contests/${problem.contestId}/machines`}>Máquinas</a></div>
-                                        )}
-                                        {problem.defunct !== DEFUNCT.DELETED && (
-                                            <div>
-                                                <button type="button" className="text-blue-600 hover:text-blue-900" onClick={() => copyLink(problem.contestId)}>
-                                                    {copiedId === problem.contestId ? 'Link copiado' : 'Copiar link'}
+                                            <Popover>
+                                                <PopoverTrigger className={ACTION_BUTTON}>
+                                                    Más <ChevronDown className="h-4 w-4" />
+                                                </PopoverTrigger>
+                                                <PopoverContent align="end" className="w-56 p-1">
+                                                    <a className={MENU_ITEM} href={`/admin/contests/${problem.contestId}/similarity`}>
+                                                        <ShieldCheck className="h-4 w-4" /> Anti-plagio
+                                                    </a>
+                                                    {problem.isExam && (
+                                                        <a className={MENU_ITEM} href={`/admin/contests/${problem.contestId}/machines`}>
+                                                            <Monitor className="h-4 w-4" /> Máquinas
+                                                        </a>
+                                                    )}
+                                                    {problem.defunct !== DEFUNCT.DELETED && (
+                                                        <button type="button" className={MENU_ITEM} onClick={() => copyLink(problem.contestId)}>
+                                                            <Link2 className="h-4 w-4" /> {copiedId === problem.contestId ? 'Link copiado' : 'Copiar link'}
+                                                        </button>
+                                                    )}
+                                                    <div className="my-1 border-t border-gray-100" />
+                                                    <button type="button" disabled={exportingId !== null} className={MENU_ITEM}
+                                                        onClick={() => exportContest(problem.contestId, true)}>
+                                                        <Download className="h-4 w-4" /> Exportar soluciones
+                                                    </button>
+                                                    {isAdmin && (
+                                                        <button type="button" disabled={exportingId !== null} className={MENU_ITEM}
+                                                            onClick={() => exportContest(problem.contestId)}>
+                                                            <FileArchive className="h-4 w-4" /> {exportingId === problem.contestId ? 'Exportando…' : 'Exportar ZIP'}
+                                                        </button>
+                                                    )}
+                                                </PopoverContent>
+                                            </Popover>
+                                            {isAdmin && (problem.defunct === DEFUNCT.DELETED
+                                                ? <button type="button" className={`${ACTION_BUTTON} text-green-700`} title="Vuelve como oculto (solo link)" onClick={() => restoreContest(problem.contestId)}>
+                                                    <RotateCcw className="h-4 w-4" /> Restaurar
                                                 </button>
-                                            </div>
-                                        )}
-                                        {isAdmin && (problem.defunct === DEFUNCT.DELETED
-                                            ? <div><button type="button" className="text-green-700 hover:text-green-900" onClick={() => restoreContest(problem.contestId)}>Restaurar (queda oculto)</button></div>
-                                            : <div className="mt-1"><DeleteContestComponent contestId={problem.contestId} /></div>)}
+                                                : <DeleteContestComponent contestId={problem.contestId} />)}
+                                        </div>
                                     </td>
 
                                 </tr>

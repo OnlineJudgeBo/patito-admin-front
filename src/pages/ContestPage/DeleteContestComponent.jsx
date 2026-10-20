@@ -10,7 +10,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { apiService } from '../../services/apiService';
 
 // Soft delete: the contest and its submissions stay in the database and can be restored.
@@ -24,7 +24,10 @@ export function DeleteContestComponent({ contestId }) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant="outline" className="text-red-600">Eliminar</Button>
+                <button type="button" title="Eliminar concurso"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50">
+                    <Trash2 className="h-4 w-4" /> Eliminar
+                </button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
