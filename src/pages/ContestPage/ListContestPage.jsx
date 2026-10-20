@@ -243,7 +243,7 @@ function ListContestPage2() {
                                                 <PopoverTrigger className={ACTION_BUTTON}>
                                                     Más <ChevronDown className="h-4 w-4" />
                                                 </PopoverTrigger>
-                                                <PopoverContent align="end" className="w-56 p-1">
+                                                <PopoverContent align="end" className="w-72 p-1">
                                                     <a className={MENU_ITEM} href={`/admin/contests/${problem.contestId}/similarity`}>
                                                         <ShieldCheck className="h-4 w-4" /> Anti-plagio
                                                     </a>
@@ -260,12 +260,12 @@ function ListContestPage2() {
                                                     <div className="my-1 border-t border-gray-100" />
                                                     <button type="button" disabled={exportingId !== null} className={MENU_ITEM}
                                                         onClick={() => exportContest(problem.contestId, true)}>
-                                                        <Download className="h-4 w-4" /> Exportar soluciones
+                                                        <Download className="h-4 w-4" /> Descargar códigos de participantes
                                                     </button>
                                                     {isAdmin && (
                                                         <button type="button" disabled={exportingId !== null} className={MENU_ITEM}
                                                             onClick={() => exportContest(problem.contestId)}>
-                                                            <FileArchive className="h-4 w-4" /> {exportingId === problem.contestId ? 'Exportando…' : 'Exportar ZIP'}
+                                                            <FileArchive className="h-4 w-4" /> {exportingId === problem.contestId ? 'Exportando…' : 'Exportar concurso (para importar)'}
                                                         </button>
                                                     )}
                                                 </PopoverContent>
