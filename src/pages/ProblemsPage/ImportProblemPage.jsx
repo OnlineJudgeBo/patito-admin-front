@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
+import { checkProblemZip, listZipEntries } from '../../utils/zipCheck';
 
 // Each format has its own entry in the menu; without ?format= it is this judge's own (ICPC based) package.
 const FORMATS = {
@@ -27,13 +28,25 @@ function ImportProblemPage() {
     const [results, setResults] = useState([]);
     const [isImporting, setIsImporting] = useState(false);
     const [error, setError] = useState('');
-    const format = FORMATS[useSearchParams()[0].get('format')];
+    // Problems found in each file before uploading: [{ name, problems }]; null while checking.
+    const [checks, setChecks] = useState([]);
+    const formatKey = useSearchParams()[0].get('format');
+    const format = FORMATS[formatKey];
 
-    const onDrop = useCallback((acceptedFiles) => {
+    const onDrop = useCallback(async (acceptedFiles) => {
         setFiles(acceptedFiles);
         setResults([]);
         setError('');
-    }, []);
+        setChecks(null);
+        setChecks(await Promise.all(acceptedFiles.map(async (file) => {
+            try {
+                return { name: file.name, problems: checkProblemZip(await listZipEntries(file), formatKey) };
+            } catch (zipError) {
+                return { name: file.name, problems: [zipError.message] };
+            }
+        })));
+    }, [formatKey]);
+    const invalidFiles = (checks ?? []).filter((check) => check.problems.length > 0);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -100,6 +113,17 @@ function ImportProblemPage() {
                 )}
             </div>
 
+            {invalidFiles.length > 0 && (
+                <div className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                    <p className="font-medium">Corrige estos archivos y vuelve a seleccionarlos; no se subió nada:</p>
+                    <ul className="mt-1 space-y-1">
+                        {invalidFiles.map((check) => (
+                            <li key={check.name}><span className="font-mono">{check.name}</span>: {check.problems.join(' ')}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
             {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
 
             {results.length > 0 && (
@@ -124,9 +148,9 @@ function ImportProblemPage() {
                     type="button"
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded disabled:opacity-50"
                     onClick={handleImport}
-                    disabled={files.length === 0 || isImporting}
+                    disabled={files.length === 0 || isImporting || checks === null || invalidFiles.length > 0}
                 >
-                    {isImporting ? `Importando ${Math.min(results.length + 1, files.length)} de ${files.length}...` : 'Importar'}
+                    {checks === null ? 'Revisando...' : isImporting ? `Importando ${Math.min(results.length + 1, files.length)} de ${files.length}...` : 'Importar'}
                 </button>
             </div>
         </div>
