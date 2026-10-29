@@ -109,8 +109,6 @@ const EditForm = () => {
         Description: Yup.string().required('La descripción es obligatoria'),
         MemoryLimit: Yup.number().required('El límite de memoria es obligatorio').positive('Debe ser positivo'),
         TimeLimit: Yup.number().required('El límite de tiempo es obligatorio').positive('Debe ser positivo'),
-        Input: Yup.string().required('La descripción de la entrada es obligatoria'),
-        Output: Yup.string().required('La descripción de la salida es obligatoria'),
     });
 
     const formik = useFormik({
