@@ -44,12 +44,19 @@ function findRoot(names, fileName) {
     return shortest.slice(0, shortest.length - fileName.length);
 }
 
-// Problems found for this format ('cms', 'tps' or undefined for this judge's own package); empty when it looks fine.
+// Problems found for this format ('cms', 'tps', 'task' for either of them, or undefined for this judge's own
+// package); empty when it looks fine.
 export function checkProblemZip(names, format) {
     const has = (path) => names.includes(path);
     const hasFolder = (path) => names.some((name) => name.startsWith(path));
     const cms = findRoot(names, 'task.yaml');
     const tps = findRoot(names, 'problem.json');
+    if (format === 'task') {
+        if (cms === null && tps === null) {
+            return ['No es una tarea de CMS (task.yaml) ni de TPS (problem.json).'];
+        }
+        format = cms !== null ? 'cms' : 'tps';
+    }
 
     if (format === 'cms') {
         if (cms === null) {

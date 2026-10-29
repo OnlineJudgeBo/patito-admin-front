@@ -19,6 +19,10 @@ const FORMATS = {
             </>
         ),
     },
+    task: {
+        title: 'Reimportar de CMS o TPS',
+        help: <>Sube el .zip de la tarea (CMS o TPS) para reemplazar este problema.</>,
+    },
 };
 
 function ImportProblemPage() {
@@ -30,8 +34,11 @@ function ImportProblemPage() {
     const [error, setError] = useState('');
     // Problems found in each file before uploading: [{ name, problems }]; null while checking.
     const [checks, setChecks] = useState([]);
-    const formatKey = useSearchParams()[0].get('format');
+    const [searchParams] = useSearchParams();
+    const formatKey = searchParams.get('format');
     const format = FORMATS[formatKey];
+    // Reimport: the zip replaces the statement, limits, tests, checker and graders of this problem.
+    const problemId = searchParams.get('problemId');
 
     const onDrop = useCallback(async (acceptedFiles) => {
         setFiles(acceptedFiles);
@@ -50,7 +57,7 @@ function ImportProblemPage() {
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        multiple: true,
+        multiple: !problemId,
         accept: { 'application/zip': ['.zip'] },
     });
 
@@ -69,7 +76,9 @@ function ImportProblemPage() {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const problem = format
+                const problem = problemId
+                    ? await apiService.postFile(`problems/${problemId}/import-task`, formData)
+                    : format
                     ? await apiService.postFile('problems/import-task', formData)
                     : await apiService.importProblem(formData);
                 imported.push({ name: file.name, problemId: problem.problemId });
@@ -92,7 +101,16 @@ function ImportProblemPage() {
 
     return (
         <div className="container mx-auto p-4 w-full min-w-full">
-            <h1 className="text-xl font-semibold mb-4">{format?.title ?? 'Importar problema'}</h1>
+            <h1 className="text-xl font-semibold mb-4">
+                {problemId ? `Reimportar el problema ${problemId}` : format?.title ?? 'Importar problema'}
+            </h1>
+
+            {problemId && (
+                <p className="mb-4 rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                    Se reemplazan el enunciado, los límites, los casos de prueba, el checker y los graders de este problema.
+                    Se mantienen su número, su visibilidad, sus temas y los envíos; para volver a evaluarlos usa Rejudge.
+                </p>
+            )}
 
             {format && (
                 <p className="mb-4 text-sm text-gray-600">
