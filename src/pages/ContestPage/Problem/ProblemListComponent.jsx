@@ -10,6 +10,8 @@ const ProblemListComponent = () => {
     const [errorMessages, setErrorMessages] = useAtom(problemSelectAtomErrorMessage);
 
     useEffect(() => {
+        // A newer list (e.g. after moving a problem) makes this run's result stale.
+        let stale = false;
         const validateProblems = async () => {
             const validProblems = [];
             setErrorMessages([]);
@@ -35,11 +37,14 @@ const ProblemListComponent = () => {
                     setErrorMessages(prev => [...prev, `Error con el problema "${problem.problemId}": ${error.message}`]);
                 }
             }
-            setSelectedProblems(validProblems);
+            if (!stale) {
+                setSelectedProblems(validProblems);
+            }
         };
         if (problemList.length > 0) {
             validateProblems();
         }
+        return () => { stale = true; };
     }, [problemList]);
 
     const loadOptions = async (inputValue, callback) => {
@@ -79,6 +84,14 @@ const ProblemListComponent = () => {
         setSelectedProblems(newValue || []);
     };
 
+    // The order here is the contest order (A, B, C...): the API numbers the problems as they are sent.
+    const move = (index, step) => {
+        const moved = [...selectedProblems];
+        [moved[index], moved[index + step]] = [moved[index + step], moved[index]];
+        setSelectedProblems(moved);
+        setProblemList(moved.map((problem) => ({ problemId: problem.value })));
+    };
+
     return (
         <div className="mb-4">
             <label htmlFor="selectedUser" className="block text-sm font-medium text-gray-700">Seleccionar Problemas</label>
@@ -92,6 +105,25 @@ const ProblemListComponent = () => {
                 placeholder="Escriba el id del problema"
                 className="text-base w-full"
             />
+            {selectedProblems.length > 1 && (
+                <ol className="mt-3 divide-y rounded border border-gray-200 text-sm">
+                    {selectedProblems.map((problem, index) => (
+                        <li key={problem.value} className="flex items-center gap-2 px-3 py-1.5">
+                            <span className="w-6 font-semibold">{String.fromCharCode(65 + index)}</span>
+                            <span className="flex-1 truncate">{problem.label} <span className="text-gray-500">#{problem.value}</span></span>
+                            <button type="button" className="px-2 disabled:opacity-30" disabled={index === 0}
+                                onClick={() => move(index, -1)} aria-label={`Subir ${problem.label}`}>↑</button>
+                            <button type="button" className="px-2 disabled:opacity-30" disabled={index === selectedProblems.length - 1}
+                                onClick={() => move(index, 1)} aria-label={`Bajar ${problem.label}`}>↓</button>
+                        </li>
+                    ))}
+                </ol>
+            )}
+            {selectedProblems.length > 1 && (
+                <p className="mt-1 text-xs text-gray-500">
+                    El orden se guarda con el concurso; los envíos y aclaraciones ya hechos siguen a su problema.
+                </p>
+            )}
             {errorMessages.length > 0 && (
                 <div className="text-red-500 text-sm mt-1">
                     {errorMessages.map((msg, index) => <div key={index}>{msg}</div>)}
