@@ -47,12 +47,15 @@ function ImportProblemPage() {
         setChecks(null);
         setChecks(await Promise.all(acceptedFiles.map(async (file) => {
             try {
-                return { name: file.name, problems: checkProblemZip(await listZipEntries(file), formatKey) };
+                const names = await listZipEntries(file);
+                // Reimport takes either format: this judge's package (problem.yaml / metadata.json) or a CMS/TPS task.
+                const key = problemId && !formatKey && !names.includes('problem.yaml') && !names.includes('metadata.json') ? 'task' : formatKey;
+                return { name: file.name, key, problems: checkProblemZip(names, key) };
             } catch (zipError) {
                 return { name: file.name, problems: [zipError.message] };
             }
         })));
-    }, [formatKey]);
+    }, [formatKey, problemId]);
     const invalidFiles = (checks ?? []).filter((check) => check.problems.length > 0);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -71,13 +74,13 @@ function ImportProblemPage() {
         setResults([]);
         // One at a time: a file that fails does not stop the rest.
         const imported = [];
-        for (const file of files) {
+        for (const [index, file] of files.entries()) {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
 
                 const problem = problemId
-                    ? await apiService.postFile(`problems/${problemId}/import-task`, formData)
+                    ? await apiService.postFile(`problems/${problemId}/${checks[index].key ? 'import-task' : 'import'}`, formData)
                     : format
                     ? await apiService.postFile('problems/import-task', formData)
                     : await apiService.importProblem(formData);
@@ -127,7 +130,7 @@ function ImportProblemPage() {
                 {files.length > 0 ? (
                     <p>{files.length} archivo(s) seleccionado(s): {files.map((file) => file.name).join(', ')}</p>
                 ) : (
-                    <p>{format ? 'Arrastra uno o varios .zip de tareas aquí' : 'Arrastra uno o varios .zip de paquetes de problema aquí'}</p>
+                    <p>{problemId ? 'Arrastra aquí el .zip: paquete del juez (exportado), tarea de CMS o de TPS' : format ? 'Arrastra uno o varios .zip de tareas aquí' : 'Arrastra uno o varios .zip de paquetes de problema aquí'}</p>
                 )}
             </div>
 

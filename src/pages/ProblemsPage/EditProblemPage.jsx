@@ -217,8 +217,8 @@ const EditForm = () => {
     return (
         <>
             <div className="mb-2 text-right">
-                <Link to={`/admin/problems/import?format=task&problemId=${problemId}`} className="text-sm text-indigo-600 underline">
-                    Reimportar de CMS o TPS
+                <Link to={`/admin/problems/import?problemId=${problemId}`} className="text-sm text-indigo-600 underline">
+                    Reimportar (paquete del juez, CMS o TPS)
                 </Link>
             </div>
             <div className="mb-6 p-4 bg-white rounded-lg shadow-lg">
