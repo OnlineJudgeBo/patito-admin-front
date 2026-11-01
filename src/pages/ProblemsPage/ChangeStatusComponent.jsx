@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { apiService } from '../../services/apiService';
 import { DEFUNCT } from '../../utils/defunctStates';
@@ -34,9 +33,15 @@ export function ChangeStatusComponent({ problemId, initialDefunct }) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant="outline">
-                    {defunct === DEFUNCT.HIDDEN ? 'No' : 'Sí'}
-                </Button>
+                <button
+                    type="button"
+                    title="Cambiar visibilidad"
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${defunct === DEFUNCT.HIDDEN
+                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                >
+                    {defunct === DEFUNCT.HIDDEN ? 'Oculto' : 'Visible'}
+                </button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
