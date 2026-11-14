@@ -6,6 +6,21 @@ const REFRESH_MS = 5000;
 
 const problemLetter = (num) => (num >= 0 ? String.fromCharCode(65 + num) : '—');
 
+const csvCell = (value) => (/[",\n\r]/.test(String(value)) ? `"${String(value).replace(/"/g, '""')}"` : String(value));
+
+const downloadCsv = (contestId, items) => {
+    const rows = [
+        ['problema', 'problem_id', 'usuario', 'envio', 'similar_a', 'envio_similar', 'similitud'],
+        ...items.map(item => [problemLetter(item.problemNum), item.problemId, item.userId, item.solutionId, item.similarUserId, item.similarSolutionId, Math.round(item.percentage)]),
+    ];
+    const blob = new Blob([rows.map(row => row.map(csvCell).join(',')).join('\n')], { type: 'text/csv;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `contest-${contestId}-similarity.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+};
+
 export default function SimilarityPage() {
     const { contestId } = useParams();
     const [report, setReport] = useState(null);
@@ -45,11 +60,24 @@ export default function SimilarityPage() {
         <div className="container mx-auto p-4 w-full min-w-full">
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
                 <h1 className="text-2xl font-bold">Similitud de código: concurso {contestId}</h1>
-                <button type="button" onClick={run} disabled={report.running}
-                    className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
-                    {report.running ? 'Analizando…' : 'Ejecutar anti-plagio'}
-                </button>
+                <div className="flex gap-2">
+                    <button type="button" onClick={() => downloadCsv(contestId, report.items)} disabled={report.items.length === 0}
+                        className="rounded bg-gray-200 px-4 py-2 text-sm font-medium hover:bg-gray-300 disabled:opacity-50">
+                        Descargar CSV
+                    </button>
+                    <button type="button" onClick={run} disabled={report.running}
+                        className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50">
+                        {report.running ? 'Analizando…' : 'Ejecutar anti-plagio'}
+                    </button>
+                </div>
             </div>
+
+            {report.error && !report.running && (
+                <div className="mb-3 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+                    <p className="font-semibold">La última corrida del anti-plagio falló: los resultados pueden estar incompletos.</p>
+                    <pre className="mt-1 whitespace-pre-wrap font-sans">{report.error}</pre>
+                </div>
+            )}
 
             {error && <div className="mb-2 text-sm text-red-600">{error}</div>}
 
