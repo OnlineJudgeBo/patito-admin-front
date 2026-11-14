@@ -10,6 +10,7 @@ const ALERT_LABELS = {
     MULTIPLE_IPS: 'Varias IPs',
     SHARED_IP: 'IP compartida',
     IP_CAPTURE: 'IP del proxy',
+    SIMILAR_CODE: 'Código similar',
 };
 
 const SEVERITY_STYLES = {
@@ -61,6 +62,7 @@ export default function ExamMonitorPage() {
                 </div>
                 <div className="flex items-center gap-3">
                     <a href={`/admin/contests/${contestId}/machines`} className="text-sm font-semibold text-blue-600">Máquinas</a>
+                    <a href={`/admin/contests/${contestId}/similarity`} className="text-sm font-semibold text-blue-600">Similitud</a>
                     <button type="button" onClick={load} className="rounded bg-gray-200 px-3 py-1 text-sm hover:bg-gray-300">Actualizar ahora</button>
                 </div>
             </div>
@@ -69,6 +71,7 @@ export default function ExamMonitorPage() {
 
             <p className="mb-3 text-xs text-gray-500">
                 La IP es un indicio, no una prueba: se marca actividad desde IP distintas con 5 minutos o menos de diferencia. Los datos móviles cambian de IP y un laboratorio comparte una sola IP pública.
+                {' '}El código similar sale de la última corrida del anti-plagio (página Similitud).
             </p>
 
             <section className="mb-6 space-y-2">
