@@ -4,6 +4,8 @@ import Sidebar from './components/Sidebar';
 import UseAuth from './hooks/UseAuth';
 import CourseAdminDetailPage from './pages/AcademicPage/CourseAdminDetailPage';
 import ListAcademicCoursePage from './pages/AcademicPage/ListAcademicCoursePage';
+import LearningPathsPage from './pages/AcademicPage/LearningPathsPage';
+import LearningPathEditorPage from './pages/AcademicPage/LearningPathEditorPage';
 import CreateContestPage from './pages/ContestPage/CreateContestPage';
 import EditContestPage from './pages/ContestPage/EditContestPage';
 import ExamMonitorPage from './pages/ContestPage/ExamMonitorPage';
@@ -67,6 +69,8 @@ const App = () => {
 
                         <Route path="/admin/academic/courses" element={<PrivateRoute><ListAcademicCoursePage /></PrivateRoute>} />
                         <Route path="/admin/academic/courses/:courseId" element={<PrivateRoute><CourseAdminDetailPage /></PrivateRoute>} />
+                        <Route path="/admin/academic/learning-paths" element={<PrivateRoute><LearningPathsPage /></PrivateRoute>} />
+                        <Route path="/admin/academic/learning-paths/:pathKey" element={<PrivateRoute><LearningPathEditorPage /></PrivateRoute>} />
 
                         <Route path="/admin/contests" element={<PrivateRoute><ListContestPage /></PrivateRoute>} />
                         <Route path="/admin/contests/add" element={<PrivateRoute><CreateContestPage /></PrivateRoute>} />
