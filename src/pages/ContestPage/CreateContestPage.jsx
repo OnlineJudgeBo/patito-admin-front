@@ -55,7 +55,7 @@ const CreateContestPage = () => {
     }
 
     const validationSchema = Yup.object().shape({
-        title: Yup.string().required('Nombre del concurso requerido'),
+        title: Yup.string().required('Nombre del concurso requerido').max(255, 'Máximo 255 caracteres'),
         startDate: Yup.date().required('Fecha de inicio requerida'),
         startTime: Yup.string().required('Hora de inicio requerida'),
         endDate: Yup.date().required('Fecha de fin requerida'),
