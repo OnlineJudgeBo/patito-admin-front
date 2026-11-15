@@ -1,0 +1,85 @@
+{
+  "key": "cp",
+  "title": "Programación competitiva",
+  "description": "De los fundamentos a los temas de ICPC e IOI: teoría, ejemplos en C++ y problemas para practicar.",
+  "languagePrimary": "cpp",
+  "category": "competitive-programming",
+  "stages": [
+    {
+      "key": "cp_fundamentos",
+      "name": "Fundamentos",
+      "topics": [
+        {
+          "key": "complejidad",
+          "title": "Complejidad y límites de tiempo",
+          "difficulty": "basic",
+          "summary": "Estimar si una idea entra en el límite de tiempo antes de programarla.",
+          "learningObjectives": [
+            "Calcular la complejidad de un algoritmo con ciclos anidados.",
+            "Elegir la complejidad necesaria a partir de los límites del enunciado.",
+            "Evitar desbordamientos y entrada/salida lenta en C++."
+          ],
+          "theory": "## ¿Por qué importa?\n\nUn juez da un **límite de tiempo** (normalmente 1 o 2 segundos). Antes de escribir código hay que estimar si la idea entra en ese límite. La herramienta para eso es la **complejidad**: cuántas operaciones hace el algoritmo en función del tamaño de la entrada $n$.\n\nUna regla práctica: una computadora del juez hace alrededor de $10^8$ operaciones simples por segundo en C++.\n\n## Notación $O$\n\nDecimos que un algoritmo es $O(f(n))$ cuando, para $n$ grande, hace a lo sumo una constante por $f(n)$ operaciones. Las constantes y los términos chicos se ignoran: $3n^2 + 5n + 7$ es $O(n^2)$.\n\n```cpp\n// O(n): un recorrido\nfor (int i = 0; i < n; i++) suma += a[i];\n\n// O(n^2): dos ciclos anidados\nfor (int i = 0; i < n; i++)\n    for (int j = i + 1; j < n; j++)\n        if (a[i] + a[j] == k) cnt++;\n```\n\n## Qué complejidad entra según $n$\n\n| $n$ hasta | Complejidad aceptable | Ejemplos |\n|---|---|---|\n| $10$ | $O(n!)$ | probar todas las permutaciones |\n| $20$ | $O(2^n \\cdot n)$ | probar todos los subconjuntos |\n| $500$ | $O(n^3)$ | tres ciclos anidados, Floyd-Warshall |\n| $5000$ | $O(n^2)$ | dos ciclos anidados |\n| $10^6$ | $O(n \\log n)$ | ordenar, búsqueda binaria |\n| $10^8$ | $O(n)$ | un recorrido |\n| $10^{18}$ | $O(\\log n)$ o $O(1)$ | fórmula, exponenciación rápida |\n\nLeer los límites del enunciado **antes** de pensar la solución suele decir qué tipo de algoritmo se espera.\n\n## Entrada y salida rápidas\n\nCon entradas grandes, leer con `cin` sin configurar puede ser más lento que el propio algoritmo:\n\n```cpp\n#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n    int n;\n    cin >> n;\n    // ...\n    cout << respuesta << '\\n';   // '\\n' en lugar de endl\n}\n```\n\n`endl` vacía el buffer en cada línea; con $10^5$ líneas de salida eso se nota.\n\n## Desbordamiento\n\nUn `int` llega hasta unos $2 \\cdot 10^9$. Si la respuesta puede pasar de eso (una suma de $10^5$ números de hasta $10^9$, o un producto), usa `long long`, que llega hasta unos $9 \\cdot 10^{18}$:\n\n```cpp\nlong long suma = 0;\nfor (int i = 0; i < n; i++) suma += a[i];\nlong long area = 1LL * ancho * alto;   // sin 1LL el producto se hace en int\n```\n\n## Errores comunes\n\n- Pensar en el caso de ejemplo y no en el $n$ máximo del enunciado.\n- Usar `endl` o `printf`/`cout` mezclados sin cuidado.\n- Multiplicar dos `int` grandes y guardar el resultado en `long long`: el desborde ocurre antes de guardar.\n",
+          "problemIds": [],
+          "challengeProblemIds": []
+        },
+        {
+          "key": "ordenamiento",
+          "title": "Ordenamiento",
+          "difficulty": "basic",
+          "summary": "Usar sort con comparadores y aprovechar el orden para simplificar problemas.",
+          "learningObjectives": [
+            "Ordenar con sort, pares y comparadores propios.",
+            "Eliminar repetidos y conservar el índice original.",
+            "Reconocer cuándo ordenar simplifica un problema."
+          ],
+          "theory": "## Idea\n\nOrdenar es el primer paso de muchísimas soluciones: después de ordenar, los elementos iguales quedan juntos, el mínimo y el máximo están en los extremos, y se puede usar búsqueda binaria o dos punteros.\n\nNo hace falta programar el ordenamiento: `sort` de C++ ordena en $O(n \\log n)$.\n\n```cpp\nvector<int> a = {5, 2, 9, 1};\nsort(a.begin(), a.end());                 // 1 2 5 9\nsort(a.begin(), a.end(), greater<int>()); // 9 5 2 1\n```\n\n## Ordenar por varios criterios\n\nLos `pair` y `tuple` se comparan por el primer campo, luego por el segundo, y así. Muchas veces basta con armar el par en el orden correcto:\n\n```cpp\n// Ordenar alumnos por nota descendente y, si empatan, por nombre\nvector<pair<int, string>> v;   // (-nota, nombre)\nfor (auto& [nota, nombre] : alumnos) v.push_back({-nota, nombre});\nsort(v.begin(), v.end());\n```\n\nPara casos más complejos se usa un comparador. Debe devolver `true` si `x` va **antes** que `y`, y nunca `true` para elementos iguales:\n\n```cpp\nstruct Evento { int inicio, fin; };\nsort(ev.begin(), ev.end(), [](const Evento& x, const Evento& y) {\n    if (x.fin != y.fin) return x.fin < y.fin;\n    return x.inicio < y.inicio;\n});\n```\n\n## Eliminar repetidos\n\n```cpp\nsort(a.begin(), a.end());\na.erase(unique(a.begin(), a.end()), a.end());\n```\n\n## Ordenamiento por conteo\n\nSi los valores son enteros chicos (por ejemplo entre $0$ y $10^6$), se pueden contar en un arreglo y recorrerlo: $O(n + V)$, donde $V$ es el valor máximo.\n\n```cpp\nvector<int> cnt(V + 1, 0);\nfor (int x : a) cnt[x]++;\n```\n\n## Errores comunes\n\n- Un comparador con `<=` en lugar de `<`: rompe `sort` y puede colgar el programa.\n- Ordenar dentro de un ciclo: $n$ veces $O(n \\log n)$ es demasiado.\n- Olvidar que ordenar pierde la posición original; si la necesitas, ordena pares `(valor, índice)`.\n",
+          "problemIds": [],
+          "challengeProblemIds": []
+        },
+        {
+          "key": "busqueda_binaria",
+          "title": "Búsqueda binaria",
+          "difficulty": "basic",
+          "summary": "Buscar en arreglos ordenados y sobre la respuesta cuando la condición es monótona.",
+          "learningObjectives": [
+            "Usar lower_bound y upper_bound.",
+            "Plantear una búsqueda binaria sobre la respuesta con una condición monótona.",
+            "Mantener un invariante para evitar errores de borde."
+          ],
+          "theory": "## Idea\n\nEn un arreglo **ordenado** se puede encontrar un valor mirando el elemento del medio y descartando la mitad que no sirve. Cada paso divide el rango a la mitad, así que se hacen $O(\\log n)$ pasos: con $n = 10^6$ son unas 20 comparaciones.\n\n## En la librería\n\n```cpp\nvector<int> a = {1, 3, 3, 7, 9};\n// primer elemento >= x\nauto it = lower_bound(a.begin(), a.end(), 3);   // apunta al primer 3\n// primer elemento > x\nauto jt = upper_bound(a.begin(), a.end(), 3);   // apunta al 7\nint cuantos = jt - it;                          // cantidad de 3: 2\nbool existe = binary_search(a.begin(), a.end(), 7);\n```\n\n## Búsqueda binaria sobre la respuesta\n\nLa idea más útil no es buscar en un arreglo, sino buscar **la respuesta**. Sirve cuando hay una condición $P(x)$ **monótona**: si se cumple para $x$, se cumple para todo valor mayor (o para todo valor menor).\n\nEjemplo: hay $n$ máquinas; la máquina $i$ fabrica un producto cada $t_i$ segundos. ¿Cuál es el tiempo mínimo para fabricar $k$ productos? Si en tiempo $T$ se alcanzan $k$ productos, con más tiempo también. Entonces buscamos el menor $T$ que cumple:\n\n```cpp\nauto alcanza = [&](long long T) {\n    long long hechos = 0;\n    for (long long t : tiempos) {\n        hechos += T / t;\n        if (hechos >= k) return true;\n    }\n    return false;\n};\n\nlong long lo = 0, hi = 1e18;   // alcanza(lo) es falso, alcanza(hi) es verdadero\nwhile (hi - lo > 1) {\n    long long mid = lo + (hi - lo) / 2;\n    if (alcanza(mid)) hi = mid;\n    else lo = mid;\n}\n// hi es el menor T que cumple\n```\n\nLa complejidad es $O(n \\log R)$, donde $R$ es el tamaño del rango de búsqueda.\n\n**Invariante:** `alcanza(lo)` siempre es falso y `alcanza(hi)` siempre es verdadero. Mantenerlo así evita los errores de uno más o uno menos.\n\n## Con números reales\n\nSi la respuesta es real, en lugar de comparar `hi - lo > 1` se repite un número fijo de veces (100 iteraciones bastan para cualquier precisión de `double`):\n\n```cpp\ndouble lo = 0, hi = 1e9;\nfor (int it = 0; it < 100; it++) {\n    double mid = (lo + hi) / 2;\n    if (cumple(mid)) hi = mid; else lo = mid;\n}\n```\n\n## Errores comunes\n\n- Usar búsqueda binaria cuando la condición no es monótona.\n- `(lo + hi) / 2` con valores grandes desborda; usa `lo + (hi - lo) / 2`.\n- Ciclos infinitos por actualizar `lo = mid` cuando `hi - lo == 1`. El invariante de arriba lo evita.\n- Que la función de verificación desborde: en el ejemplo, cortar apenas `hechos >= k`.\n",
+          "problemIds": [],
+          "challengeProblemIds": []
+        },
+        {
+          "key": "sumas_prefijas",
+          "title": "Sumas prefijas",
+          "difficulty": "basic",
+          "summary": "Responder sumas de rangos en O(1) y aplicar actualizaciones de rango con diferencias.",
+          "learningObjectives": [
+            "Construir sumas prefijas en una y dos dimensiones.",
+            "Responder consultas de suma de rango en O(1).",
+            "Usar el arreglo de diferencias para actualizaciones de rango."
+          ],
+          "theory": "## Idea\n\nSi hay que responder muchas preguntas del tipo \"¿cuánto suman los elementos entre $l$ y $r$?\", sumar cada vez cuesta $O(n)$ por pregunta. Con **sumas prefijas** se precalcula en $O(n)$ y cada pregunta se responde en $O(1)$.\n\nDefinimos $p_0 = 0$ y $p_i = a_1 + a_2 + \\dots + a_i$. Entonces:\n\n$$\\text{suma}(l, r) = a_l + \\dots + a_r = p_r - p_{l-1}$$\n\n```cpp\nint n, q;\ncin >> n >> q;\nvector<long long> p(n + 1, 0);\nfor (int i = 1; i <= n; i++) {\n    long long x; cin >> x;\n    p[i] = p[i - 1] + x;\n}\nwhile (q--) {\n    int l, r; cin >> l >> r;     // 1-indexado\n    cout << p[r] - p[l - 1] << '\\n';\n}\n```\n\nUsar índices desde 1 y $p_0 = 0$ evita casos especiales cuando $l = 1$.\n\n## En dos dimensiones\n\nPara una matriz, $p_{i,j}$ es la suma del rectángulo desde $(1,1)$ hasta $(i,j)$:\n\n$$p_{i,j} = a_{i,j} + p_{i-1,j} + p_{i,j-1} - p_{i-1,j-1}$$\n\nLa suma del rectángulo con esquinas $(x_1, y_1)$ y $(x_2, y_2)$ es:\n\n$$p_{x_2,y_2} - p_{x_1-1,y_2} - p_{x_2,y_1-1} + p_{x_1-1,y_1-1}$$\n\nSe resta dos veces la esquina superior izquierda, por eso se vuelve a sumar una vez.\n\n## Arreglo de diferencias\n\nEs la operación inversa: sirve cuando hay muchas actualizaciones \"sumar $v$ a todos los elementos entre $l$ y $r$\" y al final se quiere el arreglo completo.\n\n```cpp\nvector<long long> d(n + 2, 0);\n// cada actualización en O(1)\nd[l] += v;\nd[r + 1] -= v;\n// al final, la suma prefija de d reconstruye el arreglo\nfor (int i = 1; i <= n; i++) d[i] += d[i - 1];   // d[i] es el valor final de la posición i\n```\n\n## Más allá de la suma\n\nLa misma idea funciona con cualquier operación que se pueda \"deshacer\": XOR (porque $x \\oplus x = 0$), o contar cuántos elementos cumplen una condición. **No** funciona directamente con mínimo o máximo; para eso hay otras estructuras (sparse table, segment tree).\n\n## Errores comunes\n\n- Guardar las sumas en `int` cuando pueden desbordar.\n- Mezclar índices desde 0 y desde 1.\n- Olvidar el caso $l = 1$ si no se usa $p_0 = 0$.\n",
+          "problemIds": [],
+          "challengeProblemIds": []
+        },
+        {
+          "key": "dos_punteros",
+          "title": "Dos punteros",
+          "difficulty": "intermediate",
+          "summary": "Recorrer con dos índices que solo avanzan para resolver en O(n) problemas de pares y ventanas.",
+          "learningObjectives": [
+            "Encontrar pares con suma dada en un arreglo ordenado.",
+            "Implementar una ventana deslizante de tamaño variable.",
+            "Justificar cuándo la técnica es correcta."
+          ],
+          "theory": "## Idea\n\n**Dos punteros** recorre el arreglo con dos índices que solo avanzan. Como cada uno se mueve a lo sumo $n$ veces, el total es $O(n)$, aunque a primera vista parezca necesitar dos ciclos anidados.\n\nFunciona cuando, al mover un puntero, se sabe con seguridad que las combinaciones descartadas no sirven.\n\n## Par con suma dada\n\nEn un arreglo **ordenado**, ¿hay dos elementos que sumen $x$?\n\n```cpp\nsort(a.begin(), a.end());\nint i = 0, j = n - 1;\nwhile (i < j) {\n    long long s = a[i] + a[j];\n    if (s == x) { /* encontrado */ break; }\n    if (s < x) i++;    // a[i] con cualquier otro a[j'] <= a[j] también es poco\n    else j--;          // a[j] con cualquier a[i'] >= a[i] también es demasiado\n}\n```\n\n## Ventana deslizante\n\nCon números **no negativos**: ¿cuál es el subarreglo más largo con suma a lo sumo $S$?\n\nLa ventana es $[l, r]$. Se agranda moviendo $r$; si la suma se pasa de $S$, se achica moviendo $l$. Como los números no son negativos, achicar la ventana nunca aumenta la suma.\n\n```cpp\nlong long suma = 0;\nint l = 0, mejor = 0;\nfor (int r = 0; r < n; r++) {\n    suma += a[r];\n    while (suma > S) suma -= a[l++];\n    mejor = max(mejor, r - l + 1);\n}\n```\n\nEl mismo esquema sirve para \"el subarreglo más largo con a lo sumo $k$ valores distintos\", llevando un `map` o un arreglo de conteos de lo que hay dentro de la ventana.\n\n## ¿Cuándo funciona?\n\nLa pregunta clave: si la ventana $[l, r]$ no cumple, ¿tampoco cumple ninguna ventana más grande que la contenga? Si la respuesta es sí, dos punteros sirve. Con números negativos la propiedad se rompe (agregar un número puede bajar la suma), y hay que usar otra técnica, como sumas prefijas con un `map`.\n\n## Errores comunes\n\n- Usarlo con números negativos en problemas de suma.\n- Olvidar ordenar antes en el problema del par.\n- Mover el puntero equivocado y perder respuestas: escribir por qué cada movimiento es seguro ayuda.\n",
+          "problemIds": [],
+          "challengeProblemIds": []
+        }
+      ]
+    }
+  ]
+}
