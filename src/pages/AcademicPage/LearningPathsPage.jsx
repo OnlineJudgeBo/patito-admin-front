@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { apiService } from '../../services/apiService';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
+import { LearningPathImport } from './LearningPathImport';
 
 const inputClass = 'w-full rounded border px-3 py-2 text-sm';
 
@@ -54,6 +55,10 @@ function LearningPathsPage() {
                     </div>
                 </form>
                 {message && <p className="mt-2 text-sm text-red-600">{message}</p>}
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-4">
+                    <span className="text-sm text-gray-500">¿Tienes la ruta en un archivo?</span>
+                    <LearningPathImport pathKey={null} onDone={key => navigate(`/admin/academic/learning-paths/${encodeURIComponent(key)}`)} />
+                </div>
             </section>
 
             <section className="bg-white border rounded-lg shadow-sm">
