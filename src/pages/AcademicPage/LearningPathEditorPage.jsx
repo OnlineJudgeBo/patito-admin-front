@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { apiService } from '../../services/apiService';
+import { LearningPathImport } from './LearningPathImport';
+import { exportLearningPath } from './learningPathYaml';
 import { getApiErrorMessage } from '../../utils/getApiErrorMessage';
 
 const inputClass = 'w-full rounded border px-3 py-2 text-sm';
@@ -126,13 +128,13 @@ function TopicForm({ topic, nextOrder, onSave, onCancel, busy }) {
 
 function StageCard({ stage, pathKey, run, busy }) {
     const [editingStage, setEditingStage] = useState(false);
-    const [stageForm, setStageForm] = useState({ name: stage.name, order: stage.sortOrder, unlockedByDefault: stage.unlockedByDefault });
+    const [stageForm, setStageForm] = useState({ name: stage.name, description: stage.description ?? '', order: stage.sortOrder, unlockedByDefault: stage.unlockedByDefault });
     const [editingTopicId, setEditingTopicId] = useState(null);
     const nextTopicOrder = Math.max(0, ...stage.topics.map(topic => topic.sortOrder || 0)) + 1;
 
     const saveStage = (e) => {
         e.preventDefault();
-        run(() => apiService.updateAcademicLearningPathStage(pathKey, stage.stageId, { key: stage.stageKey, name: stageForm.name, order: Number(stageForm.order), unlockedByDefault: stageForm.unlockedByDefault }))
+        run(() => apiService.updateAcademicLearningPathStage(pathKey, stage.stageId, { key: stage.stageKey, name: stageForm.name, description: stageForm.description, order: Number(stageForm.order), unlockedByDefault: stageForm.unlockedByDefault }))
             .then(ok => ok && setEditingStage(false));
     };
 
@@ -147,6 +149,7 @@ function StageCard({ stage, pathKey, run, busy }) {
                 <form onSubmit={saveStage} className="flex flex-wrap items-end gap-3">
                     <Field label="Nombre"><input required className={inputClass} value={stageForm.name} onChange={e => setStageForm({ ...stageForm, name: e.target.value })} /></Field>
                     <Field label="Orden"><input type="number" min={1} className={`${inputClass} w-24`} value={stageForm.order} onChange={e => setStageForm({ ...stageForm, order: e.target.value })} /></Field>
+                    <div className="w-full"><Field label="Descripción"><textarea rows={2} className={inputClass} value={stageForm.description} onChange={e => setStageForm({ ...stageForm, description: e.target.value })} /></Field></div>
                     <label className="flex items-center gap-2 text-sm">
                         <input type="checkbox" checked={stageForm.unlockedByDefault} onChange={e => setStageForm({ ...stageForm, unlockedByDefault: e.target.checked })} />
                         Abierta sin completar la anterior
@@ -274,7 +277,11 @@ function LearningPathEditorPage() {
                     <Link to="/admin/academic/learning-paths" className="text-sm text-blue-600">← Rutas</Link>
                     <h1 className="text-2xl font-bold">{path.track.title} <span className="font-mono text-base font-normal text-gray-400">{path.track.id}</span></h1>
                 </div>
-                <button type="button" onClick={deletePath} disabled={busy} className={`${buttonClass} bg-red-600 text-white hover:bg-red-500`}>Eliminar ruta</button>
+                <div className="flex flex-wrap items-center gap-2">
+                    <button type="button" onClick={() => exportLearningPath(path)} className={`${buttonClass} bg-gray-200 hover:bg-gray-300`}>Exportar YAML</button>
+                    <LearningPathImport pathKey={pathKey} onDone={() => load()} />
+                    <button type="button" onClick={deletePath} disabled={busy} className={`${buttonClass} bg-red-600 text-white hover:bg-red-500`}>Eliminar ruta</button>
+                </div>
             </div>
 
             {message && <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">{message}</div>}
