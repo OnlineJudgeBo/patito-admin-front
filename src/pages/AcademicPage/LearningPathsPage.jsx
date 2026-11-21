@@ -7,6 +7,23 @@ import { LearningPathImport } from './LearningPathImport';
 
 const inputClass = 'w-full rounded border px-3 py-2 text-sm';
 
+// Creates the path, then each stage and topic in file order. Topic fields go to the API as they are.
+// ponytail: no rollback, a failure leaves the path half built; delete it from the editor and import again.
+async function importLearningPath(file, onStep) {
+    const { stages = [], ...path } = JSON.parse(file);
+    await apiService.createAcademicLearningPath({ version: 1, ...path });
+    for (const [stageIndex, { topics = [], ...stage }] of stages.entries()) {
+        onStep(`Etapa ${stage.name}`);
+        const created = await apiService.createAcademicLearningPathStage(path.key, { order: stageIndex + 1, unlockedByDefault: stageIndex === 0, ...stage });
+        const stageId = created.stages.find(item => item.stageKey === stage.key).stageId;
+        for (const [topicIndex, topic] of topics.entries()) {
+            onStep(`Tema ${topic.title}`);
+            await apiService.createAcademicLearningPathTopic(path.key, stageId, { order: topicIndex + 1, ...topic });
+        }
+    }
+    return path.key;
+}
+
 function LearningPathsPage() {
     const navigate = useNavigate();
     const [paths, setPaths] = useState([]);
@@ -35,6 +52,22 @@ function LearningPathsPage() {
         }
     };
 
+    const handleImport = async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+        setCreating(true);
+        setMessage('');
+        let step = 'Ruta';
+        try {
+            const key = await importLearningPath(await file.text(), current => { step = current; setMessage(`Importando: ${current}...`); });
+            navigate(`/admin/academic/learning-paths/${encodeURIComponent(key)}`);
+        } catch (apiError) {
+            setMessage(`${step}: ${getApiErrorMessage(apiError, 'No se pudo importar.')}`);
+            setCreating(false);
+        }
+    };
+
     return (
         <div className="container mx-auto p-4 w-full min-w-full space-y-4">
             <section className="bg-white border rounded-lg p-4 shadow-sm">
@@ -52,6 +85,10 @@ function LearningPathsPage() {
                         <button type="submit" disabled={creating} className="rounded bg-gray-900 px-4 py-2 text-white hover:bg-gray-800 disabled:opacity-50">
                             {creating ? 'Creando...' : 'Crear ruta'}
                         </button>
+                        <label className={`ml-2 inline-block cursor-pointer rounded border px-4 py-2 hover:bg-gray-50 ${creating ? 'pointer-events-none opacity-50' : ''}`}>
+                            Importar JSON
+                            <input type="file" accept=".json,application/json" className="hidden" onChange={handleImport} />
+                        </label>
                     </div>
                 </form>
                 {message && <p className="mt-2 text-sm text-red-600">{message}</p>}
